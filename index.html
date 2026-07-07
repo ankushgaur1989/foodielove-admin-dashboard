@@ -21,6 +21,7 @@
     --radius:12px;
   }
   *{box-sizing:border-box}
+  html,body{overflow-x:hidden;width:100%;max-width:100%}
   body{
     margin:0;
     font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',Arial,sans-serif;
@@ -29,7 +30,7 @@
   }
 
   #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
-  .login-card{width:360px;background:var(--card);border-radius:20px;padding:2.6rem 2.2rem;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}
+  .login-card{width:min(360px, 92vw);background:var(--card);border-radius:20px;padding:2.6rem 2.2rem;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}
   .login-card .mark{width:44px;height:44px;border-radius:12px;background:var(--accent);margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem}
   .login-card h2{font-size:1.3rem;font-weight:700;margin:0 0 .3rem}
   .login-card p.sub{color:var(--mid);font-size:.85rem;margin:0 0 1.6rem}
@@ -51,7 +52,7 @@
   .nav-item:hover{background:rgba(255,255,255,.06);color:var(--sidebar-text-active)}
   .sidebar .footnote{margin-top:auto;color:rgba(255,255,255,.35);font-size:.68rem;padding:.6rem;line-height:1.5}
 
-  .main-area{flex:1;padding:2.2rem 2.6rem;max-width:1200px}
+  .main-area{flex:1;min-width:0;padding:2.2rem 2.6rem;max-width:1200px}
   .page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.8rem}
   .page-head h1{font-size:1.6rem;font-weight:700;margin:0;letter-spacing:-.01em}
   .page-head p{color:var(--mid);font-size:.85rem;margin:.2rem 0 0}
@@ -66,7 +67,7 @@
   .panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
   .panel-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
   .panel-head h3{font-size:1rem;font-weight:700;margin:0}
-  table{width:100%;border-collapse:collapse}
+  table{width:100%;min-width:520px;border-collapse:collapse}
   th,td{padding:.85rem 1.4rem;text-align:left;font-size:.83rem}
   th{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mid);font-weight:600;border-bottom:1px solid var(--border)}
   td{border-bottom:1px solid var(--border);color:var(--ink)}
@@ -78,10 +79,16 @@
 
   @media(max-width:800px){
     .app-shell{flex-direction:column}
-    .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:.8rem}
+    .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:.8rem;gap:.4rem}
     .sidebar .brand,.sidebar .footnote{display:none}
-    .main-area{padding:1.4rem}
+    .nav-item{flex-shrink:0;white-space:nowrap}
+    .main-area{padding:1.4rem;min-width:0}
+    .page-head{flex-wrap:wrap;gap:.8rem}
     .stat-row{grid-template-columns:1fr}
+  }
+  @media(max-width:420px){
+    .login-card{padding:2rem 1.4rem}
+    .main-area{padding:1rem}
   }
 </style>
 </head>
@@ -127,10 +134,12 @@
 
       <div class="panel">
         <div class="panel-head"><h3>Recent Orders</h3></div>
+        <div style="overflow-x:auto">
         <table>
           <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
           <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
         </table>
+        </div>
       </div>
     </div>
   </div>
