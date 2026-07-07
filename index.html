@@ -64,6 +64,32 @@
   .logout-btn:hover{background:#F0F0F2}
 
   .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+
+  .widget-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;gap:1rem;flex-wrap:wrap}
+  .widget-toolbar p{color:var(--mid);font-size:.82rem;margin:0}
+  .reset-layout-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem .9rem;font-size:.78rem;font-weight:600;color:var(--ink);cursor:pointer;flex-shrink:0}
+  .reset-layout-btn:hover{background:#F0F0F2}
+
+  .widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:start}
+  .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04);touch-action:none}
+  .widget.dragging{opacity:.5;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .widget-head{display:flex;align-items:center;gap:.6rem;padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
+  .widget-head h3{font-size:.88rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.5rem}
+  .widget-drag{cursor:grab;color:var(--lt);font-size:1rem;line-height:1;user-select:none}
+  .widget-body{padding:1.2rem}
+  .widget-big-stat{font-size:1.9rem;font-weight:800;margin:0;letter-spacing:-.01em}
+  .widget-sub{font-size:.78rem;color:var(--mid);margin:.3rem 0 0}
+
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:livepulse 1.6s ease-in-out infinite}
+  @keyframes livepulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .top-items-list{margin:0;padding-left:1.2rem;font-size:.85rem}
+  .top-items-list li{padding:.35rem 0;color:var(--ink)}
+  .top-items-list li span{color:var(--mid);font-size:.78rem;margin-left:.4rem}
+
+  .activity-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.82rem}
+  .activity-row:last-child{border-bottom:none}
+  .activity-row .new-badge{background:rgba(52,199,89,.14);color:#1E8A3B;font-size:.64rem;font-weight:700;padding:.15rem .5rem;border-radius:20px}
   .stat-card{background:var(--card);border-radius:var(--radius);padding:1.4rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid var(--border)}
   .stat-card p.lbl{font-size:.76rem;color:var(--mid);margin:0 0 .5rem;font-weight:500}
   .stat-card p.val{font-size:1.75rem;font-weight:700;margin:0;letter-spacing:-.01em}
@@ -89,6 +115,8 @@
     .main-area{padding:1.4rem;min-width:0}
     .page-head{flex-wrap:wrap;gap:.8rem}
     .stat-row{grid-template-columns:1fr}
+    .widget-grid{grid-template-columns:1fr}
+    .widget{grid-column:auto!important}
   }
   @media(max-width:420px){
     .login-card{padding:2rem 1.4rem}
@@ -164,19 +192,59 @@
 
       <!-- OVERVIEW PAGE -->
       <div class="page-panel active" id="page-overview">
-        <div class="stat-row">
-          <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="ovOrderCount">0</p></div>
-          <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="ovTotalValue">$0</p></div>
-          <div class="stat-card"><p class="lbl">Most recent order</p><p class="val" id="ovMostRecent" style="font-size:1rem">—</p></div>
+        <div class="widget-toolbar">
+          <p>Drag any widget's <strong>⠿</strong> handle to rearrange your dashboard — it's remembered for next time.</p>
+          <button class="reset-layout-btn" id="resetLayoutBtn">Reset Layout</button>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h3>Latest Orders</h3></div>
-          <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
-            <tbody id="ovOrdersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
-          </table>
+        <div class="widget-grid" id="widgetGrid">
+
+          <div class="widget" data-widget="todayOrders">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Today's Orders</h3></div>
+            <div class="widget-body">
+              <p class="widget-big-stat" id="wTodayCount">0</p>
+              <p class="widget-sub">orders placed today, worth <strong id="wTodayValue">$0</strong></p>
+            </div>
           </div>
+
+          <div class="widget" data-widget="totalValue">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Total Value (last 50)</h3></div>
+            <div class="widget-body">
+              <p class="widget-big-stat" id="ovTotalValue">$0</p>
+              <p class="widget-sub"><span id="ovOrderCount">0</span> orders loaded</p>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="mostRecent">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Most Recent Order</h3></div>
+            <div class="widget-body">
+              <p class="widget-big-stat" id="ovMostRecent" style="font-size:1.1rem">—</p>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="topItems" style="grid-column:span 2">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Top Moving Items</h3></div>
+            <div class="widget-body">
+              <ol class="top-items-list" id="topItemsList"><li style="color:var(--lt)">Loading…</li></ol>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="activityStream" style="grid-column:span 2">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Live Activity <span class="live-dot" id="liveDot"></span></h3></div>
+            <div class="widget-body" style="max-height:280px;overflow-y:auto">
+              <div id="activityStreamList"><p style="color:var(--lt);font-size:.82rem">Watching for new orders…</p></div>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="latestOrders" style="grid-column:1 / -1">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Latest Orders</h3></div>
+            <div class="widget-body" style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
+                <tbody id="ovOrdersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -313,6 +381,11 @@ onAuthStateChanged(auth, async (user)=>{
   loginScreen.style.display = 'none';
   dashboardScreen.style.display = 'block';
   loadOrders();
+  initWidgetDragging();
+  pollActivityStream();
+  setInterval(pollActivityStream, 15000);
+  const liveDot = document.getElementById('liveDot');
+  if(liveDot) liveDot.title = 'Refreshing every 15 seconds';
 });
 
 async function loadOrders(){
@@ -332,6 +405,29 @@ async function loadOrders(){
     ['statOrderCount', 'ovOrderCount'].forEach(id => document.getElementById(id).textContent = orders.length);
     ['statTotalValue', 'ovTotalValue'].forEach(id => document.getElementById(id).textContent = '$' + totalValue.toFixed(2));
     ['statMostRecent', 'ovMostRecent'].forEach(id => document.getElementById(id).textContent = mostRecentText);
+
+    // Today's Orders widget
+    const todayStr = new Date().toDateString();
+    const todaysOrders = orders.filter(o => o.createdAt?.toDate && o.createdAt.toDate().toDateString() === todayStr);
+    const todaysValue = todaysOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    document.getElementById('wTodayCount').textContent = todaysOrders.length;
+    document.getElementById('wTodayValue').textContent = '$' + todaysValue.toFixed(2);
+
+    // Top Moving Items widget — tallies how often each item name appears
+    // across every order's line items, so you can see what's actually
+    // selling without digging through each order individually.
+    const itemCounts = {};
+    orders.forEach(o => {
+      (o.items || []).forEach(it => {
+        const name = it.name || 'Unknown item';
+        itemCounts[name] = (itemCounts[name] || 0) + (Number(it.qty) || 1);
+      });
+    });
+    const topItems = Object.entries(itemCounts).sort((a,b) => b[1]-a[1]).slice(0, 5);
+    const topItemsList = document.getElementById('topItemsList');
+    topItemsList.innerHTML = topItems.length
+      ? topItems.map(([name, count]) => `<li>${escapeHtml(name)} <span>×${count}</span></li>`).join('')
+      : '<li style="color:var(--lt)">No item data yet.</li>';
 
     if(!orders.length){
       const emptyRow = '<tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">No orders found yet.</td></tr>';
@@ -361,6 +457,91 @@ async function loadOrders(){
     tbody.innerHTML = errRow; ovTbody.innerHTML = errRow;
   }
 }
+
+// ── Live Activity Stream — polls for genuinely new orders every 15
+// seconds while the Dashboard is open, so incoming orders show up
+// without needing a manual refresh. ──
+let lastSeenOrderTime = null;
+let activityFeedItems = [];
+async function pollActivityStream(){
+  try{
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(10));
+    const snap = await getDocs(q);
+    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    if(!orders.length) return;
+
+    const newestTime = orders[0].createdAt?.toDate ? orders[0].createdAt.toDate().getTime() : Date.now();
+    const isFirstRun = lastSeenOrderTime === null;
+
+    orders.forEach(o => {
+      const t = o.createdAt?.toDate ? o.createdAt.toDate().getTime() : 0;
+      const isNew = !isFirstRun && lastSeenOrderTime && t > lastSeenOrderTime;
+      if(isFirstRun || isNew){
+        if(!activityFeedItems.some(a => a.id === o.id)){
+          activityFeedItems.unshift({id:o.id, name:o.name||'—', total:Number(o.total)||0, isNew, time:o.createdAt?.toDate?.() || new Date()});
+        }
+      }
+    });
+    activityFeedItems = activityFeedItems.slice(0, 12);
+    lastSeenOrderTime = newestTime;
+
+    const listEl = document.getElementById('activityStreamList');
+    listEl.innerHTML = activityFeedItems.map(a => `
+      <div class="activity-row">
+        <span>${escapeHtml(a.name)} — $${a.total.toFixed(2)}</span>
+        <span>${a.isNew ? '<span class="new-badge">NEW</span> ' : ''}${a.time.toLocaleTimeString()}</span>
+      </div>`).join('');
+  }catch(e){ /* quietly retry next interval — a single failed poll shouldn't show an error */ }
+}
+
+// ── Widget drag-to-reorder — grab the ⠿ handle and drag a widget to a
+// new position. Order is remembered in this browser for next time. ──
+const WIDGET_ORDER_KEY = 'foodielove_dashboard_widget_order';
+function initWidgetDragging(){
+  const grid = document.getElementById('widgetGrid');
+  const saved = localStorage.getItem(WIDGET_ORDER_KEY);
+  if(saved){
+    try{
+      const order = JSON.parse(saved);
+      order.forEach(name => {
+        const el = grid.querySelector(`[data-widget="${name}"]`);
+        if(el) grid.appendChild(el);
+      });
+    }catch(e){}
+  }
+
+  grid.querySelectorAll('.widget-drag').forEach(handle=>{
+    handle.addEventListener('pointerdown', (e)=>{
+      const widget = handle.closest('.widget');
+      e.preventDefault();
+      widget.classList.add('dragging');
+      widget.setPointerCapture(e.pointerId);
+
+      const onMove = (ev)=>{
+        const under = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.widget');
+        if(under && under !== widget){
+          const rect = under.getBoundingClientRect();
+          const before = ev.clientX < rect.left + rect.width/2;
+          before ? under.before(widget) : under.after(widget);
+        }
+      };
+      const onUp = ()=>{
+        widget.classList.remove('dragging');
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        const newOrder = Array.from(grid.querySelectorAll('.widget')).map(w => w.dataset.widget);
+        localStorage.setItem(WIDGET_ORDER_KEY, JSON.stringify(newOrder));
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+  });
+}
+
+document.getElementById('resetLayoutBtn').addEventListener('click', ()=>{
+  localStorage.removeItem(WIDGET_ORDER_KEY);
+  location.reload();
+});
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
