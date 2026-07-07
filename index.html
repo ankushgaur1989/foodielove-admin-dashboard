@@ -278,7 +278,23 @@
       <div class="page-panel" id="page-vouchers"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Gift Vouchers</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-discounts"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Discounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-community"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Community / Charity</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
-      <div class="page-panel" id="page-sales"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Sales & Expenses</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-sales">
+        <div class="stat-row">
+          <div class="stat-card"><p class="lbl">Gross Sales</p><p class="val" id="ssGross">$0</p></div>
+          <div class="stat-card"><p class="lbl">Net Sales</p><p class="val" id="ssNet">$0</p></div>
+          <div class="stat-card"><p class="lbl">GST Component (BAS)</p><p class="val" id="ssGST">$0</p></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><p class="lbl">Promo Discounts &amp; Comps</p><p class="val" id="ssDiscounts" style="color:#D70015">$0</p></div>
+          <div class="stat-card"><p class="lbl">Refunds</p><p class="val" id="ssRefunds" style="color:#D70015">$0</p></div>
+          <div class="stat-card"><p class="lbl">Delivery Fees (isolated)</p><p class="val" id="ssDelivery">$0</p></div>
+          <div class="stat-card"><p class="lbl">Public Holiday Surcharges</p><p class="val" id="ssSurcharges">$0</p></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Refunds Ledger — by Reason</h3></div>
+          <div id="ssRefundsByReason" style="padding:1rem 1.4rem"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
+        </div>
+      </div>
       <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-photos"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Photos</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
@@ -388,6 +404,42 @@ onAuthStateChanged(auth, async (user)=>{
   if(liveDot) liveDot.title = 'Refreshing every 15 seconds';
 });
 
+function renderSalesSummary(orders){
+  // Same math as the old admin panel's Sales Summary — Gross Sales is the
+  // full menu-price value before any discount; GST is amount÷11 since AU
+  // prices are GST-inclusive (the tax is calculated on the pre-tax price,
+  // not simply 10% of the final price).
+  const gross = orders.reduce((s,o)=>s+(Number(o.subtotal)||Number(o.total)||0),0);
+  const discounts = orders.reduce((s,o)=>s+(Number(o.discountAmount)||0),0);
+  const refunds = orders.reduce((s,o)=>s+(Number(o.refundAmount)||0),0);
+  const net = gross - discounts - refunds;
+  const gst = net / 11;
+  const deliveryFees = orders.reduce((s,o)=>s+(Number(o.deliveryFee)||0),0);
+  const surcharges = orders.reduce((s,o)=>s+(Number(o.surchargeAmount)||0),0);
+
+  document.getElementById('ssGross').textContent = '$'+gross.toFixed(2);
+  document.getElementById('ssDiscounts').textContent = '$'+discounts.toFixed(2);
+  document.getElementById('ssRefunds').textContent = '$'+refunds.toFixed(2);
+  document.getElementById('ssNet').textContent = '$'+net.toFixed(2);
+  document.getElementById('ssGST').textContent = '$'+gst.toFixed(2);
+  document.getElementById('ssDelivery').textContent = '$'+deliveryFees.toFixed(2);
+  document.getElementById('ssSurcharges').textContent = '$'+surcharges.toFixed(2);
+
+  const byReason = {};
+  orders.forEach(o=>{
+    const amt = Number(o.refundAmount)||0;
+    if(amt <= 0) return;
+    const reason = o.refundReason || 'Not recorded (refunded before this was tracked)';
+    byReason[reason] = (byReason[reason]||0) + amt;
+  });
+  const reasonEl = document.getElementById('ssRefundsByReason');
+  const reasonEntries = Object.entries(byReason).sort((a,b)=>b[1]-a[1]);
+  reasonEl.innerHTML = reasonEntries.length
+    ? reasonEntries.map(([reason, amt])=>`
+        <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>${escapeHtml(reason)}</span><span style="font-weight:700;color:#D70015">$${amt.toFixed(2)}</span></div>`).join('')
+    : '<p style="color:var(--lt);font-size:.85rem">No refunds recorded.</p>';
+}
+
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
   const ovTbody = document.getElementById('ovOrdersTableBody');
@@ -395,6 +447,7 @@ async function loadOrders(){
     const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
     const snap = await getDocs(q);
     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderSalesSummary(orders);
 
     const totalValue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
     const mostRecentText = orders.length && orders[0].createdAt?.toDate
