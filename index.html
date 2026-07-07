@@ -2,77 +2,143 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Foodie Love — Dashboard (v2, isolated)</title>
+<title>Foodie Love — Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root{
-    --bg:#F7F2E7; --card:#FFFFFF; --ink:#281808; --mid:#7A6B58; --lt:#A69A88;
-    --border:#E8DFCF; --orange:#F07030; --orange-dk:#D95F1F; --green:#4CAF6D;
+    --bg:#F5F5F7;
+    --card:#FFFFFF;
+    --ink:#1D1D1F;
+    --mid:#6E6E73;
+    --lt:#AEAEB2;
+    --border:#E5E5EA;
+    --accent:#F07030;
+    --accent-dk:#D95F1F;
+    --green:#34C759;
+    --sidebar:#1D1D1F;
+    --sidebar-text:rgba(255,255,255,.68);
+    --sidebar-text-active:#fff;
+    --radius:12px;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:#281808;color:#fff;padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center}
-  header h1{font-size:1.1rem;margin:0;font-weight:700}
-  header .tag{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.12);padding:.3rem .7rem;border-radius:20px}
-  main{max-width:1100px;margin:0 auto;padding:2rem}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',Arial,sans-serif;
+    background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
 
-  #loginScreen{max-width:380px;margin:4rem auto;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center}
-  #loginScreen input{width:100%;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:8px;margin-bottom:.8rem;font-size:.9rem}
-  #loginScreen button{width:100%;padding:.8rem;background:var(--orange);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.85rem}
-  #loginScreen button:hover{background:var(--orange-dk)}
-  #loginError{color:#B3261E;font-size:.8rem;margin-top:.6rem;display:none}
-
-  .stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
-  .stat-card{flex:1;min-width:160px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
-  .stat-card p.lbl{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--lt);margin:0 0 .4rem}
-  .stat-card p.val{font-size:1.6rem;font-weight:800;margin:0}
-
-  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-  th,td{padding:.8rem 1rem;text-align:left;font-size:.82rem;border-bottom:1px solid var(--border)}
-  th{background:#FBF6EC;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
-  tr:last-child td{border-bottom:none}
-  .status-pill{font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;background:var(--green);color:#fff}
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+  .login-card{width:360px;background:var(--card);border-radius:20px;padding:2.6rem 2.2rem;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}
+  .login-card .mark{width:44px;height:44px;border-radius:12px;background:var(--accent);margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem}
+  .login-card h2{font-size:1.3rem;font-weight:700;margin:0 0 .3rem}
+  .login-card p.sub{color:var(--mid);font-size:.85rem;margin:0 0 1.6rem}
+  .login-card input{width:100%;padding:.8rem 1rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.7rem;font-size:.9rem;background:#FAFAFA;transition:border-color .15s}
+  .login-card input:focus{outline:none;border-color:var(--accent);background:#fff}
+  .login-card button{width:100%;padding:.85rem;background:var(--ink);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:.9rem;margin-top:.4rem;transition:opacity .15s}
+  .login-card button:hover{opacity:.82}
+  #loginError{color:#D70015;font-size:.8rem;margin-top:.8rem;display:none}
 
   #dashboardScreen{display:none}
+  .app-shell{display:flex;min-height:100vh}
+
+  .sidebar{width:220px;flex-shrink:0;background:var(--sidebar);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.2rem}
+  .sidebar .brand{color:#fff;font-weight:700;font-size:1rem;padding:.6rem .6rem 1.4rem}
+  .sidebar .brand span{color:var(--accent)}
+  .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;border-radius:8px;color:var(--sidebar-text);font-size:.86rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+  .nav-item .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
+  .nav-item.active{background:rgba(255,255,255,.1);color:var(--sidebar-text-active)}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:var(--sidebar-text-active)}
+  .sidebar .footnote{margin-top:auto;color:rgba(255,255,255,.35);font-size:.68rem;padding:.6rem;line-height:1.5}
+
+  .main-area{flex:1;padding:2.2rem 2.6rem;max-width:1200px}
+  .page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.8rem}
+  .page-head h1{font-size:1.6rem;font-weight:700;margin:0;letter-spacing:-.01em}
+  .page-head p{color:var(--mid);font-size:.85rem;margin:.2rem 0 0}
+  .logout-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.55rem 1rem;font-size:.8rem;font-weight:600;color:var(--ink);cursor:pointer}
+  .logout-btn:hover{background:#F0F0F2}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+  .stat-card{background:var(--card);border-radius:var(--radius);padding:1.4rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid var(--border)}
+  .stat-card p.lbl{font-size:.76rem;color:var(--mid);margin:0 0 .5rem;font-weight:500}
+  .stat-card p.val{font-size:1.75rem;font-weight:700;margin:0;letter-spacing:-.01em}
+
+  .panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .panel-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .panel-head h3{font-size:1rem;font-weight:700;margin:0}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:.85rem 1.4rem;text-align:left;font-size:.83rem}
+  th{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mid);font-weight:600;border-bottom:1px solid var(--border)}
+  td{border-bottom:1px solid var(--border);color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:#FAFAFA}
+  .status-pill{font-size:.68rem;font-weight:600;padding:.28rem .7rem;border-radius:20px;background:rgba(52,199,89,.12);color:#1E8A3B;text-transform:capitalize}
+  .ref-mono{font-family:'SF Mono',Menlo,monospace;font-size:.78rem;color:var(--mid)}
+
+  @media(max-width:800px){
+    .app-shell{flex-direction:column}
+    .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:.8rem}
+    .sidebar .brand,.sidebar .footnote{display:none}
+    .main-area{padding:1.4rem}
+    .stat-row{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Foodie Love — Dashboard</h1>
-  <span class="tag">Isolated v2 build — separate from main site</span>
-</header>
-
-<main>
-  <div id="loginScreen">
-    <h2 style="margin-top:0">Owner Login</h2>
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="mark">FL</div>
+    <h2>Foodie Love</h2>
+    <p class="sub">Owner Dashboard — sign in to continue</p>
     <input type="email" id="loginEmail" placeholder="Email"/>
     <input type="password" id="loginPassword" placeholder="Password"/>
-    <button id="loginBtn">Log In</button>
+    <button id="loginBtn">Sign In</button>
     <p id="loginError"></p>
   </div>
+</div>
 
-  <div id="dashboardScreen">
-    <div class="stat-row">
-      <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="statOrderCount">0</p></div>
-      <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="statTotalValue">$0</p></div>
-      <div class="stat-card"><p class="lbl">Most recent</p><p class="val" id="statMostRecent" style="font-size:.95rem">—</p></div>
+<div id="dashboardScreen">
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="brand">Foodie <span>Love</span></div>
+      <div class="nav-item active"><span class="dot"></span> Orders</div>
+      <div class="nav-item"><span class="dot"></span> Customers <span style="margin-left:auto;font-size:.62rem;background:rgba(255,255,255,.12);padding:.1rem .4rem;border-radius:8px">soon</span></div>
+      <div class="nav-item"><span class="dot"></span> Menu <span style="margin-left:auto;font-size:.62rem;background:rgba(255,255,255,.12);padding:.1rem .4rem;border-radius:8px">soon</span></div>
+      <div class="nav-item"><span class="dot"></span> Reports <span style="margin-left:auto;font-size:.62rem;background:rgba(255,255,255,.12);padding:.1rem .4rem;border-radius:8px">soon</span></div>
+      <div class="footnote">Isolated build — separate from the main website. Connected read-only to live orders.</div>
+    </nav>
+
+    <div class="main-area">
+      <div class="page-head">
+        <div>
+          <h1>Orders</h1>
+          <p>Live data from your production database</p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="statOrderCount">0</p></div>
+        <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="statTotalValue">$0</p></div>
+        <div class="stat-card"><p class="lbl">Most recent order</p><p class="val" id="statMostRecent" style="font-size:1rem">—</p></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Recent Orders</h3></div>
+        <table>
+          <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
+          <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+        </table>
+      </div>
     </div>
-
-    <h3>Recent Orders</h3>
-    <table>
-      <thead><tr><th>Ref</th><th>Name</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
-      <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt)">Loading…</td></tr></tbody>
-    </table>
   </div>
-</main>
+</div>
 
 <script type="module">
-// Same live Firebase project as the main site — this dashboard only ever
-// READS orders/data from it. It shares no files, no folder, and no
-// deployment with the main website, so nothing here can ever break it.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -104,19 +170,20 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   }
 });
 
+document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth));
+
 onAuthStateChanged(auth, async (user)=>{
   if(!user){
-    loginScreen.style.display = 'block';
+    loginScreen.style.display = 'flex';
     dashboardScreen.style.display = 'none';
     return;
   }
-  // Same owner-only check used on the main site — only real owners get in.
   try{
     const ownerDoc = await getDoc(doc(db, 'owners', user.uid));
     if(!ownerDoc.exists()){
       loginError.textContent = 'This account is not registered as an owner.';
       loginError.style.display = 'block';
-      await auth.signOut();
+      await signOut(auth);
       return;
     }
   }catch(e){
@@ -145,20 +212,20 @@ async function loadOrders(){
     }
 
     if(!orders.length){
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--lt)">No orders found yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">No orders found yet.</td></tr>';
       return;
     }
 
     tbody.innerHTML = orders.map(o => `
       <tr>
-        <td>${escapeHtml(o.orderRef || o.id)}</td>
+        <td class="ref-mono">${escapeHtml(o.orderRef || o.id)}</td>
         <td>${escapeHtml(o.name || '—')}</td>
         <td>$${(Number(o.total)||0).toFixed(2)}</td>
         <td><span class="status-pill">${escapeHtml(o.fulfillType || 'order')}</span></td>
         <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString() : '—'}</td>
       </tr>`).join('');
   }catch(err){
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#B3261E">Could not load orders: ${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#D70015;padding:2rem">Could not load orders: ${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
