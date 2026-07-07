@@ -46,6 +46,10 @@
   .sidebar{width:220px;flex-shrink:0;background:var(--sidebar);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.2rem}
   .sidebar .brand{color:#fff;font-weight:700;font-size:1rem;padding:.6rem .6rem 1.4rem}
   .sidebar .brand span{color:var(--accent)}
+  .nav-group-label{color:rgba(255,255,255,.32);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:1rem .8rem .3rem;padding:0}
+  .nav-group-label:first-of-type{margin-top:.2rem}
+  .page-panel{display:none}
+  .page-panel.active{display:block}
   .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;border-radius:8px;color:var(--sidebar-text);font-size:.86rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
   .nav-item .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
   .nav-item.active{background:rgba(255,255,255,.1);color:var(--sidebar-text-active)}
@@ -110,37 +114,108 @@
   <div class="app-shell">
     <nav class="sidebar">
       <div class="brand">Foodie <span>Love</span></div>
-      <div class="nav-item active"><span class="dot"></span> Orders</div>
-      <div class="nav-item"><span class="dot"></span> Customers <span style="margin-left:auto;font-size:.62rem;background:rgba(255,255,255,.12);padding:.1rem .4rem;border-radius:8px">soon</span></div>
-      <div class="nav-item"><span class="dot"></span> Menu <span style="margin-left:auto;font-size:.62rem;background:rgba(255,255,255,.12);padding:.1rem .4rem;border-radius:8px">soon</span></div>
-      <div class="nav-item"><span class="dot"></span> Reports <span style="margin-left:auto;font-size:.62rem;background:rgba(255,255,255,.12);padding:.1rem .4rem;border-radius:8px">soon</span></div>
+
+      <p class="nav-group-label">Overview</p>
+      <div class="nav-item active" data-page="overview"><span class="dot"></span> Dashboard</div>
+
+      <p class="nav-group-label">Orders</p>
+      <div class="nav-item" data-page="orders"><span class="dot"></span> Orders</div>
+
+      <p class="nav-group-label">Menu</p>
+      <div class="nav-item" data-page="menu-brunch"><span class="dot"></span> Brunch Menu</div>
+      <div class="nav-item" data-page="menu-catering"><span class="dot"></span> Catering Menu</div>
+      <div class="nav-item" data-page="menu-visibility"><span class="dot"></span> Sections &amp; Visibility</div>
+
+      <p class="nav-group-label">Bookings</p>
+      <div class="nav-item" data-page="bookings"><span class="dot"></span> Reservations</div>
+      <div class="nav-item" data-page="floorplan"><span class="dot"></span> Floor Plan</div>
+
+      <p class="nav-group-label">Customers</p>
+      <div class="nav-item" data-page="customers"><span class="dot"></span> Customer History</div>
+      <div class="nav-item" data-page="loyalty"><span class="dot"></span> Loyalty</div>
+
+      <p class="nav-group-label">Marketing</p>
+      <div class="nav-item" data-page="offers"><span class="dot"></span> Offers</div>
+      <div class="nav-item" data-page="vouchers"><span class="dot"></span> Gift Vouchers</div>
+      <div class="nav-item" data-page="discounts"><span class="dot"></span> Discounts</div>
+      <div class="nav-item" data-page="community"><span class="dot"></span> Community / Charity</div>
+
+      <p class="nav-group-label">Reports</p>
+      <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; Expenses</div>
+      <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
+
+      <p class="nav-group-label">Settings</p>
+      <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
+      <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
+      <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
+      <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
+
       <div class="footnote">Isolated build — separate from the main website. Connected read-only to live orders.</div>
     </nav>
 
     <div class="main-area">
       <div class="page-head">
         <div>
-          <h1>Orders</h1>
-          <p>Live data from your production database</p>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Live data from your production database</p>
         </div>
         <button class="logout-btn" id="logoutBtn">Sign Out</button>
       </div>
 
-      <div class="stat-row">
-        <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="statOrderCount">0</p></div>
-        <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="statTotalValue">$0</p></div>
-        <div class="stat-card"><p class="lbl">Most recent order</p><p class="val" id="statMostRecent" style="font-size:1rem">—</p></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head"><h3>Recent Orders</h3></div>
-        <div style="overflow-x:auto">
-        <table>
-          <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
-          <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
-        </table>
+      <!-- OVERVIEW PAGE -->
+      <div class="page-panel active" id="page-overview">
+        <div class="stat-row">
+          <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="ovOrderCount">0</p></div>
+          <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="ovTotalValue">$0</p></div>
+          <div class="stat-card"><p class="lbl">Most recent order</p><p class="val" id="ovMostRecent" style="font-size:1rem">—</p></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Latest Orders</h3></div>
+          <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
+            <tbody id="ovOrdersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+          </table>
+          </div>
         </div>
       </div>
+
+      <!-- ORDERS PAGE (full list) -->
+      <div class="page-panel" id="page-orders">
+        <div class="stat-row">
+          <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="statOrderCount">0</p></div>
+          <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="statTotalValue">$0</p></div>
+          <div class="stat-card"><p class="lbl">Most recent order</p><p class="val" id="statMostRecent" style="font-size:1rem">—</p></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Recent Orders</h3></div>
+          <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
+            <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLACEHOLDER PAGES — genuinely not built yet, clearly labeled -->
+      <div class="page-panel" id="page-menu-brunch"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Brunch Menu</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-menu-catering"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Catering Menu</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-menu-visibility"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Sections & Visibility</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-bookings"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Reservations</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-floorplan"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Floor Plan</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-customers"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Customer History</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-loyalty"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Loyalty</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-offers"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Offers</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-vouchers"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Gift Vouchers</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-discounts"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Discounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-community"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Community / Charity</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-sales"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Sales & Expenses</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-photos"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Photos</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-settings"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Site Settings</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-security"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Security</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
     </div>
   </div>
 </div>
@@ -181,6 +256,41 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
 
 document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth));
 
+// ── Sidebar navigation — swaps which page-panel is visible ──
+const pageTitles = {
+  overview: ['Dashboard', 'A quick summary of what\'s happening right now'],
+  orders: ['Orders', 'Live data from your production database'],
+  'menu-brunch': ['Brunch Menu', ''],
+  'menu-catering': ['Catering Menu', ''],
+  'menu-visibility': ['Sections & Visibility', ''],
+  bookings: ['Reservations', ''],
+  floorplan: ['Floor Plan', ''],
+  customers: ['Customer History', ''],
+  loyalty: ['Loyalty', ''],
+  offers: ['Offers', ''],
+  vouchers: ['Gift Vouchers', ''],
+  discounts: ['Discounts', ''],
+  community: ['Community / Charity', ''],
+  sales: ['Sales & Expenses', ''],
+  payments: ['Payment Summary', ''],
+  staff: ['Staff Accounts', ''],
+  photos: ['Photos', ''],
+  settings: ['Site Settings', ''],
+  security: ['Security', ''],
+};
+document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const page = item.dataset.page;
+    document.querySelectorAll('.nav-item[data-page]').forEach(i=>i.classList.remove('active'));
+    document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('page-'+page)?.classList.add('active');
+    const [title, subtitle] = pageTitles[page] || [page, ''];
+    document.getElementById('pageTitle').textContent = title;
+    document.getElementById('pageSubtitle').textContent = subtitle;
+  });
+});
+
 onAuthStateChanged(auth, async (user)=>{
   if(!user){
     loginScreen.style.display = 'flex';
@@ -207,25 +317,38 @@ onAuthStateChanged(auth, async (user)=>{
 
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
+  const ovTbody = document.getElementById('ovOrdersTableBody');
   try{
     const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
     const snap = await getDocs(q);
     const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
 
-    document.getElementById('statOrderCount').textContent = orders.length;
     const totalValue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-    document.getElementById('statTotalValue').textContent = '$' + totalValue.toFixed(2);
-    if(orders.length){
-      const mostRecentDate = orders[0].createdAt?.toDate ? orders[0].createdAt.toDate() : new Date();
-      document.getElementById('statMostRecent').textContent = mostRecentDate.toLocaleString();
-    }
+    const mostRecentText = orders.length && orders[0].createdAt?.toDate
+      ? orders[0].createdAt.toDate().toLocaleString() : (orders.length ? new Date().toLocaleString() : '—');
+
+    // Same numbers feed both the Orders page and the Dashboard Overview,
+    // so there's only one place to keep them accurate.
+    ['statOrderCount', 'ovOrderCount'].forEach(id => document.getElementById(id).textContent = orders.length);
+    ['statTotalValue', 'ovTotalValue'].forEach(id => document.getElementById(id).textContent = '$' + totalValue.toFixed(2));
+    ['statMostRecent', 'ovMostRecent'].forEach(id => document.getElementById(id).textContent = mostRecentText);
 
     if(!orders.length){
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">No orders found yet.</td></tr>';
+      const emptyRow = '<tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">No orders found yet.</td></tr>';
+      tbody.innerHTML = emptyRow; ovTbody.innerHTML = emptyRow;
       return;
     }
 
-    tbody.innerHTML = orders.map(o => `
+    const rowsHtml = orders.map(o => `
+      <tr>
+        <td class="ref-mono">${escapeHtml(o.orderRef || o.id)}</td>
+        <td>${escapeHtml(o.name || '—')}</td>
+        <td>$${(Number(o.total)||0).toFixed(2)}</td>
+        <td><span class="status-pill">${escapeHtml(o.fulfillType || 'order')}</span></td>
+        <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString() : '—'}</td>
+      </tr>`).join('');
+    tbody.innerHTML = rowsHtml;
+    ovTbody.innerHTML = orders.slice(0, 8).map(o => `
       <tr>
         <td class="ref-mono">${escapeHtml(o.orderRef || o.id)}</td>
         <td>${escapeHtml(o.name || '—')}</td>
@@ -234,7 +357,8 @@ async function loadOrders(){
         <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString() : '—'}</td>
       </tr>`).join('');
   }catch(err){
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#D70015;padding:2rem">Could not load orders: ${escapeHtml(err.message)}</td></tr>`;
+    const errRow = `<tr><td colspan="5" style="text-align:center;color:#D70015;padding:2rem">Could not load orders: ${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = errRow; ovTbody.innerHTML = errRow;
   }
 }
 
