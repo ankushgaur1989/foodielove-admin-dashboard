@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Foodie Love — Dashboard (v2, isolated)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#F7F2E7; --card:#FFFFFF; --ink:#281808; --mid:#7A6B58; --lt:#A69A88;
+    --border:#E8DFCF; --orange:#F07030; --orange-dk:#D95F1F; --green:#4CAF6D;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:#281808;color:#fff;padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center}
+  header h1{font-size:1.1rem;margin:0;font-weight:700}
+  header .tag{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.12);padding:.3rem .7rem;border-radius:20px}
+  main{max-width:1100px;margin:0 auto;padding:2rem}
+
+  #loginScreen{max-width:380px;margin:4rem auto;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center}
+  #loginScreen input{width:100%;padding:.7rem .9rem;border:1.5px solid var(--border);border-radius:8px;margin-bottom:.8rem;font-size:.9rem}
+  #loginScreen button{width:100%;padding:.8rem;background:var(--orange);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.85rem}
+  #loginScreen button:hover{background:var(--orange-dk)}
+  #loginError{color:#B3261E;font-size:.8rem;margin-top:.6rem;display:none}
+
+  .stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+  .stat-card{flex:1;min-width:160px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+  .stat-card p.lbl{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--lt);margin:0 0 .4rem}
+  .stat-card p.val{font-size:1.6rem;font-weight:800;margin:0}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  th,td{padding:.8rem 1rem;text-align:left;font-size:.82rem;border-bottom:1px solid var(--border)}
+  th{background:#FBF6EC;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mid)}
+  tr:last-child td{border-bottom:none}
+  .status-pill{font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;background:var(--green);color:#fff}
+
+  #dashboardScreen{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Foodie Love — Dashboard</h1>
+  <span class="tag">Isolated v2 build — separate from main site</span>
+</header>
+
+<main>
+  <div id="loginScreen">
+    <h2 style="margin-top:0">Owner Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email"/>
+    <input type="password" id="loginPassword" placeholder="Password"/>
+    <button id="loginBtn">Log In</button>
+    <p id="loginError"></p>
+  </div>
+
+  <div id="dashboardScreen">
+    <div class="stat-row">
+      <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="statOrderCount">0</p></div>
+      <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="statTotalValue">$0</p></div>
+      <div class="stat-card"><p class="lbl">Most recent</p><p class="val" id="statMostRecent" style="font-size:.95rem">—</p></div>
+    </div>
+
+    <h3>Recent Orders</h3>
+    <table>
+      <thead><tr><th>Ref</th><th>Name</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
+      <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt)">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</main>
+
+<script type="module">
+// Same live Firebase project as the main site — this dashboard only ever
+// READS orders/data from it. It shares no files, no folder, and no
+// deployment with the main website, so nothing here can ever break it.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAuXNQCayf1n9EvoahxxIAY08iQQ8UGCT4",
+  authDomain: "foodielovecatering-9da7a.firebaseapp.com",
+  projectId: "foodielovecatering-9da7a",
+  storageBucket: "foodielovecatering-9da7a.firebasestorage.app",
+  messagingSenderId: "395434371117",
+  appId: "1:395434371117:web:06005c2bc6b5339b9970a4",
+  measurementId: "G-BK626PEVLV"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const loginScreen = document.getElementById('loginScreen');
+const dashboardScreen = document.getElementById('dashboardScreen');
+const loginError = document.getElementById('loginError');
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  loginError.style.display = 'none';
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    loginError.textContent = 'Login failed: ' + e.message;
+    loginError.style.display = 'block';
+  }
+});
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    loginScreen.style.display = 'block';
+    dashboardScreen.style.display = 'none';
+    return;
+  }
+  // Same owner-only check used on the main site — only real owners get in.
+  try{
+    const ownerDoc = await getDoc(doc(db, 'owners', user.uid));
+    if(!ownerDoc.exists()){
+      loginError.textContent = 'This account is not registered as an owner.';
+      loginError.style.display = 'block';
+      await auth.signOut();
+      return;
+    }
+  }catch(e){
+    loginError.textContent = 'Could not verify owner access: ' + e.message;
+    loginError.style.display = 'block';
+    return;
+  }
+  loginScreen.style.display = 'none';
+  dashboardScreen.style.display = 'block';
+  loadOrders();
+});
+
+async function loadOrders(){
+  const tbody = document.getElementById('ordersTableBody');
+  try{
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+
+    document.getElementById('statOrderCount').textContent = orders.length;
+    const totalValue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    document.getElementById('statTotalValue').textContent = '$' + totalValue.toFixed(2);
+    if(orders.length){
+      const mostRecentDate = orders[0].createdAt?.toDate ? orders[0].createdAt.toDate() : new Date();
+      document.getElementById('statMostRecent').textContent = mostRecentDate.toLocaleString();
+    }
+
+    if(!orders.length){
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--lt)">No orders found yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td>${escapeHtml(o.orderRef || o.id)}</td>
+        <td>${escapeHtml(o.name || '—')}</td>
+        <td>$${(Number(o.total)||0).toFixed(2)}</td>
+        <td><span class="status-pill">${escapeHtml(o.fulfillType || 'order')}</span></td>
+        <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString() : '—'}</td>
+      </tr>`).join('');
+  }catch(err){
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#B3261E">Could not load orders: ${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+</script>
+</body>
+</html>
