@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Foodie Love — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#F5F5F7;
+    --card:#FFFFFF;
+    --ink:#1D1D1F;
+    --mid:#6E6E73;
+    --lt:#AEAEB2;
+    --border:#E5E5EA;
+    --accent:#F07030;
+    --accent-dk:#D95F1F;
+    --green:#34C759;
+    --sidebar:#1D1D1F;
+    --sidebar-text:rgba(255,255,255,.68);
+    --sidebar-text-active:#fff;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{overflow-x:hidden;width:100%;max-width:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',Arial,sans-serif;
+    background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+  .login-card{width:min(360px, 92vw);background:var(--card);border-radius:20px;padding:2.6rem 2.2rem;box-shadow:0 20px 60px rgba(0,0,0,.08);text-align:center}
+  .login-card .mark{width:44px;height:44px;border-radius:12px;background:var(--accent);margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem}
+  .login-card h2{font-size:1.3rem;font-weight:700;margin:0 0 .3rem}
+  .login-card p.sub{color:var(--mid);font-size:.85rem;margin:0 0 1.6rem}
+  .login-card input{width:100%;padding:.8rem 1rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.7rem;font-size:.9rem;background:#FAFAFA;transition:border-color .15s}
+  .login-card input:focus{outline:none;border-color:var(--accent);background:#fff}
+  .login-card button{width:100%;padding:.85rem;background:var(--ink);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:.9rem;margin-top:.4rem;transition:opacity .15s}
+  .login-card button:hover{opacity:.82}
+  #loginError{color:#D70015;font-size:.8rem;margin-top:.8rem;display:none}
+
+  #dashboardScreen{display:none}
+  .app-shell{display:flex;min-height:100vh}
+
+  .sidebar{width:220px;flex-shrink:0;background:var(--sidebar);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.2rem}
+  .sidebar .brand{color:#fff;font-weight:700;font-size:1rem;padding:.6rem .6rem 1.4rem}
+  .sidebar .brand span{color:var(--accent)}
+  .nav-group-label{color:rgba(255,255,255,.32);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:1rem .8rem .3rem;padding:0}
+  .nav-group-label:first-of-type{margin-top:.2rem}
+  .page-panel{display:none}
+  .page-panel.active{display:block}
+  .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;border-radius:8px;color:var(--sidebar-text);font-size:.86rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+  .nav-item .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
+  .nav-item.active{background:rgba(255,255,255,.1);color:var(--sidebar-text-active)}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:var(--sidebar-text-active)}
+  .sidebar .footnote{margin-top:auto;color:rgba(255,255,255,.35);font-size:.68rem;padding:.6rem;line-height:1.5}
+
+  .main-area{flex:1;min-width:0;padding:2.2rem 2.6rem;max-width:1200px}
+  .page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.8rem}
+  .page-head h1{font-size:1.6rem;font-weight:700;margin:0;letter-spacing:-.01em}
+  .page-head p{color:var(--mid);font-size:.85rem;margin:.2rem 0 0}
+  .logout-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.55rem 1rem;font-size:.8rem;font-weight:600;color:var(--ink);cursor:pointer}
+  .logout-btn:hover{background:#F0F0F2}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+
+  .widget-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;gap:1rem;flex-wrap:wrap}
+  .widget-toolbar p{color:var(--mid);font-size:.82rem;margin:0}
+  .reset-layout-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem .9rem;font-size:.78rem;font-weight:600;color:var(--ink);cursor:pointer;flex-shrink:0}
+  .reset-layout-btn:hover{background:#F0F0F2}
+
+  .widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:start}
+  .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04);touch-action:none}
+  .widget.dragging{opacity:.5;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .widget-head{display:flex;align-items:center;gap:.6rem;padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
+  .widget-head h3{font-size:.88rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.5rem}
+  .widget-drag{cursor:grab;color:var(--lt);font-size:1rem;line-height:1;user-select:none}
+  .widget-body{padding:1.2rem}
+  .widget-big-stat{font-size:1.9rem;font-weight:800;margin:0;letter-spacing:-.01em}
+  .widget-sub{font-size:.78rem;color:var(--mid);margin:.3rem 0 0}
+
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:livepulse 1.6s ease-in-out infinite}
+  @keyframes livepulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .top-items-list{margin:0;padding-left:1.2rem;font-size:.85rem}
+  .top-items-list li{padding:.35rem 0;color:var(--ink)}
+  .top-items-list li span{color:var(--mid);font-size:.78rem;margin-left:.4rem}
+
+  .activity-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.82rem}
+  .activity-row:last-child{border-bottom:none}
+  .activity-row .new-badge{background:rgba(52,199,89,.14);color:#1E8A3B;font-size:.64rem;font-weight:700;padding:.15rem .5rem;border-radius:20px}
+  .stat-card{background:var(--card);border-radius:var(--radius);padding:1.4rem 1.5rem;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid var(--border)}
+
+  .mm-lbl{display:block;font-size:.76rem;font-weight:600;color:var(--mid);margin-bottom:.3rem}
+  #page-menu-brunch input[type="text"],#page-menu-brunch input[type="number"],#page-menu-brunch select{
+    width:100%;padding:.65rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-family:inherit;background:#FAFAFA;
+  }
+  #page-menu-brunch input:focus,#page-menu-brunch select:focus,#page-menu-brunch textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+  .mm-section-h{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mid);background:var(--bg);padding:.6rem 1rem;margin-top:1rem;border-radius:8px}
+  .mm-item-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;border-bottom:1px solid var(--border)}
+  .mm-item-row:last-child{border-bottom:none}
+  .mm-item-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--bg);flex-shrink:0}
+  .mm-item-name{font-weight:600;font-size:.86rem}
+  .mm-item-desc{font-size:.76rem;color:var(--mid);margin-top:.1rem}
+  .mm-item-price{font-weight:700;font-size:.86rem;margin-left:auto;white-space:nowrap}
+  .mm-item-actions{display:flex;gap:.4rem}
+  .mm-btn-sm{padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:.74rem;font-weight:600;cursor:pointer}
+  .mm-btn-sm:hover{background:var(--bg)}
+  .mm-btn-danger{color:#D70015;border-color:rgba(215,0,21,.25)}
+
+  .sv-toggle{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0}
+  .sv-toggle input{opacity:0;width:0;height:0}
+  .sv-track{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#D0D0D5;border-radius:26px;transition:.2s}
+  .sv-track:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sv-toggle input:checked + .sv-track{background:var(--green)}
+  .sv-toggle input:checked + .sv-track:before{transform:translateX(18px)}
+  .svToggleCard.is-off{border-color:#D70015;background:#FFF5F5}
+  .sv-item-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1rem;border-bottom:1px solid var(--border);font-size:.84rem}
+  .sv-item-row:last-child{border-bottom:none}
+
+  .ph-row{display:flex;gap:1rem;align-items:flex-start;padding:1rem;border-bottom:1px solid var(--border)}
+  .ph-row:last-child{border-bottom:none}
+  .ph-img{width:80px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg)}
+  .ph-label{font-weight:600;font-size:.86rem;margin-bottom:.4rem}
+  .ph-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+  .ph-controls input[type="text"]{flex:1;min-width:180px;padding:.5rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.8rem}
+  .ph-status{font-size:.76rem;margin-top:.4rem;color:var(--mid)}
+  .stat-card p.lbl{font-size:.76rem;color:var(--mid);margin:0 0 .5rem;font-weight:500}
+  .stat-card p.val{font-size:1.75rem;font-weight:700;margin:0;letter-spacing:-.01em}
+
+  .panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .panel-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .panel-head h3{font-size:1rem;font-weight:700;margin:0}
+  table{width:100%;min-width:520px;border-collapse:collapse}
+  th,td{padding:.85rem 1.4rem;text-align:left;font-size:.83rem}
+  th{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mid);font-weight:600;border-bottom:1px solid var(--border)}
+  td{border-bottom:1px solid var(--border);color:var(--ink)}
+  tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:#FAFAFA}
+  .status-pill{font-size:.68rem;font-weight:600;padding:.28rem .7rem;border-radius:20px;background:rgba(52,199,89,.12);color:#1E8A3B;text-transform:capitalize}
+  .ref-mono{font-family:'SF Mono',Menlo,monospace;font-size:.78rem;color:var(--mid)}
+
+  @media(max-width:800px){
+    .app-shell{flex-direction:column}
+    .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:.8rem;gap:.4rem}
+    .sidebar .brand,.sidebar .footnote{display:none}
+    .nav-item{flex-shrink:0;white-space:nowrap}
+    .main-area{padding:1.4rem;min-width:0}
+    .page-head{flex-wrap:wrap;gap:.8rem}
+    .stat-row{grid-template-columns:1fr}
+    .widget-grid{grid-template-columns:1fr}
+    .widget{grid-column:auto!important}
+  }
+  @media(max-width:420px){
+    .login-card{padding:2rem 1.4rem}
+    .main-area{padding:1rem}
+  }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="mark">FL</div>
+    <h2>Foodie Love</h2>
+    <p class="sub">Owner Dashboard — sign in to continue</p>
+    <input type="email" id="loginEmail" placeholder="Email"/>
+    <input type="password" id="loginPassword" placeholder="Password"/>
+    <button id="loginBtn">Sign In</button>
+    <p id="loginError"></p>
+  </div>
+</div>
+
+<div id="dashboardScreen">
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="brand">Foodie <span>Love</span></div>
+
+      <p class="nav-group-label">Overview</p>
+      <div class="nav-item active" data-page="overview"><span class="dot"></span> Dashboard</div>
+
+      <p class="nav-group-label">Orders</p>
+      <div class="nav-item" data-page="orders"><span class="dot"></span> Orders</div>
+
+      <p class="nav-group-label">Menu</p>
+      <div class="nav-item" data-page="menu-brunch"><span class="dot"></span> Brunch Menu</div>
+      <div class="nav-item" data-page="menu-catering"><span class="dot"></span> Catering Menu</div>
+      <div class="nav-item" data-page="charcuterie"><span class="dot"></span> Charcuterie Board</div>
+      <div class="nav-item" data-page="gymjunkies"><span class="dot"></span> Gym Junkies Menu</div>
+      <div class="nav-item" data-page="merchandise"><span class="dot"></span> Merchandise</div>
+      <div class="nav-item" data-page="events"><span class="dot"></span> Events</div>
+      <div class="nav-item" data-page="countdownbanner"><span class="dot"></span> Countdown Banner</div>
+      <div class="nav-item" data-page="profile"><span class="dot"></span> Business Details</div>
+      <div class="nav-item" data-page="maintenance"><span class="dot"></span> Maintenance Mode</div>
+      <div class="nav-item" data-page="featureflags"><span class="dot"></span> Feature Flags</div>
+      <div class="nav-item" data-page="ordersearch"><span class="dot"></span> Search Orders</div>
+      <div class="nav-item" data-page="blogposts"><span class="dot"></span> Blog Posts</div>
+      <div class="nav-item" data-page="musicplaylist"><span class="dot"></span> Music Playlist</div>
+      <div class="nav-item" data-page="instagram"><span class="dot"></span> Instagram Feed</div>
+      <a href="https://www.foodielove.com.au/kds.html" target="_blank" rel="noopener" class="nav-item" style="display:flex;align-items:center;text-decoration:none;color:inherit"><span class="dot"></span> Kitchen Display (KDS) ↗</a>
+      <div class="nav-item" data-page="menu-visibility"><span class="dot"></span> Sections &amp; Visibility</div>
+
+      <p class="nav-group-label">Coming Soon</p>
+      <div class="nav-item" data-page="websitesecurity" style="opacity:.55"><span class="dot"></span> Website Security</div>
+      <div class="nav-item" data-page="analytics-soon" style="opacity:.55"><span class="dot"></span> Analytics</div>
+      <div class="nav-item" data-page="gallery-soon" style="opacity:.55"><span class="dot"></span> Gallery</div>
+      <div class="nav-item" data-page="communityboard-soon" style="opacity:.55"><span class="dot"></span> Community Board</div>
+
+      <p class="nav-group-label">Bookings</p>
+      <div class="nav-item" data-page="bookings"><span class="dot"></span> Reservations</div>
+      <div class="nav-item" data-page="floorplan"><span class="dot"></span> Floor Plan</div>
+
+      <p class="nav-group-label">Customers</p>
+      <div class="nav-item" data-page="customers"><span class="dot"></span> Customer History</div>
+      <div class="nav-item" data-page="loyalty"><span class="dot"></span> Loyalty</div>
+
+      <p class="nav-group-label">Marketing</p>
+      <div class="nav-item" data-page="offers"><span class="dot"></span> Offers</div>
+      <div class="nav-item" data-page="vouchers"><span class="dot"></span> Gift Vouchers</div>
+      <div class="nav-item" data-page="discounts"><span class="dot"></span> Discounts</div>
+      <div class="nav-item" data-page="community"><span class="dot"></span> Community / Charity</div>
+
+      <p class="nav-group-label">Reports</p>
+      <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; Expenses</div>
+      <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
+
+      <p class="nav-group-label">Settings</p>
+      <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
+      <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
+      <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
+      <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
+
+      <div class="footnote">Isolated build — separate from the main website. Connected read-only to live orders.</div>
+    </nav>
+
+    <div class="main-area">
+      <div class="page-head">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Live data from your production database</p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+      </div>
+
+      <!-- OVERVIEW PAGE -->
+      <div class="page-panel active" id="page-overview">
+        <div class="widget-toolbar">
+          <p>Drag any widget's <strong>⠿</strong> handle to rearrange your dashboard — it's remembered for next time.</p>
+          <button class="reset-layout-btn" id="resetLayoutBtn">Reset Layout</button>
+        </div>
+        <div class="widget-grid" id="widgetGrid">
+
+          <div class="widget" data-widget="todayOrders">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Today's Orders</h3></div>
+            <div class="widget-body">
+              <p class="widget-big-stat" id="wTodayCount">0</p>
+              <p class="widget-sub">orders placed today, worth <strong id="wTodayValue">$0</strong></p>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="totalValue">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Total Value (last 50)</h3></div>
+            <div class="widget-body">
+              <p class="widget-big-stat" id="ovTotalValue">$0</p>
+              <p class="widget-sub"><span id="ovOrderCount">0</span> orders loaded</p>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="mostRecent">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Most Recent Order</h3></div>
+            <div class="widget-body">
+              <p class="widget-big-stat" id="ovMostRecent" style="font-size:1.1rem">—</p>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="topItems" style="grid-column:span 2">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Top Moving Items</h3></div>
+            <div class="widget-body">
+              <ol class="top-items-list" id="topItemsList"><li style="color:var(--lt)">Loading…</li></ol>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="activityStream" style="grid-column:span 2">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Live Activity <span class="live-dot" id="liveDot"></span></h3></div>
+            <div class="widget-body" style="max-height:280px;overflow-y:auto">
+              <div id="activityStreamList"><p style="color:var(--lt);font-size:.82rem">Watching for new orders…</p></div>
+            </div>
+          </div>
+
+          <div class="widget" data-widget="latestOrders" style="grid-column:1 / -1">
+            <div class="widget-head"><span class="widget-drag">⠿</span><h3>Latest Orders</h3></div>
+            <div class="widget-body" style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
+                <tbody id="ovOrdersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ORDERS PAGE (full list) -->
+      <div class="page-panel" id="page-orders">
+        <div class="stat-row">
+          <div class="stat-card"><p class="lbl">Orders loaded</p><p class="val" id="statOrderCount">0</p></div>
+          <div class="stat-card"><p class="lbl">Total value</p><p class="val" id="statTotalValue">$0</p></div>
+          <div class="stat-card"><p class="lbl">Most recent order</p><p class="val" id="statMostRecent" style="font-size:1rem">—</p></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Recent Orders</h3></div>
+          <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Type</th><th>Placed</th></tr></thead>
+            <tbody id="ordersTableBody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLACEHOLDER PAGES — genuinely not built yet, clearly labeled -->
+      <div class="page-panel" id="page-menu-brunch">
+        <div class="panel" style="margin-bottom:1.2rem">
+          <div class="panel-head"><h3 id="mmFormTitle">Add Menu Item</h3></div>
+          <div style="padding:1.2rem 1.4rem">
+            <input type="hidden" id="mmEditId">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+              <div><label class="mm-lbl">Name</label><input type="text" id="mmName" placeholder="e.g. Eggs on Toast"></div>
+              <div><label class="mm-lbl">Price ($)</label><input type="number" step="0.01" id="mmPrice" placeholder="14.90"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+              <div><label class="mm-lbl">Page</label>
+                <select id="mmPage">
+                  <option value="menu">Brunch Menu</option>
+                  <option value="catering">Catering Menu</option>
+                </select>
+              </div>
+              <div><label class="mm-lbl">Section</label>
+                <select id="mmSection">
+                  <option value="breakfast">Breakfast</option>
+                  <option value="lunch">Lunch</option>
+                  <option value="vegan">Vegan</option>
+                  <option value="gymjunkie">Gym Junkie</option>
+                  <option value="kids">Kids</option>
+                  <option value="hotdrinks">Hot Drinks</option>
+                  <option value="colddrinks">Cold Drinks</option>
+                  <option value="alcohol">Alcohol</option>
+                  <option value="vitalbowls">Vital Bowls</option>
+                  <option value="boxes">Grazing Boxes</option>
+                  <option value="wraps">Catering Wraps</option>
+                  <option value="sliders">Catering Sliders</option>
+                  <option value="dessertcups">Dessert Cups</option>
+                  <option value="custom-board">Charcuterie Board</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-bottom:.8rem"><label class="mm-lbl">Description</label><textarea id="mmDesc" rows="2" style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem"></textarea></div>
+            <div style="margin-bottom:.8rem"><label class="mm-lbl">Photo</label><input type="file" accept="image/*" id="mmPhotoFile"></div>
+            <button class="reset-layout-btn" id="mmSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save Item</button>
+            <button class="reset-layout-btn" id="mmCancelBtn" style="display:none;margin-left:.5rem">Cancel Edit</button>
+            <span id="mmStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+          </div>
+        </div>
+
+        <div class="widget-toolbar">
+          <p>Showing items from both Brunch and Catering menus — same live database as the main site</p>
+          <select id="mmPageFilter" style="padding:.4rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.8rem">
+            <option value="all">All Pages</option>
+            <option value="menu">Brunch Menu Only</option>
+            <option value="catering">Catering Menu Only</option>
+          </select>
+        </div>
+        <div id="mmItemsList"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-menu-catering" style="display:none"></div>
+      <div class="page-panel" id="page-charcuterie">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Board Designs</h3>
+          <p style="color:var(--mid);font-size:.82rem;margin:0 0 1rem">The 3 board style options customers pick from. Minimum $25 per design — enforced automatically on save.</p>
+          <div id="cbBoardDesignsWrap"></div>
+          <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <label class="mm-lbl" style="margin:0">Knife Set Add-on Price ($)</label>
+            <input type="number" id="cbKnifeSetPrice" style="width:100px" value="20">
+          </div>
+          <button class="reset-layout-btn" id="cbSaveExtrasBtn" style="background:var(--ink);color:#fff;border-color:var(--ink);margin-top:1rem">Save Board Designs &amp; Knife Price</button>
+          <span id="cbExtrasStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add a Category</h3>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            <input type="text" id="cbNewCatName" placeholder="e.g. Cheese, Cured Meats, Fruit" style="flex:1">
+            <input type="color" id="cbNewCatColor" value="#4F7A2E" style="width:44px;height:38px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:0">
+            <button class="reset-layout-btn" id="cbAddCatBtn" style="background:var(--ink);color:#fff;border-color:var(--ink);white-space:nowrap">+ Add Category</button>
+          </div>
+        </div>
+
+        <div id="cbCategoriesWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-gymjunkies">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .6rem">Add Ingredient</h3>
+          <input type="hidden" id="gjEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Category</label>
+              <select id="gjCategory">
+                <option value="protein">Protein</option>
+                <option value="base">Base (rice, quinoa, etc.)</option>
+                <option value="veggie">Steamed Veggie</option>
+                <option value="addon">Add-on / Sauce</option>
+              </select>
+            </div>
+            <div><label class="mm-lbl">Name</label><input type="text" id="gjName" placeholder="e.g. Grilled Chicken Breast"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Serving size (as served)</label><input type="text" id="gjServing" placeholder="e.g. 150g cooked"></div>
+            <div><label class="mm-lbl">Price ($, 0 if included free)</label><input type="number" step="0.50" id="gjPrice"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Calories</label><input type="number" id="gjCalories"></div>
+            <div><label class="mm-lbl">Protein (g)</label><input type="number" step="0.1" id="gjProtein"></div>
+            <div><label class="mm-lbl">Carbs (g)</label><input type="number" step="0.1" id="gjCarbs"></div>
+            <div><label class="mm-lbl">Fat (g)</label><input type="number" step="0.1" id="gjFat"></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;cursor:pointer">
+            <input type="checkbox" id="gjOutOfStock" style="width:1.1rem;height:1.1rem">
+            <span style="font-size:.85rem">Mark as out of stock right now</span>
+          </label>
+          <button class="reset-layout-btn" id="gjSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save Ingredient</button>
+          <button class="reset-layout-btn" id="gjCancelBtn" style="display:none;margin-left:.5rem">Cancel Edit</button>
+          <span id="gjStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="gjIngredientsWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-merchandise">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add Merchandise Item</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Name</label><input type="text" id="mcName" placeholder="e.g. Foodie Love Tote Bag"></div>
+            <div><label class="mm-lbl">Category</label>
+              <select id="mcCategory">
+                <option>T-Shirts</option><option>Mugs</option><option>Tote Bags</option><option>Aprons</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Price ($)</label><input type="number" step="0.01" id="mcPrice"></div>
+            <div><label class="mm-lbl">Stock on hand</label><input type="number" id="mcStock"></div>
+          </div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Description</label><textarea id="mcDescription" rows="2" style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem"></textarea></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Photo</label><input type="file" accept="image/*" id="mcPhotoFile"></div>
+          <button class="reset-layout-btn" id="mcSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Add Item</button>
+          <span id="mcStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="mcListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-events">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add Event</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Event Name</label><input type="text" id="evName" placeholder="e.g. Live Music Night"></div>
+            <div><label class="mm-lbl">Location</label><input type="text" id="evLocation" placeholder="e.g. Main dining area"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Date</label><input type="date" id="evDate"></div>
+            <div><label class="mm-lbl">Time</label><input type="time" id="evTime"></div>
+          </div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Description</label><textarea id="evDescription" rows="2" style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem"></textarea></div>
+          <button class="reset-layout-btn" id="evSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Add Event</button>
+          <span id="evStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="evListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-countdownbanner">
+        <div class="panel" style="padding:1.4rem">
+          <label style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;cursor:pointer">
+            <input type="checkbox" id="cdbActive" style="width:1.1rem;height:1.1rem">
+            <span style="font-weight:600;font-size:.9rem">Banner Active</span>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Title</label><input type="text" id="cdbTitle" placeholder="e.g. Christmas Orders Closing Soon!"></div>
+            <div><label class="mm-lbl">Shows On</label>
+              <select id="cdbTargetPage"><option value="all">Every Page</option><option value="home">Homepage Only</option><option value="menu">Menu Page Only</option><option value="catering">Catering Page Only</option></select>
+            </div>
+          </div>
+          <div style="margin-bottom:1rem"><label class="mm-lbl">Counts Down To</label><input type="datetime-local" id="cdbEndDateTime"></div>
+          <button class="reset-layout-btn" id="cdbSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save Countdown Banner</button>
+          <span id="cdbStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
+      <div class="page-panel" id="page-profile">
+        <p style="color:#B08D57;background:#F8F2E5;padding:.7rem 1rem;border-radius:8px;font-size:.8rem;margin-bottom:1rem">Note: the main admin panel requires a 2FA code for these changes if you have it enabled. This dashboard doesn't replicate that step yet — same owner login either way, just be aware.</p>
+        <div class="panel" style="padding:1.4rem">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Business Name</label><input type="text" id="bpName" placeholder="Foodie Love Catering"></div>
+            <div><label class="mm-lbl">ABN</label><input type="text" id="bpAbn" placeholder="00 000 000 000"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem">
+            <div><label class="mm-lbl">Address</label><input type="text" id="bpAddress" placeholder="4 Bittern Road, Donnybrook VIC 3064"></div>
+            <div><label class="mm-lbl">Phone</label><input type="text" id="bpPhone" placeholder="0404 664 497"></div>
+          </div>
+          <button class="reset-layout-btn" id="bpSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save Business Details</button>
+          <span id="bpStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
+      <div class="page-panel" id="page-maintenance">
+        <div class="panel" style="padding:1.4rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+            <p style="margin:0;font-size:.85rem;color:var(--mid);max-width:400px">When on, every customer sees a maintenance page instead of the real site. Admin access is unaffected.</p>
+            <span id="maStatusBadge" style="font-size:.72rem;font-weight:700;padding:.3rem .8rem;border-radius:20px">Off</span>
+          </div>
+          <label style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;cursor:pointer">
+            <input type="checkbox" id="maActive" style="width:1.1rem;height:1.1rem">
+            <span style="font-weight:600;font-size:.9rem">Maintenance Mode Active</span>
+          </label>
+          <button class="reset-layout-btn" id="maSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save</button>
+          <span id="maStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
+      <div class="page-panel" id="page-featureflags">
+        <div class="panel" id="ffListWrap" style="padding:.5rem 1.4rem"><p style="color:var(--lt);padding:1.5rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-ordersearch">
+        <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Find a customer using any single detail — name, email, or phone number. Searches real orders, catering enquiries, and bookings all at once.</p>
+        <div style="display:flex;gap:.6rem;max-width:520px;margin-bottom:.6rem">
+          <input type="text" id="osInput" placeholder="Type a name, email, or phone number…" style="flex:1;padding:.7rem .9rem;border:1px solid var(--border);border-radius:8px;font-size:.9rem">
+          <button class="reset-layout-btn" id="osSearchBtn" style="background:var(--ink);color:#fff;border-color:var(--ink);white-space:nowrap">Search</button>
+        </div>
+        <p id="osStatus" style="font-size:.78rem;color:var(--mid);margin-bottom:1rem"></p>
+        <div id="osResults"></div>
+      </div>
+      <div class="page-panel" id="page-blogposts">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Write a New Post</h3>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Title</label><input type="text" id="blgTitle" placeholder="e.g. Our Favourite Winter Brunch Ideas"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Excerpt (shown in the blog list)</label><input type="text" id="blgExcerpt" placeholder="A short one-liner to hook readers in"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Post Content</label><textarea id="blgBody" rows="6" style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem"></textarea></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Cover Photo</label><input type="file" accept="image/*" id="blgPhotoFile"></div>
+          <button class="reset-layout-btn" id="blgSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Publish Post</button>
+          <span id="blgPostStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="blgListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-musicplaylist">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add Track</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Title</label><input type="text" id="plTitle" placeholder="e.g. Sunday Morning"></div>
+            <div><label class="mm-lbl">Artist</label><input type="text" id="plArtist" placeholder="e.g. Local Artist"></div>
+          </div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">License / Usage Note (optional)</label><input type="text" id="plLicense" placeholder="e.g. Royalty-free, licensed via..."></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">MP3 File (max 20MB)</label><input type="file" accept="audio/mpeg,.mp3" id="plFile"></div>
+          <button class="reset-layout-btn" id="plSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Add Track</button>
+          <span id="plStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="plListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-instagram">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add Post</h3>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Photo</label><input type="file" accept="image/*" id="igPhotoFile"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Caption</label><input type="text" id="igCaption" placeholder="e.g. Fresh grazing boxes ready to go 🌿"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Link to Instagram Post (optional)</label><input type="text" id="igLink" placeholder="https://instagram.com/p/..."></div>
+          <button class="reset-layout-btn" id="igSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Add Post</button>
+          <span id="igSaveStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="igListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-websitesecurity">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Website Security — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">This section is reserved for the security tools already in the main admin panel — this is a placeholder tab, not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-analytics-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Analytics — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">Reserved for real site analytics, matching the main admin panel — not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-gallery-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Gallery — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">Reserved for the Gallery page's management tools — not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-communityboard-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Community Board — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">Reserved for Community Board management (including the music player) — not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-menu-visibility">
+        <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">These are the same master switches as the main admin panel — changes here take effect on the live site immediately.</p>
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
+          <div class="panel svToggleCard" id="svOrderingCard" style="padding:1.2rem 1.4rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><p style="font-weight:700;font-size:.9rem;margin:0 0 .2rem">Ordering</p><p style="font-size:.76rem;color:var(--mid);margin:0">Turns off the whole ordering system sitewide</p></div>
+              <label class="sv-toggle"><input type="checkbox" id="svToggleOrdering"><span class="sv-track"></span></label>
+            </div>
+          </div>
+          <div class="panel svToggleCard" id="svMenuCard" style="padding:1.2rem 1.4rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><p style="font-weight:700;font-size:.9rem;margin:0 0 .2rem">Brunch Menu</p><p style="font-size:.76rem;color:var(--mid);margin:0">Hides the whole Brunch Menu page</p></div>
+              <label class="sv-toggle"><input type="checkbox" id="svToggleMenu"><span class="sv-track"></span></label>
+            </div>
+          </div>
+          <div class="panel svToggleCard" id="svCateringCard" style="padding:1.2rem 1.4rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><p style="font-weight:700;font-size:.9rem;margin:0 0 .2rem">Catering</p><p style="font-size:.76rem;color:var(--mid);margin:0">Hides the whole Catering page</p></div>
+              <label class="sv-toggle"><input type="checkbox" id="svToggleCatering"></span><span class="sv-track"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-head" style="padding:0;margin:1.6rem 0 .8rem"><h3 style="font-size:1rem;margin:0">Individual Item Visibility</h3></div>
+        <input type="text" id="svItemSearch" placeholder="Search items…" style="width:100%;max-width:320px;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:.8rem">
+        <div class="panel" id="svItemsWrap" style="max-height:480px;overflow-y:auto"><p style="color:var(--lt);padding:1.5rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-bookings">
+        <div class="widget-toolbar">
+          <p>Live — updates instantly as new bookings come in or status changes</p>
+          <select id="bkFilter" style="padding:.4rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.8rem">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="panel"><div style="overflow-x:auto"><table>
+          <thead><tr><th>Status</th><th>Submitted</th><th>Name</th><th>Date/Time</th><th>Guests</th><th>Occasion</th><th>Phone</th><th>Email</th><th>Action</th></tr></thead>
+          <tbody id="bkTbody"><tr><td colspan="9" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="page-panel" id="page-floorplan"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Floor Plan</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-customers"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Customer History</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-loyalty">
+        <div class="widget-toolbar"><p>Every customer with a saved profile — name, loyalty card number, contact details</p></div>
+        <div class="panel"><div style="overflow-x:auto"><table>
+          <thead><tr><th>Name</th><th>Loyalty Card #</th><th>Email</th><th>Phone</th><th>Birthday</th></tr></thead>
+          <tbody id="loyTbody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="page-panel" id="page-offers">
+        <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Same discount codes customers type at checkout, and the same cards shown on your Offers page — one place controls both.</p>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 id="ofFormTitle" style="margin:0 0 .8rem">Add a New Promotion</h3>
+          <input type="hidden" id="ofEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Title</label><input type="text" id="ofTitle" placeholder="e.g. Weekend 15% Off"></div>
+            <div><label class="mm-lbl">Discount Code</label><input type="text" id="ofCode" placeholder="e.g. WEEKEND15"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Discount Type</label>
+              <select id="ofDiscountType"><option value="percent">Percent Off</option><option value="fixed">Fixed $ Off</option></select>
+            </div>
+            <div><label class="mm-lbl">Value</label><input type="number" id="ofDiscountValue" placeholder="e.g. 15"></div>
+            <div><label class="mm-lbl">Applies To</label>
+              <select id="ofApplicableCategory"><option value="all">Everything</option><option value="menu">Brunch Menu Only</option><option value="catering">Catering Only</option></select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Badge Text (optional)</label><input type="text" id="ofBadge" placeholder="e.g. Limited Time"></div>
+            <div><label class="mm-lbl">Ends On (optional)</label><input type="date" id="ofEndDate"></div>
+          </div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Note (optional)</label><input type="text" id="ofNote" placeholder="e.g. Minimum $50 order"></div>
+          <label style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;cursor:pointer"><input type="checkbox" id="ofActive" checked style="width:1.1rem;height:1.1rem"><span style="font-size:.85rem">Active — visible to customers right now</span></label>
+          <button class="reset-layout-btn" id="ofSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save Promotion</button>
+          <button class="reset-layout-btn" id="ofCancelBtn" style="display:none;margin-left:.5rem">Cancel Edit</button>
+          <span id="ofStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="ofListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-vouchers">
+        <div class="widget-toolbar"><p>Every gift voucher ever created — paid, unpaid, and partially redeemed</p></div>
+        <div class="panel"><div style="overflow-x:auto"><table>
+          <thead><tr><th>Code</th><th>Amount</th><th>To / From</th><th>Buyer Email</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="gvTbody"><tr><td colspan="6" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
+        </table></div></div>
+      </div>
+      <div class="page-panel" id="page-discounts"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Discounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-community"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Community / Charity</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-sales">
+        <div class="stat-row">
+          <div class="stat-card"><p class="lbl">Gross Sales</p><p class="val" id="ssGross">$0</p></div>
+          <div class="stat-card"><p class="lbl">Net Sales</p><p class="val" id="ssNet">$0</p></div>
+          <div class="stat-card"><p class="lbl">GST Component (BAS)</p><p class="val" id="ssGST">$0</p></div>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><p class="lbl">Promo Discounts &amp; Comps</p><p class="val" id="ssDiscounts" style="color:#D70015">$0</p></div>
+          <div class="stat-card"><p class="lbl">Refunds</p><p class="val" id="ssRefunds" style="color:#D70015">$0</p></div>
+          <div class="stat-card"><p class="lbl">Delivery Fees (isolated)</p><p class="val" id="ssDelivery">$0</p></div>
+          <div class="stat-card"><p class="lbl">Public Holiday Surcharges</p><p class="val" id="ssSurcharges">$0</p></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Refunds Ledger — by Reason</h3></div>
+          <div id="ssRefundsByReason" style="padding:1rem 1.4rem"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
+        </div>
+      </div>
+      <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-photos">
+        <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Every photo on the live site, organized by section. Upload a file or paste an image link — changes go live on foodielove.com.au immediately.</p>
+        <div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1rem">
+          <select id="phGroupFilter" style="padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem">
+            <option value="">All sections</option>
+          </select>
+          <input type="text" id="phSearch" placeholder="Search photos…" style="flex:1;min-width:200px;max-width:320px;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem">
+        </div>
+        <div id="phList"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-settings"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Site Settings</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-security"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Security</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc, addDoc, updateDoc, deleteDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAuXNQCayf1n9EvoahxxIAY08iQQ8UGCT4",
+  authDomain: "foodielovecatering-9da7a.firebaseapp.com",
+  projectId: "foodielovecatering-9da7a",
+  storageBucket: "foodielovecatering-9da7a.firebasestorage.app",
+  messagingSenderId: "395434371117",
+  appId: "1:395434371117:web:06005c2bc6b5339b9970a4",
+  measurementId: "G-BK626PEVLV"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Simple client-side compression before upload — same approach as the
+// main admin panel, keeps menu photos from being unnecessarily huge.
+function compressImageForUpload(file){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      img.onload = ()=>{
+        const canvas = document.createElement('canvas');
+        const maxDim = 1200;
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width > height){ height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob)=> resolve(blob || file), 'image/jpeg', 0.82);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const loginScreen = document.getElementById('loginScreen');
+const dashboardScreen = document.getElementById('dashboardScreen');
+const loginError = document.getElementById('loginError');
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  loginError.style.display = 'none';
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    loginError.textContent = 'Login failed: ' + e.message;
+    loginError.style.display = 'block';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth));
+
+// ── Sidebar navigation — swaps which page-panel is visible ──
+const pageTitles = {
+  overview: ['Dashboard', 'A quick summary of what\'s happening right now'],
+  orders: ['Orders', 'Live data from your production database'],
+  websitesecurity: ['Website Security', 'Coming soon'],
+  'analytics-soon': ['Analytics', 'Coming soon'],
+  'gallery-soon': ['Gallery', 'Coming soon'],
+  'communityboard-soon': ['Community Board', 'Coming soon'],
+  'menu-brunch': ['Brunch Menu', ''],
+  'menu-catering': ['Catering Menu', ''],
+  charcuterie: ['Charcuterie Board', 'Board designs, categories, and items customers pick from'],
+  gymjunkies: ['Gym Junkies Menu', 'Macro Bowl ingredient library — same data the live bowl builder reads from'],
+  merchandise: ['Merchandise', 'T-shirts, mugs, and other physical items for sale'],
+  events: ['Events', 'Upcoming events shown on the live site'],
+  countdownbanner: ['Countdown Banner', 'The site-wide countdown banner, when active'],
+  profile: ['Business Details', 'Shown on invoices and receipts'],
+  maintenance: ['Maintenance Mode', 'Takes the entire customer-facing site offline when on'],
+  featureflags: ['Feature Flags', 'Instantly turn any of these features off sitewide, no deploy needed'],
+  ordersearch: ['Search Orders', 'Find a customer across orders, enquiries, and bookings at once'],
+  blogposts: ['Blog Posts', 'Published live on your blog page'],
+  musicplaylist: ['Music Playlist', 'Background music played in-store via Sonic Hub'],
+  instagram: ['Instagram Feed', 'Photos shown on your homepage Instagram section'],
+  'menu-visibility': ['Sections & Visibility', ''],
+  bookings: ['Reservations', ''],
+  floorplan: ['Floor Plan', ''],
+  customers: ['Customer History', ''],
+  loyalty: ['Loyalty', ''],
+  offers: ['Offers', 'Promotions and discount codes — same system either way'],
+  vouchers: ['Gift Vouchers', ''],
+  discounts: ['Discounts', ''],
+  community: ['Community / Charity', ''],
+  sales: ['Sales & Expenses', ''],
+  payments: ['Payment Summary', ''],
+  staff: ['Staff Accounts', ''],
+  photos: ['Photos', 'Every photo on the live site, in one place'],
+  settings: ['Site Settings', ''],
+  security: ['Security', ''],
+};
+document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    let page = item.dataset.page;
+    document.querySelectorAll('.nav-item[data-page]').forEach(i=>i.classList.remove('active'));
+    document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
+    item.classList.add('active');
+    // Brunch Menu and Catering Menu share one unified page (matching the
+    // main admin panel's "unified Menu Manager" design) — Catering Menu
+    // just opens it pre-filtered instead of duplicating the whole page.
+    if(page === 'menu-catering'){
+      document.getElementById('page-menu-brunch')?.classList.add('active');
+      const filterEl = document.getElementById('mmPageFilter');
+      if(filterEl){ filterEl.value = 'catering'; filterEl.dispatchEvent(new Event('change')); }
+    }else if(page === 'discounts'){
+      // Discounts and Offers are the exact same underlying promotions
+      // system in the main admin panel — one page covers both rather
+      // than duplicating the same CRUD twice.
+      document.getElementById('page-offers')?.classList.add('active');
+    }else{
+      document.getElementById('page-'+page)?.classList.add('active');
+    }
+    const [title, subtitle] = pageTitles[page] || [page, ''];
+    document.getElementById('pageTitle').textContent = title;
+    document.getElementById('pageSubtitle').textContent = subtitle;
+  });
+});
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){
+    loginScreen.style.display = 'flex';
+    dashboardScreen.style.display = 'none';
+    return;
+  }
+  try{
+    const ownerDoc = await getDoc(doc(db, 'owners', user.uid));
+    if(!ownerDoc.exists()){
+      loginError.textContent = 'This account is not registered as an owner.';
+      loginError.style.display = 'block';
+      await signOut(auth);
+      return;
+    }
+  }catch(e){
+    loginError.textContent = 'Could not verify owner access: ' + e.message;
+    loginError.style.display = 'block';
+    return;
+  }
+  loginScreen.style.display = 'none';
+  dashboardScreen.style.display = 'block';
+  loadOrders();
+  loadMenuItemsMM();
+  loadBookingsRV();
+  loadLoyaltyRV();
+  loadVouchersRV();
+  loadVisibilitySV();
+  loadCharcuterieBoardCB();
+  loadGymJunkiesGJ();
+  loadPhotosPH();
+  loadPromotionsOF();
+  loadMerchandiseMC();
+  loadEventsEV();
+  loadCountdownBannerCDB();
+  loadBusinessDetailsBP();
+  loadMaintenanceModeMA();
+  loadFeatureFlagsFF();
+  loadBlogPostsBLG();
+  loadPlaylistPL();
+  loadInstagramIG();
+  initWidgetDragging();
+  pollActivityStream();
+  setInterval(pollActivityStream, 15000);
+  const liveDot = document.getElementById('liveDot');
+  if(liveDot) liveDot.title = 'Refreshing every 15 seconds';
+});
+
+function renderSalesSummary(orders){
+  // Same math as the old admin panel's Sales Summary — Gross Sales is the
+  // full menu-price value before any discount; GST is amount÷11 since AU
+  // prices are GST-inclusive (the tax is calculated on the pre-tax price,
+  // not simply 10% of the final price).
+  const gross = orders.reduce((s,o)=>s+(Number(o.subtotal)||Number(o.total)||0),0);
+  const discounts = orders.reduce((s,o)=>s+(Number(o.discountAmount)||0),0);
+  const refunds = orders.reduce((s,o)=>s+(Number(o.refundAmount)||0),0);
+  const net = gross - discounts - refunds;
+  const gst = net / 11;
+  const deliveryFees = orders.reduce((s,o)=>s+(Number(o.deliveryFee)||0),0);
+  const surcharges = orders.reduce((s,o)=>s+(Number(o.surchargeAmount)||0),0);
+
+  document.getElementById('ssGross').textContent = '$'+gross.toFixed(2);
+  document.getElementById('ssDiscounts').textContent = '$'+discounts.toFixed(2);
+  document.getElementById('ssRefunds').textContent = '$'+refunds.toFixed(2);
+  document.getElementById('ssNet').textContent = '$'+net.toFixed(2);
+  document.getElementById('ssGST').textContent = '$'+gst.toFixed(2);
+  document.getElementById('ssDelivery').textContent = '$'+deliveryFees.toFixed(2);
+  document.getElementById('ssSurcharges').textContent = '$'+surcharges.toFixed(2);
+
+  const byReason = {};
+  orders.forEach(o=>{
+    const amt = Number(o.refundAmount)||0;
+    if(amt <= 0) return;
+    const reason = o.refundReason || 'Not recorded (refunded before this was tracked)';
+    byReason[reason] = (byReason[reason]||0) + amt;
+  });
+  const reasonEl = document.getElementById('ssRefundsByReason');
+  const reasonEntries = Object.entries(byReason).sort((a,b)=>b[1]-a[1]);
+  reasonEl.innerHTML = reasonEntries.length
+    ? reasonEntries.map(([reason, amt])=>`
+        <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.85rem"><span>${escapeHtml(reason)}</span><span style="font-weight:700;color:#D70015">$${amt.toFixed(2)}</span></div>`).join('')
+    : '<p style="color:var(--lt);font-size:.85rem">No refunds recorded.</p>';
+}
+
+async function loadOrders(){
+  const tbody = document.getElementById('ordersTableBody');
+  const ovTbody = document.getElementById('ovOrdersTableBody');
+  try{
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderSalesSummary(orders);
+
+    const totalValue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    const mostRecentText = orders.length && orders[0].createdAt?.toDate
+      ? orders[0].createdAt.toDate().toLocaleString() : (orders.length ? new Date().toLocaleString() : '—');
+
+    // Same numbers feed both the Orders page and the Dashboard Overview,
+    // so there's only one place to keep them accurate.
+    ['statOrderCount', 'ovOrderCount'].forEach(id => document.getElementById(id).textContent = orders.length);
+    ['statTotalValue', 'ovTotalValue'].forEach(id => document.getElementById(id).textContent = '$' + totalValue.toFixed(2));
+    ['statMostRecent', 'ovMostRecent'].forEach(id => document.getElementById(id).textContent = mostRecentText);
+
+    // Today's Orders widget
+    const todayStr = new Date().toDateString();
+    const todaysOrders = orders.filter(o => o.createdAt?.toDate && o.createdAt.toDate().toDateString() === todayStr);
+    const todaysValue = todaysOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    document.getElementById('wTodayCount').textContent = todaysOrders.length;
+    document.getElementById('wTodayValue').textContent = '$' + todaysValue.toFixed(2);
+
+    // Top Moving Items widget — tallies how often each item name appears
+    // across every order's line items, so you can see what's actually
+    // selling without digging through each order individually.
+    const itemCounts = {};
+    orders.forEach(o => {
+      (o.items || []).forEach(it => {
+        const name = it.name || 'Unknown item';
+        itemCounts[name] = (itemCounts[name] || 0) + (Number(it.qty) || 1);
+      });
+    });
+    const topItems = Object.entries(itemCounts).sort((a,b) => b[1]-a[1]).slice(0, 5);
+    const topItemsList = document.getElementById('topItemsList');
+    topItemsList.innerHTML = topItems.length
+      ? topItems.map(([name, count]) => `<li>${escapeHtml(name)} <span>×${count}</span></li>`).join('')
+      : '<li style="color:var(--lt)">No item data yet.</li>';
+
+    if(!orders.length){
+      const emptyRow = '<tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">No orders found yet.</td></tr>';
+      tbody.innerHTML = emptyRow; ovTbody.innerHTML = emptyRow;
+      return;
+    }
+
+    const rowsHtml = orders.map(o => `
+      <tr>
+        <td class="ref-mono">${escapeHtml(o.orderRef || o.id)}</td>
+        <td>${escapeHtml(o.name || '—')}</td>
+        <td>$${(Number(o.total)||0).toFixed(2)}</td>
+        <td><span class="status-pill">${escapeHtml(o.fulfillType || 'order')}</span></td>
+        <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString() : '—'}</td>
+      </tr>`).join('');
+    tbody.innerHTML = rowsHtml;
+    ovTbody.innerHTML = orders.slice(0, 8).map(o => `
+      <tr>
+        <td class="ref-mono">${escapeHtml(o.orderRef || o.id)}</td>
+        <td>${escapeHtml(o.name || '—')}</td>
+        <td>$${(Number(o.total)||0).toFixed(2)}</td>
+        <td><span class="status-pill">${escapeHtml(o.fulfillType || 'order')}</span></td>
+        <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString() : '—'}</td>
+      </tr>`).join('');
+  }catch(err){
+    const errRow = `<tr><td colspan="5" style="text-align:center;color:#D70015;padding:2rem">Could not load orders: ${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = errRow; ovTbody.innerHTML = errRow;
+  }
+}
+
+// ── Live Activity Stream — polls for genuinely new orders every 15
+// seconds while the Dashboard is open, so incoming orders show up
+// without needing a manual refresh. ──
+let lastSeenOrderTime = null;
+let activityFeedItems = [];
+async function pollActivityStream(){
+  try{
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(10));
+    const snap = await getDocs(q);
+    const orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    if(!orders.length) return;
+
+    const newestTime = orders[0].createdAt?.toDate ? orders[0].createdAt.toDate().getTime() : Date.now();
+    const isFirstRun = lastSeenOrderTime === null;
+
+    orders.forEach(o => {
+      const t = o.createdAt?.toDate ? o.createdAt.toDate().getTime() : 0;
+      const isNew = !isFirstRun && lastSeenOrderTime && t > lastSeenOrderTime;
+      if(isFirstRun || isNew){
+        if(!activityFeedItems.some(a => a.id === o.id)){
+          activityFeedItems.unshift({id:o.id, name:o.name||'—', total:Number(o.total)||0, isNew, time:o.createdAt?.toDate?.() || new Date()});
+        }
+      }
+    });
+    activityFeedItems = activityFeedItems.slice(0, 12);
+    lastSeenOrderTime = newestTime;
+
+    const listEl = document.getElementById('activityStreamList');
+    listEl.innerHTML = activityFeedItems.map(a => `
+      <div class="activity-row">
+        <span>${escapeHtml(a.name)} — $${a.total.toFixed(2)}</span>
+        <span>${a.isNew ? '<span class="new-badge">NEW</span> ' : ''}${a.time.toLocaleTimeString()}</span>
+      </div>`).join('');
+  }catch(e){ /* quietly retry next interval — a single failed poll shouldn't show an error */ }
+}
+
+// ── Widget drag-to-reorder — grab the ⠿ handle and drag a widget to a
+// new position. Order is remembered in this browser for next time. ──
+const WIDGET_ORDER_KEY = 'foodielove_dashboard_widget_order';
+function initWidgetDragging(){
+  const grid = document.getElementById('widgetGrid');
+  const saved = localStorage.getItem(WIDGET_ORDER_KEY);
+  if(saved){
+    try{
+      const order = JSON.parse(saved);
+      order.forEach(name => {
+        const el = grid.querySelector(`[data-widget="${name}"]`);
+        if(el) grid.appendChild(el);
+      });
+    }catch(e){}
+  }
+
+  grid.querySelectorAll('.widget-drag').forEach(handle=>{
+    handle.addEventListener('pointerdown', (e)=>{
+      const widget = handle.closest('.widget');
+      e.preventDefault();
+      widget.classList.add('dragging');
+      widget.setPointerCapture(e.pointerId);
+
+      const onMove = (ev)=>{
+        const under = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.widget');
+        if(under && under !== widget){
+          const rect = under.getBoundingClientRect();
+          const before = ev.clientX < rect.left + rect.width/2;
+          before ? under.before(widget) : under.after(widget);
+        }
+      };
+      const onUp = ()=>{
+        widget.classList.remove('dragging');
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        const newOrder = Array.from(grid.querySelectorAll('.widget')).map(w => w.dataset.widget);
+        localStorage.setItem(WIDGET_ORDER_KEY, JSON.stringify(newOrder));
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+  });
+}
+
+document.getElementById('resetLayoutBtn').addEventListener('click', ()=>{
+  localStorage.removeItem(WIDGET_ORDER_KEY);
+  location.reload();
+});
+
+// ═══════════════ MENU MANAGER ═══════════════
+// Ported from the main admin panel's core menu CRUD — deliberately a
+// simplified first version (single price, no add-ons/badges/drag-reorder
+// yet) so this is genuinely solid and working now, with room to layer in
+// the more advanced features from the main panel in follow-up work.
+const SECTION_LABELS_MM = {
+  breakfast:'Breakfast', lunch:'Lunch', vegan:'Vegan', gymjunkie:'Gym Junkie', kids:'Kids',
+  hotdrinks:'Hot Drinks', colddrinks:'Cold Drinks', alcohol:'Alcohol', vitalbowls:'Vital Bowls',
+  boxes:'Grazing Boxes', wraps:'Catering Wraps', sliders:'Catering Sliders',
+  dessertcups:'Dessert Cups', 'custom-board':'Charcuterie Board'
+};
+let mmItemsCache = [];
+
+async function loadMenuItemsMM(){
+  const listEl = document.getElementById('mmItemsList');
+  try{
+    const snap = await getDocs(collection(db,'menuItems'));
+    mmItemsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderMenuManagerList();
+    // Sections & Visibility's item list depends on this same cache — if
+    // that page loaded first, it would have rendered before any items
+    // existed. Refresh it now that real data is actually available.
+    if(document.getElementById('svItemsWrap')) renderItemVisibilityListSV(document.getElementById('svItemSearch')?.value || '');
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load menu items: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderMenuManagerList(){
+  const listEl = document.getElementById('mmItemsList');
+  const filter = document.getElementById('mmPageFilter').value;
+  const items = mmItemsCache.filter(i => filter === 'all' || (i.page || 'menu') === filter);
+
+  if(!items.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No items yet.</div>';
+    return;
+  }
+
+  const bySection = {};
+  items.forEach(it=>{
+    const sec = it.section || 'other';
+    (bySection[sec] = bySection[sec] || []).push(it);
+  });
+
+  let html = '<div class="panel">';
+  Object.keys(bySection).forEach(sec=>{
+    html += `<div class="mm-section-h">${escapeHtml(SECTION_LABELS_MM[sec] || sec)} (${bySection[sec].length})</div>`;
+    bySection[sec].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(it=>{
+      html += `<div class="mm-item-row">
+        ${it.photo ? `<img class="mm-item-thumb" src="${escapeHtml(it.photo)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+        <div style="flex:1;min-width:0">
+          <div class="mm-item-name">${escapeHtml(it.name)}</div>
+          ${it.desc ? `<div class="mm-item-desc">${escapeHtml(it.desc.slice(0,80))}${it.desc.length>80?'…':''}</div>` : ''}
+        </div>
+        <div class="mm-item-price">$${Number(it.price||0).toFixed(2)}</div>
+        <div class="mm-item-actions">
+          <button class="mm-btn-sm" data-mm-edit="${it.id}">Edit</button>
+          <button class="mm-btn-sm mm-btn-danger" data-mm-delete="${it.id}">Delete</button>
+        </div>
+      </div>`;
+    });
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('[data-mm-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const item = mmItemsCache.find(i=>i.id===btn.dataset.mmEdit);
+      if(!item) return;
+      document.getElementById('mmEditId').value = item.id;
+      document.getElementById('mmName').value = item.name || '';
+      document.getElementById('mmPrice').value = item.price || '';
+      document.getElementById('mmPage').value = item.page || 'menu';
+      document.getElementById('mmSection').value = item.section || 'breakfast';
+      document.getElementById('mmDesc').value = item.desc || '';
+      document.getElementById('mmFormTitle').textContent = 'Edit: ' + item.name;
+      document.getElementById('mmCancelBtn').style.display = 'inline-block';
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+  listEl.querySelectorAll('[data-mm-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const item = mmItemsCache.find(i=>i.id===btn.dataset.mmDelete);
+      if(!confirm(`Delete "${item?.name}" permanently? This cannot be undone.`)) return;
+      try{
+        await deleteDoc(doc(db,'menuItems',btn.dataset.mmDelete));
+        loadMenuItemsMM();
+      }catch(e){
+        alert('Could not delete: ' + e.message);
+      }
+    });
+  });
+}
+
+document.getElementById('mmPageFilter')?.addEventListener('change', renderMenuManagerList);
+
+document.getElementById('mmCancelBtn')?.addEventListener('click', ()=>{
+  document.getElementById('mmEditId').value = '';
+  document.getElementById('mmName').value = '';
+  document.getElementById('mmPrice').value = '';
+  document.getElementById('mmDesc').value = '';
+  document.getElementById('mmFormTitle').textContent = 'Add Menu Item';
+  document.getElementById('mmCancelBtn').style.display = 'none';
+});
+
+document.getElementById('mmSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('mmStatus');
+  const editId = document.getElementById('mmEditId').value;
+  const name = document.getElementById('mmName').value.trim();
+  const price = parseFloat(document.getElementById('mmPrice').value) || 0;
+  const page = document.getElementById('mmPage').value;
+  const section = document.getElementById('mmSection').value;
+  const desc = document.getElementById('mmDesc').value.trim();
+
+  if(!name){ statusEl.textContent = 'Please enter a name.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--mid)';
+  try{
+    let photoUrl = null;
+    const file = document.getElementById('mmPhotoFile').files[0];
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `menuPhotos/${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      photoUrl = await getDownloadURL(sref);
+    }
+
+    const data = { name, price, page, section, sectionLabel: SECTION_LABELS_MM[section], desc };
+    if(photoUrl) data.photo = photoUrl;
+
+    if(editId){
+      await updateDoc(doc(db,'menuItems',editId), data);
+    }else{
+      await addDoc(collection(db,'menuItems'), {...data, createdAt: serverTimestamp()});
+    }
+    statusEl.textContent = '✅ Saved.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('mmCancelBtn').click();
+    document.getElementById('mmPhotoFile').value = '';
+    loadMenuItemsMM();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ SECTIONS & VISIBILITY ═══════════════
+const svSettingsRef = () => doc(db,'settings','menuVisibility');
+let svSettings = { orderingLive:true, menuLive:true, cateringLive:true, itemsOff:[] };
+
+async function loadVisibilitySV(){
+  try{
+    const snap = await getDoc(svSettingsRef());
+    if(snap.exists()){
+      const d = snap.data();
+      svSettings = { orderingLive: d.orderingLive!==false, menuLive: d.menuLive!==false, cateringLive: d.cateringLive!==false, itemsOff: d.itemsOff||[] };
+    }
+  }catch(e){ console.warn('Could not load visibility settings:', e.message); }
+  renderVisibilityControlsSV();
+}
+async function saveVisibilitySV(){
+  await setDoc(svSettingsRef(), svSettings, { merge: true });
+}
+function renderVisibilityControlsSV(){
+  document.getElementById('svToggleOrdering').checked = svSettings.orderingLive;
+  document.getElementById('svToggleMenu').checked = svSettings.menuLive;
+  document.getElementById('svToggleCatering').checked = svSettings.cateringLive;
+  document.getElementById('svOrderingCard').classList.toggle('is-off', !svSettings.orderingLive);
+  document.getElementById('svMenuCard').classList.toggle('is-off', !svSettings.menuLive);
+  document.getElementById('svCateringCard').classList.toggle('is-off', !svSettings.cateringLive);
+  renderItemVisibilityListSV();
+}
+function renderItemVisibilityListSV(filterText=''){
+  const wrap = document.getElementById('svItemsWrap');
+  const items = (mmItemsCache||[])
+    .filter(it=>!filterText || (it.name||'').toLowerCase().includes(filterText.toLowerCase()))
+    .sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  if(!mmItemsCache || !mmItemsCache.length){ wrap.innerHTML = '<p style="text-align:center;color:var(--lt);padding:1.5rem">No menu items yet — add some on the Menu tab first.</p>'; return; }
+  if(!items.length){ wrap.innerHTML = '<p style="text-align:center;color:var(--lt);padding:1.5rem">No items match your search.</p>'; return; }
+  wrap.innerHTML = items.map(it => `
+    <div class="sv-item-row">
+      <span>${escapeHtml(it.name||'(unnamed)')} <span style="color:var(--lt)">— ${escapeHtml(it.sectionLabel||it.section||'')}</span></span>
+      <label class="sv-toggle"><input type="checkbox" data-sv-item="${escapeHtml(it.id)}" ${!svSettings.itemsOff.includes(it.id)?'checked':''}><span class="sv-track"></span></label>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-sv-item]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      const id = cb.dataset.svItem;
+      svSettings.itemsOff = svSettings.itemsOff.filter(x=>x!==id);
+      if(!cb.checked) svSettings.itemsOff.push(id);
+      await saveVisibilitySV();
+    });
+  });
+}
+document.getElementById('svToggleOrdering')?.addEventListener('change', async (e)=>{
+  svSettings.orderingLive = e.target.checked;
+  document.getElementById('svOrderingCard').classList.toggle('is-off', !svSettings.orderingLive);
+  await saveVisibilitySV();
+});
+document.getElementById('svToggleMenu')?.addEventListener('change', async (e)=>{
+  svSettings.menuLive = e.target.checked;
+  document.getElementById('svMenuCard').classList.toggle('is-off', !svSettings.menuLive);
+  await saveVisibilitySV();
+});
+document.getElementById('svToggleCatering')?.addEventListener('change', async (e)=>{
+  svSettings.cateringLive = e.target.checked;
+  document.getElementById('svCateringCard').classList.toggle('is-off', !svSettings.cateringLive);
+  await saveVisibilitySV();
+});
+document.getElementById('svItemSearch')?.addEventListener('input', (e)=> renderItemVisibilityListSV(e.target.value));
+
+// ═══════════════ CHARCUTERIE BOARD ═══════════════
+let cbData = { categories: [], boardDesigns: [], knifeSetPrice: 20 };
+const pendingBoardPhotos = {}; // idx -> File, staged until Save is clicked
+
+async function loadCharcuterieBoardCB(){
+  try{
+    const snap = await getDoc(doc(db,'settings','charcuterieBoard'));
+    cbData = snap.exists() ? snap.data() : { categories: [] };
+    if(!Array.isArray(cbData.categories)) cbData.categories = [];
+    if(!Array.isArray(cbData.boardDesigns) || !cbData.boardDesigns.length){
+      cbData.boardDesigns = [
+        { name: 'Bare Board', price: 25, photo: null },
+        { name: 'Designed Board', price: 35, photo: null },
+        { name: 'Custom Engraved Board', price: 50, photo: null }
+      ];
+    }
+  }catch(e){
+    document.getElementById('cbCategoriesWrap').innerHTML = `<p style="color:#D70015;padding:1rem">Could not load: ${escapeHtml(e.message)}</p>`;
+    return;
+  }
+  const knifeEl = document.getElementById('cbKnifeSetPrice');
+  if(knifeEl) knifeEl.value = cbData.knifeSetPrice != null ? cbData.knifeSetPrice : 20;
+  renderBoardDesignsCB();
+  renderCategoriesCB();
+}
+
+async function saveCharcuterieBoardCB(){
+  await setDoc(doc(db,'settings','charcuterieBoard'), { ...cbData, updatedAt: serverTimestamp() });
+}
+
+function renderBoardDesignsCB(){
+  const wrap = document.getElementById('cbBoardDesignsWrap');
+  wrap.innerHTML = cbData.boardDesigns.map((d, idx) => `
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--bg);border-radius:10px;padding:.8rem;margin-bottom:.6rem">
+      <span id="cbThumb-${idx}" style="width:50px;height:50px;border-radius:8px;flex-shrink:0;background:var(--card) center/cover no-repeat;background-image:url('${d.photo||''}');display:flex;align-items:center;justify-content:center;color:var(--lt);font-size:.65rem;cursor:pointer" data-cb-photo-trigger="${idx}">${d.photo?'':'Photo'}</span>
+      <input type="file" id="cbPhotoInput-${idx}" accept="image/*" style="display:none">
+      <input type="text" value="${escapeHtml(d.name)}" data-cb-name="${idx}" placeholder="e.g. Bare Board" style="flex:1;min-width:120px">
+      <div style="display:flex;align-items:center;gap:.3rem">
+        <span style="font-size:.85rem;color:var(--mid)">$</span>
+        <input type="number" value="${d.price}" min="25" step="1" data-cb-price="${idx}" style="width:80px">
+      </div>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-cb-photo-trigger]').forEach(el=>{
+    el.addEventListener('click', ()=> document.getElementById(`cbPhotoInput-${el.dataset.cbPhotoTrigger}`).click());
+  });
+  wrap.querySelectorAll('[id^="cbPhotoInput-"]').forEach(input=>{
+    input.addEventListener('change', ()=>{
+      const idx = input.id.replace('cbPhotoInput-','');
+      const file = input.files[0];
+      if(!file) return;
+      pendingBoardPhotos[idx] = file;
+      const thumb = document.getElementById(`cbThumb-${idx}`);
+      thumb.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+      thumb.textContent = '';
+    });
+  });
+}
+
+document.getElementById('cbSaveExtrasBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('cbExtrasStatus');
+  const wrap = document.getElementById('cbBoardDesignsWrap');
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const names = wrap.querySelectorAll('[data-cb-name]');
+    const prices = wrap.querySelectorAll('[data-cb-price]');
+    const updatedDesigns = [];
+    for(let i=0;i<names.length;i++){
+      const name = names[i].value.trim();
+      let price = parseFloat(prices[i].value) || 0;
+      if(price < 25) price = 25; // real, enforced floor — matches the actual cost of the wooden board
+      let photo = cbData.boardDesigns[i]?.photo || null;
+      if(pendingBoardPhotos[i]){
+        const compressed = await compressImageForUpload(pendingBoardPhotos[i]);
+        const sref = ref(storage, `charcuterieBoard/${Date.now()}_design${i}.jpg`);
+        await uploadBytes(sref, compressed);
+        photo = await getDownloadURL(sref);
+      }
+      updatedDesigns.push({ name: name || `Design ${i+1}`, price, photo });
+    }
+    cbData.boardDesigns = updatedDesigns;
+    cbData.knifeSetPrice = parseFloat(document.getElementById('cbKnifeSetPrice').value) || 0;
+    await saveCharcuterieBoardCB();
+    Object.keys(pendingBoardPhotos).forEach(k => delete pendingBoardPhotos[k]);
+    statusEl.textContent = '✅ Saved.'; statusEl.style.color = '#1E8A3B';
+    renderBoardDesignsCB();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+document.getElementById('cbAddCatBtn')?.addEventListener('click', async ()=>{
+  const nameInput = document.getElementById('cbNewCatName');
+  const colorInput = document.getElementById('cbNewCatColor');
+  const name = nameInput.value.trim();
+  if(!name){ alert('Please enter a category name.'); return; }
+  cbData.categories.push({ name, color: colorInput.value, items: [] });
+  try{
+    await saveCharcuterieBoardCB();
+    nameInput.value = '';
+    renderCategoriesCB();
+  }catch(e){
+    alert('Could not save: ' + e.message);
+    cbData.categories.pop();
+  }
+});
+
+function renderCategoriesCB(){
+  const wrap = document.getElementById('cbCategoriesWrap');
+  if(!cbData.categories.length){
+    wrap.innerHTML = '<p style="color:var(--lt);padding:2rem;text-align:center">No categories yet — add your first one above.</p>';
+    return;
+  }
+  wrap.innerHTML = cbData.categories.map((cat, cIdx) => `
+    <div class="panel" style="padding:1.2rem;margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="width:14px;height:14px;border-radius:4px;background:${cat.color||'#4F7A2E'};flex-shrink:0"></span>
+          <h3 style="margin:0;font-size:1rem">${escapeHtml(cat.name)}</h3>
+        </div>
+        <button class="mm-btn-sm mm-btn-danger" data-cb-cat-remove="${cIdx}">Remove Category</button>
+      </div>
+      <div id="cbItemsWrap-${cIdx}">
+        ${(cat.items||[]).length ? (cat.items||[]).map((it, iIdx) => `
+          <div class="mm-item-row">
+            ${it.photo ? `<img class="mm-item-thumb" src="${escapeHtml(it.photo)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+            <div style="flex:1;min-width:0;${it.enabled===false?'opacity:.5':''}">
+              <div class="mm-item-name">${escapeHtml(it.name)} ${(it.dietTags||[]).map(t=>`<span style="font-size:.62rem;font-weight:700;padding:.05rem .4rem;border-radius:6px;background:#EAF2E2;color:#3A5C20;margin-left:.2rem">${t}</span>`).join('')}</div>
+              <div class="mm-item-desc">$${Number(it.price||0).toFixed(2)} / ${escapeHtml(it.unit||'serve')}</div>
+            </div>
+            <label class="sv-toggle" style="transform:scale(.75)"><input type="checkbox" data-cb-item-toggle="${cIdx}:${iIdx}" ${it.enabled!==false?'checked':''}><span class="sv-track"></span></label>
+            <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-cb-item-remove="${cIdx}:${iIdx}">Delete</button></div>
+          </div>`).join('') : '<p style="font-size:.8rem;color:var(--lt);padding:.6rem 0">No items in this category yet.</p>'}
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:.8rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.8rem">
+        <input type="text" id="cbItemName-${cIdx}" placeholder="e.g. Prosciutto (150g)" style="flex:1;min-width:150px">
+        <input type="number" id="cbItemPrice-${cIdx}" placeholder="Price $" min="0" step="0.50" style="width:90px">
+        <input type="text" id="cbItemUnit-${cIdx}" placeholder="Unit e.g. 150g" style="width:110px">
+        <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem"><input type="checkbox" id="cbItemV-${cIdx}"> V</label>
+        <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem"><input type="checkbox" id="cbItemVG-${cIdx}"> VG</label>
+        <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem"><input type="checkbox" id="cbItemGF-${cIdx}"> GF</label>
+        <button class="mm-btn-sm" data-cb-add-item="${cIdx}">+ Add Item</button>
+      </div>
+    </div>`).join('');
+
+  wrap.querySelectorAll('[data-cb-cat-remove]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = Number(btn.dataset.cbCatRemove);
+      if(!confirm(`Remove category "${cbData.categories[idx].name}" and all its items? This cannot be undone.`)) return;
+      const removed = cbData.categories.splice(idx, 1)[0];
+      try{ await saveCharcuterieBoardCB(); renderCategoriesCB(); }
+      catch(e){ alert('Could not remove: ' + e.message); cbData.categories.splice(idx, 0, removed); }
+    });
+  });
+  wrap.querySelectorAll('[data-cb-item-toggle]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      const [cIdx, iIdx] = cb.dataset.cbItemToggle.split(':').map(Number);
+      cbData.categories[cIdx].items[iIdx].enabled = cb.checked;
+      try{ await saveCharcuterieBoardCB(); }
+      catch(e){ alert('Could not save: ' + e.message); cb.checked = !cb.checked; }
+    });
+  });
+  wrap.querySelectorAll('[data-cb-item-remove]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const [cIdx, iIdx] = btn.dataset.cbItemRemove.split(':').map(Number);
+      const item = cbData.categories[cIdx].items[iIdx];
+      if(!confirm(`Delete "${item.name}"?`)) return;
+      const removed = cbData.categories[cIdx].items.splice(iIdx, 1)[0];
+      try{ await saveCharcuterieBoardCB(); renderCategoriesCB(); }
+      catch(e){ alert('Could not delete: ' + e.message); cbData.categories[cIdx].items.splice(iIdx, 0, removed); }
+    });
+  });
+  wrap.querySelectorAll('[data-cb-add-item]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const cIdx = Number(btn.dataset.cbAddItem);
+      const name = document.getElementById(`cbItemName-${cIdx}`).value.trim();
+      const price = parseFloat(document.getElementById(`cbItemPrice-${cIdx}`).value) || 0;
+      const unit = document.getElementById(`cbItemUnit-${cIdx}`).value.trim();
+      const dietTags = [];
+      if(document.getElementById(`cbItemV-${cIdx}`).checked) dietTags.push('V');
+      if(document.getElementById(`cbItemVG-${cIdx}`).checked) dietTags.push('VG');
+      if(document.getElementById(`cbItemGF-${cIdx}`).checked) dietTags.push('GF');
+      if(!name){ alert('Please enter an item name.'); return; }
+      if(!cbData.categories[cIdx].items) cbData.categories[cIdx].items = [];
+      cbData.categories[cIdx].items.push({ name, price, unit, dietTags, enabled: true, photo: null });
+      try{ await saveCharcuterieBoardCB(); renderCategoriesCB(); }
+      catch(e){ alert('Could not save: ' + e.message); cbData.categories[cIdx].items.pop(); }
+    });
+  });
+}
+
+// ═══════════════ GYM JUNKIES MENU ═══════════════
+const GJ_CAT_LABELS = { protein:'Proteins', base:'Bases', veggie:'Steamed Veggies', addon:'Add-ons / Sauces' };
+let gjIngredientsCache = [];
+
+async function loadGymJunkiesGJ(){
+  const wrap = document.getElementById('gjIngredientsWrap');
+  try{
+    const snap = await getDocs(collection(db,'gymBowlIngredients'));
+    gjIngredientsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderGymJunkiesListGJ();
+  }catch(e){
+    wrap.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load ingredients: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderGymJunkiesListGJ(){
+  const wrap = document.getElementById('gjIngredientsWrap');
+  if(!gjIngredientsCache.length){
+    wrap.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No ingredients yet — add your first one above.</div>';
+    return;
+  }
+  const grouped = {};
+  gjIngredientsCache.forEach(it=>{ (grouped[it.category] = grouped[it.category]||[]).push(it); });
+
+  let html = '<div class="panel">';
+  Object.keys(GJ_CAT_LABELS).filter(c=>grouped[c]).forEach(cat=>{
+    html += `<div class="mm-section-h">${escapeHtml(GJ_CAT_LABELS[cat])} (${grouped[cat].length})</div>`;
+    grouped[cat].forEach(it=>{
+      html += `<div class="mm-item-row" style="${it.outOfStock?'opacity:.55':''}">
+        <div style="flex:1;min-width:0">
+          <div class="mm-item-name">${escapeHtml(it.name)} <span style="color:var(--lt);font-weight:400;font-size:.78rem">(${escapeHtml(it.serving)})</span> ${it.outOfStock?'<span style="color:#D70015;font-size:.7rem;font-weight:700;margin-left:.4rem">● OUT OF STOCK</span>':''}</div>
+          <div class="mm-item-desc">${it.calories||0} cal · P ${it.protein||0}g · C ${it.carbs||0}g · F ${it.fat||0}g ${it.price>0?`· $${Number(it.price).toFixed(2)}`:'· Included'}</div>
+        </div>
+        <div class="mm-item-actions">
+          <button class="mm-btn-sm" data-gj-toggle-stock="${it.id}" data-current="${it.outOfStock?'1':'0'}">${it.outOfStock?'Mark In Stock':'Mark Out'}</button>
+          <button class="mm-btn-sm" data-gj-edit="${it.id}">Edit</button>
+          <button class="mm-btn-sm mm-btn-danger" data-gj-delete="${it.id}">Delete</button>
+        </div>
+      </div>`;
+    });
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('[data-gj-toggle-stock]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const newState = btn.dataset.current !== '1';
+      try{
+        await updateDoc(doc(db,'gymBowlIngredients',btn.dataset.gjToggleStock), { outOfStock: newState });
+        loadGymJunkiesGJ();
+      }catch(e){ alert('Could not update: ' + e.message); }
+    });
+  });
+  wrap.querySelectorAll('[data-gj-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const it = gjIngredientsCache.find(i=>i.id===btn.dataset.gjEdit);
+      if(!it) return;
+      document.getElementById('gjEditId').value = it.id;
+      document.getElementById('gjCategory').value = it.category;
+      document.getElementById('gjName').value = it.name || '';
+      document.getElementById('gjServing').value = it.serving || '';
+      document.getElementById('gjPrice').value = it.price || 0;
+      document.getElementById('gjCalories').value = it.calories || '';
+      document.getElementById('gjProtein').value = it.protein || '';
+      document.getElementById('gjCarbs').value = it.carbs || '';
+      document.getElementById('gjFat').value = it.fat || '';
+      document.getElementById('gjOutOfStock').checked = !!it.outOfStock;
+      document.getElementById('gjCancelBtn').style.display = 'inline-block';
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+  wrap.querySelectorAll('[data-gj-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const it = gjIngredientsCache.find(i=>i.id===btn.dataset.gjDelete);
+      if(!confirm(`Delete "${it?.name}" permanently?`)) return;
+      try{
+        await deleteDoc(doc(db,'gymBowlIngredients',btn.dataset.gjDelete));
+        loadGymJunkiesGJ();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('gjCancelBtn')?.addEventListener('click', ()=>{
+  document.getElementById('gjEditId').value = '';
+  ['gjName','gjServing','gjPrice','gjCalories','gjProtein','gjCarbs','gjFat'].forEach(id=>{ document.getElementById(id).value = ''; });
+  document.getElementById('gjOutOfStock').checked = false;
+  document.getElementById('gjCancelBtn').style.display = 'none';
+});
+
+document.getElementById('gjSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('gjStatus');
+  const editId = document.getElementById('gjEditId').value;
+  const name = document.getElementById('gjName').value.trim();
+  const category = document.getElementById('gjCategory').value;
+  const serving = document.getElementById('gjServing').value.trim();
+  const price = parseFloat(document.getElementById('gjPrice').value) || 0;
+  const calories = parseFloat(document.getElementById('gjCalories').value) || 0;
+  const protein = parseFloat(document.getElementById('gjProtein').value) || 0;
+  const carbs = parseFloat(document.getElementById('gjCarbs').value) || 0;
+  const fat = parseFloat(document.getElementById('gjFat').value) || 0;
+  const outOfStock = document.getElementById('gjOutOfStock').checked;
+
+  if(!name || !serving || !calories){
+    statusEl.textContent = 'Please fill in at least name, serving size, and calories.';
+    statusEl.style.color = '#D70015';
+    return;
+  }
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const data = { name, category, serving, price, calories, protein, carbs, fat, outOfStock };
+    if(editId){
+      await updateDoc(doc(db,'gymBowlIngredients',editId), data);
+    }else{
+      await addDoc(collection(db,'gymBowlIngredients'), {...data, createdAt: serverTimestamp()});
+    }
+    statusEl.textContent = '✅ Saved.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('gjCancelBtn').click();
+    loadGymJunkiesGJ();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ PHOTOS ═══════════════
+const PHOTO_REGISTRY = [{"key": "site-logo", "label": "Site Logo (shown in header on every page)", "defaultUrl": "", "group": "Branding"}, {"key": "hero-main", "label": "Homepage Hero — Main Photo", "defaultUrl": "https://images.pexels.com/photos/8775044/pexels-photo-8775044.jpeg?auto=compress&cs=tinysrgb&w=1400", "group": "Homepage Hero"}, {"key": "hero-2", "label": "Homepage Hero — Photo 2 (unused, hidden on desktop)", "defaultUrl": "https://images.pexels.com/photos/7627415/pexels-photo-7627415.jpeg?auto=compress&cs=tinysrgb&w=600", "group": "Homepage Hero"}, {"key": "hero-3", "label": "Homepage Hero — Photo 3 (unused, hidden on desktop)", "defaultUrl": "https://images.pexels.com/photos/10280005/pexels-photo-10280005.jpeg?auto=compress&cs=tinysrgb&w=600", "group": "Homepage Hero"}, {"key": "hero-4", "label": "Homepage Hero — Photo 4 (unused, hidden on desktop)", "defaultUrl": "https://images.pexels.com/photos/18072617/pexels-photo-18072617.jpeg?auto=compress&cs=tinysrgb&w=900", "group": "Homepage Hero"}, {"key": "coffee-beans", "label": "Homepage — Coffee Beans Photo", "defaultUrl": "https://images.pexels.com/photos/669162/pexels-photo-669162.jpeg?auto=compress&cs=tinysrgb&w=700", "group": "Coffee Section"}, {"key": "coffee-latte", "label": "Homepage — Barista Pouring Latte", "defaultUrl": "https://images.pexels.com/photos/302887/pexels-photo-302887.jpeg?auto=compress&cs=tinysrgb&w=700", "group": "Coffee Section"}, {"key": "mosaic-grazing", "label": "Homepage Mosaic — Full Grazing Board", "defaultUrl": "https://images.pexels.com/photos/13084371/pexels-photo-13084371.jpeg?auto=compress&cs=tinysrgb&w=900", "group": "Mosaic Gallery"}, {"key": "mosaic-salmon", "label": "Homepage Mosaic — Pistachio Salmon", "defaultUrl": "https://images.pexels.com/photos/7627415/pexels-photo-7627415.jpeg?auto=compress&cs=tinysrgb&w=600", "group": "Mosaic Gallery"}, {"key": "mosaic-waffle", "label": "Homepage Mosaic — Berry Waffle", "defaultUrl": "https://images.pexels.com/photos/11513598/pexels-photo-11513598.jpeg?auto=compress&cs=tinysrgb&w=600", "group": "Mosaic Gallery"}, {"key": "mosaic-dessert", "label": "Homepage Mosaic — Dessert Cups", "defaultUrl": "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg?auto=compress&cs=tinysrgb&w=700", "group": "Mosaic Gallery"}, {"key": "mosaic-lamb", "label": "Homepage Mosaic — Lamb Cutlets", "defaultUrl": "https://images.pexels.com/photos/323682/pexels-photo-323682.jpeg?auto=compress&cs=tinysrgb&w=600", "group": "Mosaic Gallery"}, {"key": "who-we-are", "label": "Homepage — \"Who We Are\" Photo", "defaultUrl": "https://images.pexels.com/photos/4703909/pexels-photo-4703909.jpeg?auto=compress&cs=tinysrgb&w=900", "group": "Who We Are"}, {"key": "gallery-grazing", "label": "Homepage Gallery — Grazing Board", "defaultUrl": "https://images.pexels.com/photos/8775044/pexels-photo-8775044.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-salmon", "label": "Homepage Gallery — Pistachio Salmon", "defaultUrl": "https://images.pexels.com/photos/7627415/pexels-photo-7627415.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-lamb", "label": "Homepage Gallery — Lamb Cutlets", "defaultUrl": "https://images.pexels.com/photos/323682/pexels-photo-323682.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-flatwhite", "label": "Homepage Gallery — Flat White", "defaultUrl": "https://images.pexels.com/photos/851555/pexels-photo-851555.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-waffle", "label": "Homepage Gallery — Berry Waffle", "defaultUrl": "https://images.pexels.com/photos/11513598/pexels-photo-11513598.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-dessert", "label": "Homepage Gallery — Dessert Cups", "defaultUrl": "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-burger", "label": "Homepage Gallery — Cheese Burger", "defaultUrl": "https://images.pexels.com/photos/19247562/pexels-photo-19247562.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "gallery-fruit", "label": "Homepage Gallery — Fruit Platter", "defaultUrl": "https://images.pexels.com/photos/18072617/pexels-photo-18072617.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Horizontal Gallery"}, {"key": "about-kitchen", "label": "Homepage — About/Kitchen Photo", "defaultUrl": "https://images.pexels.com/photos/6004233/pexels-photo-6004233.jpeg?auto=compress&cs=tinysrgb&w=800", "group": "About Section"}, {"key": "book-banner", "label": "Homepage — \"Book a Table\" Banner Photo", "defaultUrl": "https://images.pexels.com/photos/28469013/pexels-photo-28469013.jpeg?auto=compress&cs=tinysrgb&w=900", "group": "Book a Table Banner"}, {"key": "popup-image", "label": "Homepage — Subscribe Popup Photo", "defaultUrl": "https://images.pexels.com/photos/8775044/pexels-photo-8775044.jpeg?auto=compress&cs=tinysrgb&w=800", "group": "Subscribe Popup"}, {"key": "story-origin", "label": "Homepage — \"Our Journey\" Origin Photo", "defaultUrl": "https://images.pexels.com/photos/6004233/pexels-photo-6004233.jpeg?auto=compress&cs=tinysrgb&w=900", "group": "Our Journey"}, {"key": "careers-team-photo", "label": "Careers Page — Team Photo Banner (replace with a real photo of your own team!)", "defaultUrl": "https://images.pexels.com/photos/19553654/pexels-photo-19553654.jpeg?auto=compress&cs=tinysrgb&w=1600", "group": "Careers Page"}, {"key": "menu-hero-photo", "label": "Brunch Menu Page — Hero Background Photo", "defaultUrl": "https://images.pexels.com/photos/16991282/pexels-photo-16991282.jpeg?auto=compress&cs=tinysrgb&w=1800", "group": "Menu Page"}, {"key": "catering-hero", "label": "Catering Page — Hero Background Photo", "defaultUrl": "https://images.pexels.com/photos/8775044/pexels-photo-8775044.jpeg?auto=compress&cs=tinysrgb&w=1800", "group": "Catering Page"}, {"key": "maintenance-page-photo", "label": "Maintenance Mode Page — Photo", "defaultUrl": "https://images.pexels.com/photos/12312104/pexels-photo-12312104.jpeg?auto=compress&cs=tinysrgb&w=900", "group": "Maintenance Page"}, {"key": "community-board-hero", "label": "Community Board Page — Hero Banner (brunch, catering, or garden view)", "defaultUrl": "", "group": "Community Board"}, {"key": "macro-bowl-card", "label": "Menu Page — \"Create Your Own Macro Bowl\" Card Photo", "defaultUrl": "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400", "group": "Menu Page"}];
+const phFiles = {}; // key -> selected File, pending upload
+let phOverridesCache = {};
+
+function phGroupedRegistry(){
+  const groups = {};
+  PHOTO_REGISTRY.forEach(p=>{ (groups[p.group] = groups[p.group]||[]).push(p); });
+  return groups;
+}
+
+async function loadPhotosPH(){
+  const listEl = document.getElementById('phList');
+  try{
+    const snap = await getDocs(collection(db,'siteImages'));
+    phOverridesCache = {};
+    snap.docs.forEach(d=>{ phOverridesCache[d.id] = d.data().url; });
+    renderPhotosPH();
+  }catch(err){
+    listEl.innerHTML = `<p style="color:#D70015;text-align:center;padding:2rem">Could not load photos: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+function renderPhotosPH(filterText='', groupFilter=''){
+  const listEl = document.getElementById('phList');
+  const groups = phGroupedRegistry();
+  let html = '';
+  Object.keys(groups).forEach(groupName=>{
+    if(groupFilter && groupName !== groupFilter) return;
+    const items = groups[groupName].filter(p => !filterText || p.label.toLowerCase().includes(filterText.toLowerCase()));
+    if(!items.length) return;
+    html += `<div class="mm-section-h">${escapeHtml(groupName)}</div><div class="panel">`;
+    items.forEach(p=>{
+      const currentUrl = phOverridesCache[p.key] || p.defaultUrl;
+      const hasOverride = !!phOverridesCache[p.key];
+      const imgTag = currentUrl
+        ? `<img class="ph-img" src="${escapeHtml(currentUrl)}" alt="">`
+        : `<div class="ph-img" style="display:flex;align-items:center;justify-content:center;color:var(--lt);font-size:.65rem;text-align:center">No photo yet</div>`;
+      html += `<div class="ph-row" data-ph-key="${p.key}">
+        ${imgTag}
+        <div style="flex:1;min-width:0">
+          <div class="ph-label">${escapeHtml(p.label)} ${hasOverride?'<span style="color:var(--green);font-size:.7rem;font-weight:700">● Custom</span>':'<span style="color:var(--lt);font-size:.7rem">Original</span>'}</div>
+          <div class="ph-controls">
+            <input type="file" accept="image/*" data-ph-upload="${p.key}" style="font-size:.78rem">
+            <span style="font-size:.72rem;color:var(--lt)">or</span>
+            <input type="text" placeholder="Paste an image link (https://...)" data-ph-url="${p.key}">
+            <button class="mm-btn-sm" data-ph-save="${p.key}">Save</button>
+            ${hasOverride?`<button class="mm-btn-sm" data-ph-reset="${p.key}">Reset to original</button>`:''}
+          </div>
+          <div class="ph-status" data-ph-status="${p.key}"></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  listEl.innerHTML = html || '<p style="color:var(--lt);padding:2rem;text-align:center">No photos match your search.</p>';
+
+  listEl.querySelectorAll('[data-ph-upload]').forEach(input=>{
+    input.addEventListener('change', e=>{ phFiles[input.dataset.phUpload] = e.target.files[0] || null; });
+  });
+  listEl.querySelectorAll('[data-ph-save]').forEach(btn=>{
+    btn.addEventListener('click', ()=> savePhotoPH(btn.dataset.phSave));
+  });
+  listEl.querySelectorAll('[data-ph-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=> resetPhotoPH(btn.dataset.phReset));
+  });
+}
+
+async function savePhotoPH(key){
+  const row = document.querySelector(`[data-ph-key="${key}"]`);
+  const statusEl = row.querySelector('[data-ph-status]');
+  const urlInput = row.querySelector('[data-ph-url]');
+  const pastedUrl = urlInput.value.trim();
+  const file = phFiles[key];
+
+  if(!file && !pastedUrl){
+    statusEl.textContent = 'Choose a file or paste a link first.';
+    statusEl.style.color = '#D70015';
+    return;
+  }
+  statusEl.style.color = 'var(--mid)';
+  statusEl.textContent = 'Saving…';
+  try{
+    let finalUrl = pastedUrl;
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `siteImages/${key}_${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      finalUrl = await getDownloadURL(sref);
+    }
+    await setDoc(doc(db,'siteImages',key), { url: finalUrl, updatedAt: serverTimestamp() });
+    delete phFiles[key];
+    phOverridesCache[key] = finalUrl;
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved — live on the website now.';
+    renderPhotosPH(document.getElementById('phSearch').value, document.getElementById('phGroupFilter').value);
+  }catch(err){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + err.message;
+  }
+}
+
+async function resetPhotoPH(key){
+  if(!confirm('Reset this photo back to the original?')) return;
+  try{
+    await deleteDoc(doc(db,'siteImages',key));
+    delete phOverridesCache[key];
+    renderPhotosPH(document.getElementById('phSearch').value, document.getElementById('phGroupFilter').value);
+  }catch(e){ alert('Could not reset: ' + e.message); }
+}
+
+document.getElementById('phSearch')?.addEventListener('input', (e)=> renderPhotosPH(e.target.value, document.getElementById('phGroupFilter').value));
+document.getElementById('phGroupFilter')?.addEventListener('change', (e)=> renderPhotosPH(document.getElementById('phSearch').value, e.target.value));
+// Populate the group dropdown from the actual registry — never goes
+// stale if new photo keys/groups are added later, since it's built
+// from the same PHOTO_REGISTRY the list itself renders from.
+(function populatePhotoGroupFilter(){
+  const sel = document.getElementById('phGroupFilter');
+  if(!sel) return;
+  const groupNames = [...new Set(PHOTO_REGISTRY.map(p=>p.group))];
+  groupNames.forEach(g=>{
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    sel.appendChild(opt);
+  });
+})();
+
+// ═══════════════ OFFERS / DISCOUNTS (promotions) ═══════════════
+let ofPromosCache = [];
+let ofEditingId = null;
+
+async function loadPromotionsOF(){
+  const listEl = document.getElementById('ofListWrap');
+  try{
+    const snap = await getDocs(collection(db,'promotions'));
+    ofPromosCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderPromotionsOF();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load promotions: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderPromotionsOF(){
+  const listEl = document.getElementById('ofListWrap');
+  if(!ofPromosCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No promotions yet — add one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + ofPromosCache.map(p=>{
+    const expired = p.endDate && new Date(p.endDate) < new Date();
+    return `<div class="sv-item-row">
+      <span>
+        <strong>${escapeHtml(p.title||'(untitled)')}</strong>
+        ${p.code ? `<span style="font-family:monospace;background:var(--bg);padding:.1rem .4rem;border-radius:5px;font-size:.72rem;margin-left:.4rem">${escapeHtml(p.code)}</span>` : ''}
+        ${expired ? '<span style="color:#D70015;font-size:.72rem;margin-left:.4rem;font-weight:700">Expired</span>' : ''}
+      </span>
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <label class="sv-toggle" style="transform:scale(.75)"><input type="checkbox" data-of-toggle="${p.id}" ${p.isActive?'checked':''}><span class="sv-track"></span></label>
+        <button class="mm-btn-sm" data-of-edit="${p.id}">Edit</button>
+        <button class="mm-btn-sm mm-btn-danger" data-of-delete="${p.id}">Delete</button>
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-of-toggle]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      try{ await updateDoc(doc(db,'promotions',cb.dataset.ofToggle), { isActive: cb.checked }); }
+      catch(e){ alert('Could not update: ' + e.message); cb.checked = !cb.checked; }
+    });
+  });
+  listEl.querySelectorAll('[data-of-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = ofPromosCache.find(x=>x.id===btn.dataset.ofEdit);
+      if(!p) return;
+      ofEditingId = p.id;
+      document.getElementById('ofFormTitle').textContent = 'Edit Promotion';
+      document.getElementById('ofTitle').value = p.title || '';
+      document.getElementById('ofCode').value = p.code || '';
+      document.getElementById('ofDiscountType').value = p.discountType || 'percent';
+      document.getElementById('ofDiscountValue').value = p.discountValue || '';
+      document.getElementById('ofApplicableCategory').value = p.applicableCategory || 'all';
+      document.getElementById('ofBadge').value = p.badge || '';
+      document.getElementById('ofEndDate').value = p.endDate || '';
+      document.getElementById('ofNote').value = p.note || '';
+      document.getElementById('ofActive').checked = p.isActive !== false;
+      document.getElementById('ofCancelBtn').style.display = 'inline-block';
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+  listEl.querySelectorAll('[data-of-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm('Delete this promotion? Any customer trying to use its code afterward will get "invalid code."')) return;
+      try{
+        await deleteDoc(doc(db,'promotions',btn.dataset.ofDelete));
+        loadPromotionsOF();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('ofCancelBtn')?.addEventListener('click', ()=>{
+  ofEditingId = null;
+  document.getElementById('ofFormTitle').textContent = 'Add a New Promotion';
+  ['ofTitle','ofCode','ofDiscountValue','ofBadge','ofEndDate','ofNote'].forEach(id=>{ document.getElementById(id).value = ''; });
+  document.getElementById('ofDiscountType').value = 'percent';
+  document.getElementById('ofApplicableCategory').value = 'all';
+  document.getElementById('ofActive').checked = true;
+  document.getElementById('ofCancelBtn').style.display = 'none';
+});
+
+document.getElementById('ofSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('ofStatus');
+  const title = document.getElementById('ofTitle').value.trim();
+  const code = document.getElementById('ofCode').value.trim().toUpperCase();
+  const discountType = document.getElementById('ofDiscountType').value;
+  const discountValue = parseFloat(document.getElementById('ofDiscountValue').value) || 0;
+  const applicableCategory = document.getElementById('ofApplicableCategory').value;
+  const badge = document.getElementById('ofBadge').value.trim();
+  const endDate = document.getElementById('ofEndDate').value;
+  const note = document.getElementById('ofNote').value.trim();
+  const isActive = document.getElementById('ofActive').checked;
+
+  if(!title){ statusEl.textContent = 'Please enter a title.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const data = { title, code, discountType, discountValue, applicableCategory, badge, endDate, note, isActive };
+    if(ofEditingId){
+      await updateDoc(doc(db,'promotions',ofEditingId), data);
+    }else{
+      await addDoc(collection(db,'promotions'), {...data, createdAt: serverTimestamp()});
+    }
+    statusEl.textContent = '✅ Saved.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('ofCancelBtn').click();
+    loadPromotionsOF();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ MERCHANDISE ═══════════════
+let mcItemsCache = [];
+
+async function loadMerchandiseMC(){
+  const listEl = document.getElementById('mcListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'merchandise'), orderBy('createdAt','desc')));
+    mcItemsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderMerchandiseMC();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load merchandise: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderMerchandiseMC(){
+  const listEl = document.getElementById('mcListWrap');
+  if(!mcItemsCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No merchandise yet — add your first item above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + mcItemsCache.map(it=>`
+    <div class="mm-item-row">
+      ${it.photoUrl ? `<img class="mm-item-thumb" src="${escapeHtml(it.photoUrl)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(it.name)} <span style="color:var(--lt);font-weight:400;font-size:.76rem">— ${escapeHtml(it.category||'')}</span></div>
+        <div class="mm-item-desc">Stock: ${it.stock != null ? it.stock : '—'}</div>
+      </div>
+      <div class="mm-item-price">$${Number(it.price||0).toFixed(2)}</div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-mc-delete="${it.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-mc-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const it = mcItemsCache.find(i=>i.id===btn.dataset.mcDelete);
+      if(!confirm(`Delete "${it?.name}" permanently?`)) return;
+      try{
+        await deleteDoc(doc(db,'merchandise',btn.dataset.mcDelete));
+        loadMerchandiseMC();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('mcSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('mcStatus');
+  const name = document.getElementById('mcName').value.trim();
+  const category = document.getElementById('mcCategory').value;
+  const price = parseFloat(document.getElementById('mcPrice').value) || 0;
+  const stock = parseInt(document.getElementById('mcStock').value) || 0;
+  const description = document.getElementById('mcDescription').value.trim();
+
+  if(!name){ statusEl.textContent = 'Please enter a name.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--mid)';
+  try{
+    let photoUrl = '';
+    const file = document.getElementById('mcPhotoFile').files[0];
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `merchandisePhotos/${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      photoUrl = await getDownloadURL(sref);
+    }
+    await addDoc(collection(db,'merchandise'), { name, category, price, stock, description, photoUrl, createdAt: serverTimestamp() });
+    document.getElementById('mcName').value = '';
+    document.getElementById('mcPrice').value = '';
+    document.getElementById('mcStock').value = '';
+    document.getElementById('mcDescription').value = '';
+    document.getElementById('mcPhotoFile').value = '';
+    statusEl.textContent = '✅ Added.'; statusEl.style.color = '#1E8A3B';
+    loadMerchandiseMC();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ EVENTS ═══════════════
+let evItemsCache = [];
+
+async function loadEventsEV(){
+  const listEl = document.getElementById('evListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'events'), orderBy('date','asc')));
+    evItemsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderEventsEV();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load events: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderEventsEV(){
+  const listEl = document.getElementById('evListWrap');
+  if(!evItemsCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No events yet — add one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + evItemsCache.map(ev=>`
+    <div class="mm-item-row">
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(ev.name)}</div>
+        <div class="mm-item-desc">${escapeHtml(ev.date||'')} ${escapeHtml(ev.time||'')} · ${escapeHtml(ev.location||'')}</div>
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-ev-delete="${ev.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-ev-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const ev = evItemsCache.find(e=>e.id===btn.dataset.evDelete);
+      if(!confirm(`Delete "${ev?.name}"?`)) return;
+      try{
+        await deleteDoc(doc(db,'events',btn.dataset.evDelete));
+        loadEventsEV();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('evSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('evStatus');
+  const name = document.getElementById('evName').value.trim();
+  const location = document.getElementById('evLocation').value.trim();
+  const date = document.getElementById('evDate').value;
+  const time = document.getElementById('evTime').value;
+  const description = document.getElementById('evDescription').value.trim();
+
+  if(!name || !date){ statusEl.textContent = 'Please enter at least a name and date.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Saving…'; statusEl.style.color = 'var(--mid)';
+  try{
+    await addDoc(collection(db,'events'), { name, date, time, location, description, createdAt: serverTimestamp() });
+    document.getElementById('evName').value = '';
+    document.getElementById('evLocation').value = '';
+    document.getElementById('evDate').value = '';
+    document.getElementById('evTime').value = '';
+    document.getElementById('evDescription').value = '';
+    statusEl.textContent = '✅ Added.'; statusEl.style.color = '#1E8A3B';
+    loadEventsEV();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ COUNTDOWN BANNER ═══════════════
+const cdbRef = () => doc(db,'settings','countdownBanner');
+
+async function loadCountdownBannerCDB(){
+  try{
+    const snap = await getDoc(cdbRef());
+    if(!snap.exists()) return;
+    const d = snap.data();
+    document.getElementById('cdbActive').checked = !!d.active;
+    document.getElementById('cdbTitle').value = d.title || '';
+    document.getElementById('cdbTargetPage').value = d.targetPage || 'all';
+    if(d.endDateTime){
+      document.getElementById('cdbEndDateTime').value = d.endDateTime.slice(0,16);
+    }
+  }catch(e){ console.warn('Could not load countdown banner:', e.message); }
+}
+
+document.getElementById('cdbSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('cdbStatus');
+  const endDateTimeInput = document.getElementById('cdbEndDateTime').value;
+  if(document.getElementById('cdbActive').checked && !endDateTimeInput){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = 'Please pick an end date and time first.';
+    return;
+  }
+  statusEl.style.color = 'var(--mid)'; statusEl.textContent = 'Saving…';
+  try{
+    await setDoc(cdbRef(), {
+      active: document.getElementById('cdbActive').checked,
+      title: document.getElementById('cdbTitle').value.trim(),
+      endDateTime: endDateTimeInput ? new Date(endDateTimeInput).toISOString() : '',
+      targetPage: document.getElementById('cdbTargetPage').value,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved.';
+  }catch(e){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + e.message;
+  }
+});
+
+// ═══════════════ BUSINESS DETAILS ═══════════════
+async function loadBusinessDetailsBP(){
+  try{
+    const snap = await getDoc(doc(db,'settings','business'));
+    if(!snap.exists()) return;
+    const d = snap.data();
+    document.getElementById('bpName').value = d.name || '';
+    document.getElementById('bpAbn').value = d.abn || '';
+    document.getElementById('bpAddress').value = d.address || '';
+    document.getElementById('bpPhone').value = d.phone || '';
+  }catch(e){ console.warn('Could not load business details:', e.message); }
+}
+
+document.getElementById('bpSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('bpStatus');
+  statusEl.style.color = 'var(--mid)'; statusEl.textContent = 'Saving…';
+  try{
+    await setDoc(doc(db,'settings','business'), {
+      name: document.getElementById('bpName').value.trim(),
+      abn: document.getElementById('bpAbn').value.trim(),
+      address: document.getElementById('bpAddress').value.trim(),
+      phone: document.getElementById('bpPhone').value.trim(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved.';
+  }catch(e){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + e.message;
+  }
+});
+
+// ═══════════════ MAINTENANCE MODE ═══════════════
+const maRef = () => doc(db,'settings','maintenanceMode');
+
+function updateMaintBadgeMA(active){
+  const badge = document.getElementById('maStatusBadge');
+  badge.textContent = active ? 'ON — site is down' : 'Off';
+  badge.style.background = active ? '#FEECEC' : '#EAF7EE';
+  badge.style.color = active ? '#C62828' : '#2E7D32';
+}
+
+async function loadMaintenanceModeMA(){
+  try{
+    const snap = await getDoc(maRef());
+    const active = snap.exists() && !!snap.data().active;
+    document.getElementById('maActive').checked = active;
+    updateMaintBadgeMA(active);
+  }catch(e){ console.warn('Could not load maintenance mode:', e.message); }
+}
+
+document.getElementById('maSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('maStatus');
+  const active = document.getElementById('maActive').checked;
+  statusEl.style.color = 'var(--mid)'; statusEl.textContent = 'Saving…';
+  try{
+    await setDoc(maRef(), { active, updatedAt: serverTimestamp() });
+    updateMaintBadgeMA(active);
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = active ? '✅ Site is now in maintenance mode.' : '✅ Site is live again.';
+  }catch(e){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + e.message;
+  }
+});
+
+// ═══════════════ FEATURE FLAGS ═══════════════
+const FEATURE_FLAG_REGISTRY = [
+  {key:'recommendations', label:'Product Recommendations at Checkout', defaultOn:true},
+  {key:'rushOrder', label:'Rush Order Option at Checkout', defaultOn:true},
+  {key:'waitlist', label:'Table Waitlist', defaultOn:true},
+  {key:'pwaInstallPrompt', label:'PWA Install Banner', defaultOn:true},
+  {key:'gymJunkies', label:'Gym Junkies — Build Your Macro Bowl', defaultOn:true}
+];
+
+async function loadFeatureFlagsFF(){
+  const listEl = document.getElementById('ffListWrap');
+  try{
+    const snap = await getDoc(doc(db,'settings','featureFlags'));
+    const flags = snap.exists() ? snap.data() : {};
+    listEl.innerHTML = FEATURE_FLAG_REGISTRY.map(f=>{
+      const isOn = flags[f.key] !== undefined ? flags[f.key] : f.defaultOn;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.88rem">${escapeHtml(f.label)}</span>
+        <label class="sv-toggle"><input type="checkbox" data-ff-flag="${f.key}" ${isOn?'checked':''}><span class="sv-track"></span></label>
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('[data-ff-flag]').forEach(input=>{
+      input.addEventListener('change', async ()=>{
+        try{
+          await setDoc(doc(db,'settings','featureFlags'), { [input.dataset.ffFlag]: input.checked }, { merge: true });
+        }catch(e){
+          alert('Could not save: ' + e.message);
+          input.checked = !input.checked;
+        }
+      });
+    });
+  }catch(err){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load feature flags: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+// ═══════════════ SEARCH ORDERS ═══════════════
+async function runOrderSearchOS(){
+  const query = document.getElementById('osInput').value.trim().toLowerCase();
+  const statusEl = document.getElementById('osStatus');
+  const resultsEl = document.getElementById('osResults');
+  if(!query){ statusEl.textContent = 'Type something to search for first.'; return; }
+
+  const btn = document.getElementById('osSearchBtn');
+  btn.disabled = true; statusEl.textContent = 'Searching…'; resultsEl.innerHTML = '';
+
+  const matches = (obj, fields) => fields.some(f => (obj[f]||'').toString().toLowerCase().includes(query));
+
+  try{
+    const [ordersSnap, leadsSnap, bookingsSnap] = await Promise.all([
+      getDocs(collection(db,'orders')),
+      getDocs(collection(db,'catering_leads')),
+      getDocs(collection(db,'bookings'))
+    ]);
+
+    const orderHits = ordersSnap.docs.map(d=>({id:d.id, ...d.data()})).filter(o => matches(o, ['name','email','phone']));
+    const leadHits = leadsSnap.docs.map(d=>({id:d.id, ...d.data()})).filter(l => matches(l, ['name','email','phone']));
+    const bookingHits = bookingsSnap.docs.map(d=>({id:d.id, ...d.data()})).filter(b => matches(b, ['name','email','phone']));
+
+    const totalHits = orderHits.length + leadHits.length + bookingHits.length;
+    statusEl.textContent = totalHits ? `Found ${totalHits} match${totalHits===1?'':'es'}.` : 'No matches found — try a shorter or different detail.';
+
+    let html = '';
+    if(orderHits.length){
+      html += `<h3 style="font-size:1rem;margin:1rem 0 .6rem">Orders (${orderHits.length})</h3>`;
+      html += orderHits.map(o => `
+        <div class="stat-card" style="margin-bottom:.6rem">
+          <p style="margin:0"><strong>${escapeHtml(o.name||'—')}</strong> — $${(o.total||0).toFixed(2)} — <span style="color:var(--mid)">${escapeHtml(o.orderRef||o.id)}</span></p>
+          <p style="margin:.2rem 0 0;font-size:.8rem;color:var(--mid)">${escapeHtml(o.email||'')} ${o.phone?'· '+escapeHtml(o.phone):''} ${o.deliveryAddr?'· '+escapeHtml(o.deliveryAddr):''}</p>
+        </div>`).join('');
+    }
+    if(leadHits.length){
+      html += `<h3 style="font-size:1rem;margin:1rem 0 .6rem">Catering Enquiries (${leadHits.length})</h3>`;
+      html += leadHits.map(l => `
+        <div class="stat-card" style="margin-bottom:.6rem">
+          <p style="margin:0"><strong>${escapeHtml(l.name||'—')}</strong> ${l.estimatedTotal?'— est. $'+Number(l.estimatedTotal).toFixed(2):''}</p>
+          <p style="margin:.2rem 0 0;font-size:.8rem;color:var(--mid)">${escapeHtml(l.email||'')} ${l.phone?'· '+escapeHtml(l.phone):''}</p>
+        </div>`).join('');
+    }
+    if(bookingHits.length){
+      html += `<h3 style="font-size:1rem;margin:1rem 0 .6rem">Reservations (${bookingHits.length})</h3>`;
+      html += bookingHits.map(b => `
+        <div class="stat-card" style="margin-bottom:.6rem">
+          <p style="margin:0"><strong>${escapeHtml(b.name||'—')}</strong> — ${escapeHtml(b.date||'')} ${escapeHtml(b.time||'')} — ${escapeHtml(b.guests||'')} guests</p>
+          <p style="margin:.2rem 0 0;font-size:.8rem;color:var(--mid)">${escapeHtml(b.email||'')} ${b.phone?'· '+escapeHtml(b.phone):''}</p>
+        </div>`).join('');
+    }
+    resultsEl.innerHTML = html;
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message;
+  }
+  btn.disabled = false;
+}
+document.getElementById('osSearchBtn')?.addEventListener('click', runOrderSearchOS);
+document.getElementById('osInput')?.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') runOrderSearchOS(); });
+
+// ═══════════════ BLOG POSTS ═══════════════
+let blgPostsCache = [];
+
+async function loadBlogPostsBLG(){
+  const listEl = document.getElementById('blgListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'blogPosts'), orderBy('createdAt','desc')));
+    blgPostsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderBlogPostsBLG();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load posts: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderBlogPostsBLG(){
+  const listEl = document.getElementById('blgListWrap');
+  if(!blgPostsCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No posts yet — write your first one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + blgPostsCache.map(p=>`
+    <div class="mm-item-row">
+      ${p.photo ? `<img class="mm-item-thumb" src="${escapeHtml(p.photo)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(p.title)}</div>
+        <div class="mm-item-desc">${escapeHtml(p.excerpt||'')}</div>
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-blg-delete="${p.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-blg-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const p = blgPostsCache.find(x=>x.id===btn.dataset.blgDelete);
+      if(!confirm(`Delete "${p?.title}" permanently? This removes it from the live blog immediately.`)) return;
+      try{
+        await deleteDoc(doc(db,'blogPosts',btn.dataset.blgDelete));
+        loadBlogPostsBLG();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('blgSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('blgPostStatus');
+  const title = document.getElementById('blgTitle').value.trim();
+  const excerpt = document.getElementById('blgExcerpt').value.trim();
+  const body = document.getElementById('blgBody').value.trim();
+
+  if(!title || !body){ statusEl.textContent = 'Please add at least a title and the post content.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Publishing…'; statusEl.style.color = 'var(--mid)';
+  try{
+    let photoUrl = null;
+    const file = document.getElementById('blgPhotoFile').files[0];
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `blogPosts/${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      photoUrl = await getDownloadURL(sref);
+    }
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '-' + Date.now().toString().slice(-5);
+    await addDoc(collection(db,'blogPosts'), { title, excerpt, body, photo: photoUrl, slug, createdAt: serverTimestamp() });
+    statusEl.textContent = '✅ Published — live on your blog now.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('blgTitle').value = '';
+    document.getElementById('blgExcerpt').value = '';
+    document.getElementById('blgBody').value = '';
+    document.getElementById('blgPhotoFile').value = '';
+    loadBlogPostsBLG();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ MUSIC PLAYLIST ═══════════════
+let plTracksCache = [];
+
+async function loadPlaylistPL(){
+  const listEl = document.getElementById('plListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'sonicHubPlaylist'), orderBy('createdAt','asc')));
+    plTracksCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderPlaylistPL();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load playlist: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderPlaylistPL(){
+  const listEl = document.getElementById('plListWrap');
+  if(!plTracksCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No tracks yet — add your first one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + plTracksCache.map(t=>`
+    <div class="mm-item-row">
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(t.title)}</div>
+        <div class="mm-item-desc">${escapeHtml(t.artist||'')}${t.license ? ' · '+escapeHtml(t.license) : ''}</div>
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-pl-delete="${t.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-pl-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const t = plTracksCache.find(x=>x.id===btn.dataset.plDelete);
+      if(!confirm(`Remove "${t?.title}" from the playlist?`)) return;
+      try{
+        await deleteDoc(doc(db,'sonicHubPlaylist',btn.dataset.plDelete));
+        loadPlaylistPL();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('plSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('plStatus');
+  const title = document.getElementById('plTitle').value.trim();
+  const artist = document.getElementById('plArtist').value.trim();
+  const license = document.getElementById('plLicense').value.trim();
+  const file = document.getElementById('plFile').files[0];
+
+  if(!title){ statusEl.textContent = 'Please enter a track title.'; statusEl.style.color = '#D70015'; return; }
+  if(!file){ statusEl.textContent = 'Please choose an MP3 file.'; statusEl.style.color = '#D70015'; return; }
+  if(!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg'){
+    statusEl.textContent = 'Please upload an MP3 file.'; statusEl.style.color = '#D70015'; return;
+  }
+  if(file.size > 20*1024*1024){
+    statusEl.textContent = 'That file is larger than 20MB — please use a smaller/shorter track.'; statusEl.style.color = '#D70015'; return;
+  }
+
+  statusEl.textContent = 'Uploading…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const storagePath = `sonicHubPlaylist/${Date.now()}_${file.name}`;
+    const sref = ref(storage, storagePath);
+    await uploadBytes(sref, file);
+    const url = await getDownloadURL(sref);
+    await addDoc(collection(db,'sonicHubPlaylist'), { title, artist, license, src: url, storagePath, createdAt: serverTimestamp() });
+    statusEl.textContent = '✅ Added to playlist.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('plTitle').value = '';
+    document.getElementById('plArtist').value = '';
+    document.getElementById('plLicense').value = '';
+    document.getElementById('plFile').value = '';
+    loadPlaylistPL();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ INSTAGRAM FEED ═══════════════
+let igPostsCache = [];
+
+async function loadInstagramIG(){
+  const listEl = document.getElementById('igListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'instagramPosts'), orderBy('createdAt','desc')));
+    igPostsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderInstagramIG();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load posts: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderInstagramIG(){
+  const listEl = document.getElementById('igListWrap');
+  if(!igPostsCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No posts yet — add your first one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + igPostsCache.map(p=>`
+    <div class="mm-item-row">
+      ${p.photoUrl ? `<img class="mm-item-thumb" src="${escapeHtml(p.photoUrl)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(p.caption||'(no caption)')}</div>
+        ${p.link ? `<div class="mm-item-desc">${escapeHtml(p.link)}</div>` : ''}
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-ig-delete="${p.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-ig-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm('Remove this post from the feed?')) return;
+      try{
+        await deleteDoc(doc(db,'instagramPosts',btn.dataset.igDelete));
+        loadInstagramIG();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('igSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('igSaveStatus');
+  const file = document.getElementById('igPhotoFile').files[0];
+  const caption = document.getElementById('igCaption').value.trim();
+  const link = document.getElementById('igLink').value.trim();
+
+  if(!file){ statusEl.textContent = 'Please choose a photo first.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Uploading…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const compressed = await compressImageForUpload(file);
+    const sref = ref(storage, `instagramPostPhotos/${Date.now()}_${file.name}`);
+    await uploadBytes(sref, compressed);
+    const photoUrl = await getDownloadURL(sref);
+    await addDoc(collection(db,'instagramPosts'), { photoUrl, caption, link, createdAt: serverTimestamp() });
+    statusEl.textContent = '✅ Added.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('igPhotoFile').value = '';
+    document.getElementById('igCaption').value = '';
+    document.getElementById('igLink').value = '';
+    loadInstagramIG();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ═══════════════ BOOKINGS / RESERVATIONS ═══════════════
+let bkAllBookings = [];
+async function loadBookingsRV(){
+  try{
+    const snap = await getDocs(query(collection(db,'bookings'), orderBy('createdAt','desc')));
+    bkAllBookings = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderBookingsList();
+  }catch(e){
+    document.getElementById('bkTbody').innerHTML = `<tr><td colspan="9" style="color:#D70015;padding:1rem">Could not load bookings: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+function renderBookingsList(){
+  const filter = document.getElementById('bkFilter').value;
+  const tbody = document.getElementById('bkTbody');
+  const filtered = bkAllBookings.filter(b => filter === 'all' || b.status === filter);
+  if(!filtered.length){ tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--lt);padding:2rem">No bookings.</td></tr>'; return; }
+
+  const STATUS_STYLES = {
+    pending:{bg:'#F8F2E5',color:'#B08D57',label:'Pending'}, accepted:{bg:'#EAF7EE',color:'#2E7D32',label:'Accepted'},
+    rejected:{bg:'#FEECEC',color:'#C62828',label:'Rejected'}, cancelled:{bg:'#F3F4F6',color:'#8A7A68',label:'Cancelled'},
+    confirmed:{bg:'#EAF7EE',color:'#2E7D32',label:'Confirmed'}
+  };
+  tbody.innerHTML = filtered.map(b=>{
+    const submitted = b.createdAt?.toDate ? b.createdAt.toDate().toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending;
+    const badge = `<span style="font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.2rem .55rem;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>`;
+    const actions = (b.status==='pending'||b.status==='confirmed')
+      ? `<div style="display:flex;gap:.3rem"><button class="mm-btn-sm" data-bk-accept="${b.id}">✓ Accept</button><button class="mm-btn-sm mm-btn-danger" data-bk-reject="${b.id}">✕ Reject</button></div>`
+      : `<button class="mm-btn-sm" data-bk-restore="${b.id}">↩ Restore</button>`;
+    return `<tr>
+      <td>${badge}</td><td style="font-size:.72rem">${submitted}</td><td><strong>${escapeHtml(b.name)||'—'}</strong></td>
+      <td>${escapeHtml(b.date)} ${escapeHtml(b.time)}</td><td style="text-align:center">${escapeHtml(b.guests)||'—'}</td>
+      <td>${escapeHtml(b.occasion)||'—'}</td><td>${escapeHtml(b.phone)||'—'}</td><td style="font-size:.75rem">${escapeHtml(b.email)||'—'}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('[data-bk-accept]').forEach(btn=>btn.addEventListener('click', ()=>updateBookingStatus(btn.dataset.bkAccept,'accepted')));
+  tbody.querySelectorAll('[data-bk-reject]').forEach(btn=>btn.addEventListener('click', ()=>updateBookingStatus(btn.dataset.bkReject,'rejected')));
+  tbody.querySelectorAll('[data-bk-restore]').forEach(btn=>btn.addEventListener('click', ()=>updateBookingStatus(btn.dataset.bkRestore,'pending')));
+}
+async function updateBookingStatus(id, status){
+  try{
+    await updateDoc(doc(db,'bookings',id), { status });
+    loadBookingsRV();
+  }catch(e){ alert('Could not update: ' + e.message); }
+}
+document.getElementById('bkFilter')?.addEventListener('change', renderBookingsList);
+
+// ═══════════════ LOYALTY ═══════════════
+async function loadLoyaltyRV(){
+  const tbody = document.getElementById('loyTbody');
+  try{
+    const snap = await getDocs(collection(db,'userProfiles'));
+    const profiles = snap.docs.map(d=>({id:d.id, ...d.data()})).filter(p=>p.name);
+    if(!profiles.length){ tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">No customer profiles yet.</td></tr>'; return; }
+    profiles.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    tbody.innerHTML = profiles.map(p=>`
+      <tr><td><strong>${escapeHtml(p.name)}</strong></td><td>${escapeHtml(p.loyaltyCardNumber)||'—'}</td>
+      <td style="font-size:.78rem">${escapeHtml(p.email)||'—'}</td><td>${escapeHtml(p.phone)||'—'}</td>
+      <td>${escapeHtml(p.birthday)||'—'}</td></tr>`).join('');
+  }catch(e){
+    tbody.innerHTML = `<tr><td colspan="5" style="color:#D70015;padding:1rem">Could not load: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+// ═══════════════ GIFT VOUCHERS ═══════════════
+async function loadVouchersRV(){
+  const tbody = document.getElementById('gvTbody');
+  try{
+    const snap = await getDocs(collection(db,'giftVouchers'));
+    const vouchers = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    if(!vouchers.length){ tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--lt);padding:2rem">No vouchers yet.</td></tr>'; return; }
+    const statusBadge = v => {
+      if(v.status!=='paid') return '<span style="color:#D70015;font-weight:700">Unpaid</span>';
+      const bal = v.remainingBalance!=null ? v.remainingBalance : v.amount;
+      if(bal<=0) return '<span style="color:var(--mid)">Fully redeemed</span>';
+      if(bal<v.amount) return `<span style="color:var(--accent);font-weight:700">Partial · $${bal.toFixed(2)} left</span>`;
+      return '<span style="color:var(--green);font-weight:700">Paid · Active</span>';
+    };
+    tbody.innerHTML = vouchers.map(v=>`
+      <tr><td><strong>${escapeHtml(v.code)}</strong></td><td>$${(v.amount||0).toFixed(2)}</td>
+      <td style="font-size:.78rem">${escapeHtml(v.toName)} ← ${escapeHtml(v.fromName)}</td>
+      <td style="font-size:.75rem">${escapeHtml(v.email)}</td><td>${statusBadge(v)}</td>
+      <td>${v.status!=='paid' ? `<button class="mm-btn-sm" data-gv-markpaid="${v.id}">Mark Paid</button>` : ''}</td></tr>`).join('');
+
+    tbody.querySelectorAll('[data-gv-markpaid]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('Mark this voucher as paid? This makes it redeemable.')) return;
+        try{
+          await updateDoc(doc(db,'giftVouchers',btn.dataset.gvMarkpaid), { status:'paid' });
+          loadVouchersRV();
+        }catch(e){ alert('Could not update: ' + e.message); }
+      });
+    });
+  }catch(e){
+    tbody.innerHTML = `<tr><td colspan="6" style="color:#D70015;padding:1rem">Could not load: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+</script>
+</body>
+</html>
