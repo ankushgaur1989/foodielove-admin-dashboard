@@ -19,7 +19,23 @@
     --sidebar-text:rgba(255,255,255,.68);
     --sidebar-text-active:#fff;
     --radius:12px;
+    --input-bg:#FAFAFA;
+    --hover-bg:#F0F0F2;
   }
+  [data-theme="dark"]{
+    --bg:#161616;
+    --card:#212121;
+    --ink:#F2F2F2;
+    --mid:#A8A8AC;
+    --lt:#6E6E73;
+    --border:#333333;
+    --sidebar:#0D0D0D;
+    --input-bg:#2A2A2A;
+    --hover-bg:#2E2E2E;
+  }
+  [data-theme="dark"] body{background:var(--bg);color:var(--ink)}
+  [data-theme="dark"] .skel-box{background:linear-gradient(90deg,#2a2a2a 25%,#333 50%,#2a2a2a 75%)}
+  [data-theme="dark"] .svToggleCard.is-off{background:rgba(215,0,21,.12)}
   *{box-sizing:border-box}
   html,body{overflow-x:hidden;width:100%;max-width:100%}
   body{
@@ -34,8 +50,8 @@
   .login-card .mark{width:44px;height:44px;border-radius:12px;background:var(--accent);margin:0 auto 1.2rem;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem}
   .login-card h2{font-size:1.3rem;font-weight:700;margin:0 0 .3rem}
   .login-card p.sub{color:var(--mid);font-size:.85rem;margin:0 0 1.6rem}
-  .login-card input{width:100%;padding:.8rem 1rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.7rem;font-size:.9rem;background:#FAFAFA;transition:border-color .15s}
-  .login-card input:focus{outline:none;border-color:var(--accent);background:#fff}
+  .login-card input{width:100%;padding:.8rem 1rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.7rem;font-size:.9rem;background:var(--input-bg);transition:border-color .15s}
+  .login-card input:focus{outline:none;border-color:var(--accent);background:var(--card)}
   .login-card button{width:100%;padding:.85rem;background:var(--ink);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:.9rem;margin-top:.4rem;transition:opacity .15s}
   .login-card button:hover{opacity:.82}
   #loginError{color:#D70015;font-size:.8rem;margin-top:.8rem;display:none}
@@ -53,6 +69,68 @@
   .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;border-radius:8px;color:var(--sidebar-text);font-size:.86rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
   .nav-item .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6}
   .nav-item.active{background:rgba(255,255,255,.1);color:var(--sidebar-text-active)}
+  .hp-subtab{padding:.85rem 1.4rem;border:none;background:none;font-size:.85rem;font-weight:600;color:var(--lt);cursor:pointer;border-bottom:2.5px solid transparent;transition:color .15s,border-color .15s}
+  .hp-subtab:hover{color:var(--ink)}
+  .hp-subtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .hp-subpanel{display:none}
+  .hp-subpanel.active{display:block}
+
+  /* ── Toast notifications — replaces plain inline "Saved" text with a
+     real, modern notification. Foundational piece: every future page
+     built from here on can call showToast() instead of writing its own
+     status-text handling. ── */
+  #toastStack{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.6rem;pointer-events:none}
+  .toast{background:var(--ink);color:#fff;padding:.85rem 1.2rem;border-radius:10px;font-size:.85rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;gap:.6rem;min-width:220px;max-width:360px;pointer-events:auto;transform:translateX(420px);opacity:0;transition:transform .35s cubic-bezier(0.16,1,0.3,1),opacity .35s}
+  .toast.show{transform:translateX(0);opacity:1}
+  .toast.toast-success{background:#1E8A3B}
+  .toast.toast-error{background:#D70015}
+  .toast-icon{font-size:1rem;flex-shrink:0}
+
+  /* ── Panel transitions — subtle fade instead of an instant hard cut,
+     applies to both the main sidebar pages and the new horizontal
+     sub-tabs (Photos/Web Text), so it's consistent everywhere. ── */
+  .page-panel{display:none;opacity:0}
+  .page-panel.active{display:block;animation:panelFadeIn .28s ease forwards}
+  .hp-subpanel{opacity:0}
+  .hp-subpanel.active{animation:panelFadeIn .22s ease forwards}
+  @keyframes panelFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @media(prefers-reduced-motion: reduce){ .page-panel.active,.hp-subpanel.active{animation:none;opacity:1} }
+
+  /* ── Loading skeleton — shown briefly while real data is being
+     fetched, instead of a blank gap. ── */
+  .skel-row{display:flex;gap:1rem;padding:.9rem;border-radius:10px;margin-bottom:.6rem;background:var(--card)}
+  .skel-box{border-radius:8px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:skelShimmer 1.4s ease-in-out infinite}
+  .skel-thumb{width:64px;height:64px;flex-shrink:0}
+  .skel-lines{flex:1;display:flex;flex-direction:column;gap:.5rem;justify-content:center}
+  .skel-line{height:12px;border-radius:6px}
+  @keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* ── Command palette — the hallmark "high tech" interaction pattern
+     (Linear, Notion, Vercel, GitHub all use this). Searches every
+     sidebar destination instantly, keyboard-first. ── */
+  .cmdk-trigger{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;background:var(--card);border:1px solid var(--border);border-radius:9px;font-size:.8rem;color:var(--mid);cursor:pointer;transition:border-color .15s,transform .1s}
+  .cmdk-trigger:hover{border-color:var(--accent)}
+  .cmdk-trigger kbd{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:.1rem .4rem;font-size:.72rem;font-family:inherit;color:var(--lt)}
+  #cmdkOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+  #cmdkOverlay.open{display:flex}
+  #cmdkModal{background:var(--card);border-radius:14px;width:min(560px,90vw);max-height:60vh;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);display:flex;flex-direction:column;animation:cmdkPop .18s cubic-bezier(0.16,1,0.3,1)}
+  @keyframes cmdkPop{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  #cmdkInput{border:none;outline:none;padding:1.1rem 1.3rem;font-size:1rem;background:transparent;color:var(--ink);border-bottom:1px solid var(--border)}
+  #cmdkResults{overflow-y:auto;padding:.5rem}
+  .cmdk-item{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:9px;cursor:pointer;font-size:.85rem;color:var(--ink)}
+  .cmdk-item.selected,.cmdk-item:hover{background:var(--accent);color:#fff}
+  .cmdk-empty{padding:2rem;text-align:center;color:var(--lt);font-size:.85rem}
+
+  /* ── Dark mode toggle ── */
+  .theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:1rem;transition:transform .1s}
+
+  /* ── Micro-interactions — subtle press feedback on every button
+     across the whole dashboard, applied broadly rather than one at a
+     time. Small, but it's the difference between feeling static and
+     feeling responsive. ── */
+  button{transition:transform .1s ease}
+  button:active{transform:scale(.96)}
+  @media(prefers-reduced-motion: reduce){ button:active{transform:none} }
   .nav-item:hover{background:rgba(255,255,255,.06);color:var(--sidebar-text-active)}
   .sidebar .footnote{margin-top:auto;color:rgba(255,255,255,.35);font-size:.68rem;padding:.6rem;line-height:1.5}
 
@@ -61,14 +139,14 @@
   .page-head h1{font-size:1.6rem;font-weight:700;margin:0;letter-spacing:-.01em}
   .page-head p{color:var(--mid);font-size:.85rem;margin:.2rem 0 0}
   .logout-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.55rem 1rem;font-size:.8rem;font-weight:600;color:var(--ink);cursor:pointer}
-  .logout-btn:hover{background:#F0F0F2}
+  .logout-btn:hover{background:var(--hover-bg)}
 
   .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
 
   .widget-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;gap:1rem;flex-wrap:wrap}
   .widget-toolbar p{color:var(--mid);font-size:.82rem;margin:0}
   .reset-layout-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.5rem .9rem;font-size:.78rem;font-weight:600;color:var(--ink);cursor:pointer;flex-shrink:0}
-  .reset-layout-btn:hover{background:#F0F0F2}
+  .reset-layout-btn:hover{background:var(--hover-bg)}
 
   .widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:start}
   .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04);touch-action:none}
@@ -94,9 +172,9 @@
 
   .mm-lbl{display:block;font-size:.76rem;font-weight:600;color:var(--mid);margin-bottom:.3rem}
   #page-menu-brunch input[type="text"],#page-menu-brunch input[type="number"],#page-menu-brunch select{
-    width:100%;padding:.65rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-family:inherit;background:#FAFAFA;
+    width:100%;padding:.65rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-family:inherit;background:var(--input-bg);
   }
-  #page-menu-brunch input:focus,#page-menu-brunch select:focus,#page-menu-brunch textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+  #page-menu-brunch input:focus,#page-menu-brunch select:focus,#page-menu-brunch textarea:focus{outline:none;border-color:var(--accent);background:var(--card)}
   .mm-section-h{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mid);background:var(--bg);padding:.6rem 1rem;margin-top:1rem;border-radius:8px}
   .mm-item-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;border-bottom:1px solid var(--border)}
   .mm-item-row:last-child{border-bottom:none}
@@ -105,13 +183,13 @@
   .mm-item-desc{font-size:.76rem;color:var(--mid);margin-top:.1rem}
   .mm-item-price{font-weight:700;font-size:.86rem;margin-left:auto;white-space:nowrap}
   .mm-item-actions{display:flex;gap:.4rem}
-  .mm-btn-sm{padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:.74rem;font-weight:600;cursor:pointer}
+  .mm-btn-sm{padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--card);font-size:.74rem;font-weight:600;cursor:pointer}
   .mm-btn-sm:hover{background:var(--bg)}
   .mm-btn-danger{color:#D70015;border-color:rgba(215,0,21,.25)}
 
   .sv-toggle{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0}
   .sv-toggle input{opacity:0;width:0;height:0}
-  .sv-track{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#D0D0D5;border-radius:26px;transition:.2s}
+  .sv-track{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:26px;transition:.2s}
   .sv-track:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   .sv-toggle input:checked + .sv-track{background:var(--green)}
   .sv-toggle input:checked + .sv-track:before{transform:translateX(18px)}
@@ -138,7 +216,7 @@
   td{border-bottom:1px solid var(--border);color:var(--ink)}
   tr:last-child td{border-bottom:none}
   tbody tr{transition:background .12s}
-  tbody tr:hover{background:#FAFAFA}
+  tbody tr:hover{background:var(--hover-bg)}
   .status-pill{font-size:.68rem;font-weight:600;padding:.28rem .7rem;border-radius:20px;background:rgba(52,199,89,.12);color:#1E8A3B;text-transform:capitalize}
   .ref-mono{font-family:'SF Mono',Menlo,monospace;font-size:.78rem;color:var(--mid)}
 
@@ -160,6 +238,13 @@
 </style>
 </head>
 <body>
+<div id="toastStack"></div>
+<div id="cmdkOverlay">
+  <div id="cmdkModal">
+    <input type="text" id="cmdkInput" placeholder="Jump to any section…" autocomplete="off">
+    <div id="cmdkResults"></div>
+  </div>
+</div>
 
 <div id="loginScreen">
   <div class="login-card">
@@ -177,6 +262,13 @@
   <div class="app-shell">
     <nav class="sidebar">
       <div class="brand">Foodie <span>Love</span></div>
+
+      <p class="nav-group-label">📄 By Page (New)</p>
+      <div class="nav-item" data-page="pg-homepage"><span class="dot"></span> Homepage</div>
+      <div class="nav-item" data-page="pg-menu-soon" style="opacity:.55"><span class="dot"></span> Menu — coming soon</div>
+      <div class="nav-item" data-page="pg-catering-soon" style="opacity:.55"><span class="dot"></span> Catering — coming soon</div>
+      <div class="nav-item" data-page="pg-gallery-soon" style="opacity:.55"><span class="dot"></span> Gallery — coming soon</div>
+      <div class="nav-item" data-page="pg-offers-soon" style="opacity:.55"><span class="dot"></span> Offers — coming soon</div>
 
       <p class="nav-group-label">Overview</p>
       <div class="nav-item active" data-page="overview"><span class="dot"></span> Dashboard</div>
@@ -196,7 +288,17 @@
       <div class="nav-item" data-page="maintenance"><span class="dot"></span> Maintenance Mode</div>
       <div class="nav-item" data-page="featureflags"><span class="dot"></span> Feature Flags</div>
       <div class="nav-item" data-page="ordersearch"><span class="dot"></span> Search Orders</div>
+      <div class="nav-item" data-page="blogposts"><span class="dot"></span> Blog Posts</div>
+      <div class="nav-item" data-page="musicplaylist"><span class="dot"></span> Music Playlist</div>
+      <div class="nav-item" data-page="instagram"><span class="dot"></span> Instagram Feed</div>
+      <a href="https://www.foodielove.com.au/kds.html" target="_blank" rel="noopener" class="nav-item" style="display:flex;align-items:center;text-decoration:none;color:inherit"><span class="dot"></span> Kitchen Display (KDS) ↗</a>
       <div class="nav-item" data-page="menu-visibility"><span class="dot"></span> Sections &amp; Visibility</div>
+
+      <p class="nav-group-label">Coming Soon</p>
+      <div class="nav-item" data-page="websitesecurity" style="opacity:.55"><span class="dot"></span> Website Security</div>
+      <div class="nav-item" data-page="analytics-soon" style="opacity:.55"><span class="dot"></span> Analytics</div>
+      <div class="nav-item" data-page="gallery-soon" style="opacity:.55"><span class="dot"></span> Gallery</div>
+      <div class="nav-item" data-page="communityboard-soon" style="opacity:.55"><span class="dot"></span> Community Board</div>
 
       <p class="nav-group-label">Bookings</p>
       <div class="nav-item" data-page="bookings"><span class="dot"></span> Reservations</div>
@@ -222,7 +324,7 @@
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
 
-      <div class="footnote">Isolated build — separate from the main website. Connected read-only to live orders.</div>
+      <div class="footnote">Isolated build — separate from the main website. Reads and writes the same live data as the main admin — changes here go live immediately, same as there.</div>
     </nav>
 
     <div class="main-area">
@@ -231,7 +333,13 @@
           <h1 id="pageTitle">Dashboard</h1>
           <p id="pageSubtitle">Live data from your production database</p>
         </div>
-        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        <div style="display:flex;align-items:center;gap:.7rem">
+          <button class="cmdk-trigger" id="cmdkTrigger" title="Quick search (⌘K)">
+            <span>🔍 Quick search</span><kbd>⌘K</kbd>
+          </button>
+          <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+          <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
       </div>
 
       <!-- OVERVIEW PAGE -->
@@ -481,7 +589,7 @@
         </div>
       </div>
       <div class="page-panel" id="page-profile">
-        <p style="color:#B08D57;background:#F8F2E5;padding:.7rem 1rem;border-radius:8px;font-size:.8rem;margin-bottom:1rem">Note: the main admin panel requires a 2FA code for these changes if you have it enabled. This dashboard doesn't replicate that step yet — same owner login either way, just be aware.</p>
+        <p style="color:#B08D57;background:var(--input-bg);padding:.7rem 1rem;border-radius:8px;font-size:.8rem;margin-bottom:1rem">Note: the main admin panel requires a 2FA code for these changes if you have it enabled. This dashboard doesn't replicate that step yet — same owner login either way, just be aware.</p>
         <div class="panel" style="padding:1.4rem">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
             <div><label class="mm-lbl">Business Name</label><input type="text" id="bpName" placeholder="Foodie Love Catering"></div>
@@ -520,6 +628,121 @@
         </div>
         <p id="osStatus" style="font-size:.78rem;color:var(--mid);margin-bottom:1rem"></p>
         <div id="osResults"></div>
+      </div>
+      <div class="page-panel" id="page-blogposts">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Write a New Post</h3>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Title</label><input type="text" id="blgTitle" placeholder="e.g. Our Favourite Winter Brunch Ideas"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Excerpt (shown in the blog list)</label><input type="text" id="blgExcerpt" placeholder="A short one-liner to hook readers in"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Post Content</label><textarea id="blgBody" rows="6" style="width:100%;padding:.7rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem"></textarea></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Cover Photo</label><input type="file" accept="image/*" id="blgPhotoFile"></div>
+          <button class="reset-layout-btn" id="blgSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Publish Post</button>
+          <span id="blgPostStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="blgListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-musicplaylist">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add Track</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Title</label><input type="text" id="plTitle" placeholder="e.g. Sunday Morning"></div>
+            <div><label class="mm-lbl">Artist</label><input type="text" id="plArtist" placeholder="e.g. Local Artist"></div>
+          </div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">License / Usage Note (optional)</label><input type="text" id="plLicense" placeholder="e.g. Royalty-free, licensed via..."></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">MP3 File (max 20MB)</label><input type="file" accept="audio/mpeg,.mp3" id="plFile"></div>
+          <button class="reset-layout-btn" id="plSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Add Track</button>
+          <span id="plStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="plListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-instagram">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add Post</h3>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Photo</label><input type="file" accept="image/*" id="igPhotoFile"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Caption</label><input type="text" id="igCaption" placeholder="e.g. Fresh grazing boxes ready to go 🌿"></div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Link to Instagram Post (optional)</label><input type="text" id="igLink" placeholder="https://instagram.com/p/..."></div>
+          <button class="reset-layout-btn" id="igSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Add Post</button>
+          <span id="igSaveStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div id="igListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+      </div>
+      <div class="page-panel" id="page-websitesecurity">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Website Security — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">This section is reserved for the security tools already in the main admin panel — this is a placeholder tab, not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-analytics-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Analytics — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">Reserved for real site analytics, matching the main admin panel — not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-gallery-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Gallery — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">Reserved for the Gallery page's management tools — not yet built here.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-communityboard-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Community Board — coming soon</h3>
+          <p style="max-width:400px;margin:0 auto">Reserved for Community Board management (including the music player) — not yet built here.</p>
+        </div>
+      </div>
+
+      <!-- ══ NEW "BY PAGE" NAVIGATION — Homepage (fully built) ══ -->
+      <div class="page-panel" id="page-pg-homepage">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa" id="hpSubTabs">
+            <button type="button" class="hp-subtab active" data-hpsub="photos">📷 Photos</button>
+            <button type="button" class="hp-subtab" data-hpsub="text">📝 Web Text</button>
+          </div>
+          <div style="padding:1.4rem">
+            <div id="hpSub-photos" class="hp-subpanel active">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Every photo that appears on your homepage, in one place. Uses the exact same photo storage as the main Photos tab — updating here updates it there too, and vice versa.</p>
+              <div id="hpPhotosList"><div class="skel-row"><div class="skel-box skel-thumb"></div><div class="skel-lines"><div class="skel-box skel-line" style="width:60%"></div><div class="skel-box skel-line" style="width:35%"></div></div></div><div class="skel-row"><div class="skel-box skel-thumb"></div><div class="skel-lines"><div class="skel-box skel-line" style="width:50%"></div><div class="skel-box skel-line" style="width:30%"></div></div></div><div class="skel-row"><div class="skel-box skel-thumb"></div><div class="skel-lines"><div class="skel-box skel-line" style="width:65%"></div><div class="skel-box skel-line" style="width:40%"></div></div></div></div>
+            </div>
+            <div id="hpSub-text" class="hp-subpanel" style="display:none">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Every editable text block on your homepage — wording, color, size, spacing, and alignment.</p>
+              <div id="hpTextList"><div class="skel-row"><div class="skel-lines"><div class="skel-box skel-line" style="width:70%"></div><div class="skel-box skel-line" style="width:45%"></div></div></div><div class="skel-row"><div class="skel-lines"><div class="skel-box skel-line" style="width:55%"></div><div class="skel-box skel-line" style="width:38%"></div></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other "By Page" tabs — queued, not yet built, matching the honest placeholder pattern above -->
+      <div class="page-panel" id="page-pg-menu-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Menu Page — coming soon</h3>
+          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Menu page — items, photos, and text — in one place, same as Homepage now does.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-pg-catering-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Catering Page — coming soon</h3>
+          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Catering page in one place, same as Homepage now does.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-pg-gallery-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Gallery Page — coming soon</h3>
+          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Gallery page in one place, same as Homepage now does.</p>
+        </div>
+      </div>
+      <div class="page-panel" id="page-pg-offers-soon">
+        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
+          <h3 style="color:var(--dark);margin-bottom:.4rem">Offers Page — coming soon</h3>
+          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Offers page in one place, same as Homepage now does.</p>
+        </div>
       </div>
       <div class="page-panel" id="page-menu-visibility">
         <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">These are the same master switches as the main admin panel — changes here take effect on the live site immediately.</p>
@@ -633,7 +856,12 @@
       <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-photos">
         <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Every photo on the live site, organized by section. Upload a file or paste an image link — changes go live on foodielove.com.au immediately.</p>
-        <input type="text" id="phSearch" placeholder="Search photos…" style="width:100%;max-width:320px;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:1rem">
+        <div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1rem">
+          <select id="phGroupFilter" style="padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem">
+            <option value="">All sections</option>
+          </select>
+          <input type="text" id="phSearch" placeholder="Search photos…" style="flex:1;min-width:200px;max-width:320px;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem">
+        </div>
         <div id="phList"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
       </div>
       <div class="page-panel" id="page-settings"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Site Settings</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
@@ -661,6 +889,38 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// ── Global toast notifications — foundational piece for the "high
+// tech from the start" direction. Call showToast('message', 'success'
+// | 'error' | 'info') from anywhere; every future page tab can use
+// this immediately instead of writing its own status-text handling. ──
+function showToast(message, type='info'){
+  const stack = document.getElementById('toastStack');
+  if(!stack) return;
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]||icons.info}</span><span>${message}</span>`;
+  stack.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add('show'));
+  setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=> el.remove(), 350);
+  }, 3200);
+}
+
+// ── Loading skeleton helper — returns placeholder HTML for a given
+// number of rows, shown briefly while real data is fetching. ──
+function skeletonRows(count=3){
+  return Array.from({length:count}, ()=>`
+    <div class="skel-row">
+      <div class="skel-box skel-thumb"></div>
+      <div class="skel-lines">
+        <div class="skel-box skel-line" style="width:60%"></div>
+        <div class="skel-box skel-line" style="width:35%"></div>
+      </div>
+    </div>`).join('');
+}
 
 // Simple client-side compression before upload — same approach as the
 // main admin panel, keeps menu photos from being unnecessarily huge.
@@ -709,6 +969,10 @@ document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth
 const pageTitles = {
   overview: ['Dashboard', 'A quick summary of what\'s happening right now'],
   orders: ['Orders', 'Live data from your production database'],
+  websitesecurity: ['Website Security', 'Coming soon'],
+  'analytics-soon': ['Analytics', 'Coming soon'],
+  'gallery-soon': ['Gallery', 'Coming soon'],
+  'communityboard-soon': ['Community Board', 'Coming soon'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
   charcuterie: ['Charcuterie Board', 'Board designs, categories, and items customers pick from'],
@@ -720,6 +984,9 @@ const pageTitles = {
   maintenance: ['Maintenance Mode', 'Takes the entire customer-facing site offline when on'],
   featureflags: ['Feature Flags', 'Instantly turn any of these features off sitewide, no deploy needed'],
   ordersearch: ['Search Orders', 'Find a customer across orders, enquiries, and bookings at once'],
+  blogposts: ['Blog Posts', 'Published live on your blog page'],
+  musicplaylist: ['Music Playlist', 'Background music played in-store via Sonic Hub'],
+  instagram: ['Instagram Feed', 'Photos shown on your homepage Instagram section'],
   'menu-visibility': ['Sections & Visibility', ''],
   bookings: ['Reservations', ''],
   floorplan: ['Floor Plan', ''],
@@ -735,6 +1002,11 @@ const pageTitles = {
   photos: ['Photos', 'Every photo on the live site, in one place'],
   settings: ['Site Settings', ''],
   security: ['Security', ''],
+  'pg-homepage': ['Homepage', 'Everything for your homepage — photos, text, all in one place'],
+  'pg-menu-soon': ['Menu Page', ''],
+  'pg-catering-soon': ['Catering Page', ''],
+  'pg-gallery-soon': ['Gallery Page', ''],
+  'pg-offers-soon': ['Offers Page', ''],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -760,6 +1032,123 @@ document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
     const [title, subtitle] = pageTitles[page] || [page, ''];
     document.getElementById('pageTitle').textContent = title;
     document.getElementById('pageSubtitle').textContent = subtitle;
+  });
+});
+
+// ══════════════ COMMAND PALETTE (⌘K) ══════════════
+// Builds its searchable index directly from the real sidebar nav
+// items — never goes stale, and automatically includes every future
+// page tab added to the sidebar without any extra wiring.
+function cmdkBuildIndex(){
+  return [...document.querySelectorAll('.nav-item[data-page]')].map(item=>({
+    label: item.textContent.trim(),
+    page: item.dataset.page,
+    el: item
+  }));
+}
+let cmdkSelectedIndex = 0;
+let cmdkCurrentResults = [];
+
+function openCmdk(){
+  document.getElementById('cmdkOverlay').classList.add('open');
+  const input = document.getElementById('cmdkInput');
+  input.value = '';
+  input.focus();
+  cmdkRender('');
+}
+function closeCmdk(){
+  document.getElementById('cmdkOverlay').classList.remove('open');
+}
+function cmdkRender(query){
+  const index = cmdkBuildIndex();
+  const q = query.trim().toLowerCase();
+  cmdkCurrentResults = q ? index.filter(i => i.label.toLowerCase().includes(q)) : index;
+  cmdkSelectedIndex = 0;
+  const resultsEl = document.getElementById('cmdkResults');
+  if(!cmdkCurrentResults.length){
+    resultsEl.innerHTML = '<div class="cmdk-empty">No matching section found.</div>';
+    return;
+  }
+  resultsEl.innerHTML = cmdkCurrentResults.map((r,i)=>
+    `<div class="cmdk-item${i===0?' selected':''}" data-cmdk-index="${i}">${r.label}</div>`
+  ).join('');
+  resultsEl.querySelectorAll('.cmdk-item').forEach(el=>{
+    el.addEventListener('click', ()=> cmdkChoose(Number(el.dataset.cmdkIndex)));
+  });
+}
+function cmdkChoose(index){
+  const result = cmdkCurrentResults[index];
+  if(!result) return;
+  result.el.click(); // reuses the exact same panel-switching logic already wired to real nav clicks
+  closeCmdk();
+}
+document.getElementById('cmdkTrigger')?.addEventListener('click', openCmdk);
+document.getElementById('cmdkInput')?.addEventListener('input', e=> cmdkRender(e.target.value));
+document.getElementById('cmdkOverlay')?.addEventListener('click', e=>{
+  if(e.target.id === 'cmdkOverlay') closeCmdk();
+});
+document.addEventListener('keydown', e=>{
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    openCmdk();
+    return;
+  }
+  if(!document.getElementById('cmdkOverlay').classList.contains('open')) return;
+  if(e.key === 'Escape'){ closeCmdk(); return; }
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    cmdkSelectedIndex = Math.min(cmdkSelectedIndex+1, cmdkCurrentResults.length-1);
+    document.querySelectorAll('.cmdk-item').forEach((el,i)=> el.classList.toggle('selected', i===cmdkSelectedIndex));
+    document.querySelectorAll('.cmdk-item')[cmdkSelectedIndex]?.scrollIntoView({block:'nearest'});
+  }
+  if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    cmdkSelectedIndex = Math.max(cmdkSelectedIndex-1, 0);
+    document.querySelectorAll('.cmdk-item').forEach((el,i)=> el.classList.toggle('selected', i===cmdkSelectedIndex));
+    document.querySelectorAll('.cmdk-item')[cmdkSelectedIndex]?.scrollIntoView({block:'nearest'});
+  }
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    cmdkChoose(cmdkSelectedIndex);
+  }
+});
+
+// ══════════════ DARK MODE ══════════════
+// Persists across visits via localStorage, respects the system
+// preference on first visit if nothing's been chosen yet.
+(function initTheme(){
+  const saved = localStorage.getItem('fl_theme');
+  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (systemPrefersDark ? 'dark' : 'light');
+  if(theme === 'dark'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('themeToggle');
+    if(btn) btn.textContent = '☀️';
+  }
+})();
+document.getElementById('themeToggle')?.addEventListener('click', ()=>{
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if(isDark){
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('fl_theme', 'light');
+    document.getElementById('themeToggle').textContent = '🌙';
+  }else{
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('fl_theme', 'dark');
+    document.getElementById('themeToggle').textContent = '☀️';
+  }
+});
+
+// ── Homepage panel's horizontal sub-tabs (Photos / Web Text) ──
+document.querySelectorAll('.hp-subtab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const sub = btn.dataset.hpsub;
+    document.querySelectorAll('.hp-subtab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.hp-subpanel').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
+    btn.classList.add('active');
+    const panel = document.getElementById('hpSub-'+sub);
+    panel.classList.add('active');
+    panel.style.display='block';
   });
 });
 
@@ -793,6 +1182,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadCharcuterieBoardCB();
   loadGymJunkiesGJ();
   loadPhotosPH();
+  loadHomepageText();
   loadPromotionsOF();
   loadMerchandiseMC();
   loadEventsEV();
@@ -800,6 +1190,9 @@ onAuthStateChanged(auth, async (user)=>{
   loadBusinessDetailsBP();
   loadMaintenanceModeMA();
   loadFeatureFlagsFF();
+  loadBlogPostsBLG();
+  loadPlaylistPL();
+  loadInstagramIG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -1540,16 +1933,18 @@ async function loadPhotosPH(){
     phOverridesCache = {};
     snap.docs.forEach(d=>{ phOverridesCache[d.id] = d.data().url; });
     renderPhotosPH();
+    renderHomepagePhotos(); // keep the new Homepage tab's photo view in sync with the same data
   }catch(err){
     listEl.innerHTML = `<p style="color:#D70015;text-align:center;padding:2rem">Could not load photos: ${escapeHtml(err.message)}</p>`;
   }
 }
 
-function renderPhotosPH(filterText=''){
+function renderPhotosPH(filterText='', groupFilter=''){
   const listEl = document.getElementById('phList');
   const groups = phGroupedRegistry();
   let html = '';
   Object.keys(groups).forEach(groupName=>{
+    if(groupFilter && groupName !== groupFilter) return;
     const items = groups[groupName].filter(p => !filterText || p.label.toLowerCase().includes(filterText.toLowerCase()));
     if(!items.length) return;
     html += `<div class="mm-section-h">${escapeHtml(groupName)}</div><div class="panel">`;
@@ -1617,7 +2012,7 @@ async function savePhotoPH(key){
     phOverridesCache[key] = finalUrl;
     statusEl.style.color = '#1E8A3B';
     statusEl.textContent = '✅ Saved — live on the website now.';
-    renderPhotosPH(document.getElementById('phSearch').value);
+    renderPhotosPH(document.getElementById('phSearch').value, document.getElementById('phGroupFilter').value);
   }catch(err){
     statusEl.style.color = '#D70015';
     statusEl.textContent = '❌ ' + err.message;
@@ -1629,11 +2024,230 @@ async function resetPhotoPH(key){
   try{
     await deleteDoc(doc(db,'siteImages',key));
     delete phOverridesCache[key];
-    renderPhotosPH(document.getElementById('phSearch').value);
+    renderPhotosPH(document.getElementById('phSearch').value, document.getElementById('phGroupFilter').value);
   }catch(e){ alert('Could not reset: ' + e.message); }
 }
 
-document.getElementById('phSearch')?.addEventListener('input', (e)=> renderPhotosPH(e.target.value));
+document.getElementById('phSearch')?.addEventListener('input', (e)=> renderPhotosPH(e.target.value, document.getElementById('phGroupFilter').value));
+document.getElementById('phGroupFilter')?.addEventListener('change', (e)=> renderPhotosPH(document.getElementById('phSearch').value, e.target.value));
+// Populate the group dropdown from the actual registry — never goes
+// stale if new photo keys/groups are added later, since it's built
+// from the same PHOTO_REGISTRY the list itself renders from.
+(function populatePhotoGroupFilter(){
+  const sel = document.getElementById('phGroupFilter');
+  if(!sel) return;
+  const groupNames = [...new Set(PHOTO_REGISTRY.map(p=>p.group))];
+  groupNames.forEach(g=>{
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    sel.appendChild(opt);
+  });
+})();
+
+// ══════════════ HOMEPAGE PAGE-TAB — Photos sub-view ══════════════
+// Reuses the exact same PHOTO_REGISTRY and siteImages storage as the
+// main Photos tab — this is a filtered VIEW onto the same real data,
+// not a separate copy. Uses its own "hph-" prefixed data attributes
+// (rather than reusing "ph-") so a querySelector here can never
+// accidentally match a row in the original Photos panel, since both
+// panels exist in the DOM at the same time.
+function renderHomepagePhotos(){
+  const listEl = document.getElementById('hpPhotosList');
+  if(!listEl) return;
+  const homepageItems = PHOTO_REGISTRY.filter(p => p.label.startsWith('Homepage'));
+  const groups = {};
+  homepageItems.forEach(p=>{ (groups[p.group] = groups[p.group]||[]).push(p); });
+
+  let html = '';
+  Object.keys(groups).forEach(groupName=>{
+    html += `<div class="mm-section-h">${escapeHtml(groupName)}</div><div class="panel">`;
+    groups[groupName].forEach(p=>{
+      const currentUrl = phOverridesCache[p.key] || p.defaultUrl;
+      const hasOverride = !!phOverridesCache[p.key];
+      const imgTag = currentUrl
+        ? `<img class="ph-img" src="${escapeHtml(currentUrl)}" alt="">`
+        : `<div class="ph-img" style="display:flex;align-items:center;justify-content:center;color:var(--lt);font-size:.65rem;text-align:center">No photo yet</div>`;
+      html += `<div class="ph-row" data-hph-key="${p.key}">
+        ${imgTag}
+        <div style="flex:1;min-width:0">
+          <div class="ph-label">${escapeHtml(p.label)} ${hasOverride?'<span style="color:var(--green);font-size:.7rem;font-weight:700">● Custom</span>':'<span style="color:var(--lt);font-size:.7rem">Original</span>'}</div>
+          <div class="ph-controls">
+            <input type="file" accept="image/*" data-hph-upload="${p.key}" style="font-size:.78rem">
+            <span style="font-size:.72rem;color:var(--lt)">or</span>
+            <input type="text" placeholder="Paste an image link (https://...)" data-hph-url="${p.key}">
+            <button class="mm-btn-sm" data-hph-save="${p.key}">Save</button>
+            ${hasOverride?`<button class="mm-btn-sm" data-hph-reset="${p.key}">Reset to original</button>`:''}
+          </div>
+          <div class="ph-status" data-hph-status="${p.key}"></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  listEl.innerHTML = html || '<p style="color:var(--lt);padding:2rem;text-align:center">No homepage photos found in the registry.</p>';
+
+  const hphFiles = renderHomepagePhotos._files || (renderHomepagePhotos._files = {});
+  listEl.querySelectorAll('[data-hph-upload]').forEach(input=>{
+    input.addEventListener('change', e=>{ hphFiles[input.dataset.hphUpload] = e.target.files[0] || null; });
+  });
+  listEl.querySelectorAll('[data-hph-save]').forEach(btn=>{
+    btn.addEventListener('click', ()=> saveHomepagePhoto(btn.dataset.hphSave));
+  });
+  listEl.querySelectorAll('[data-hph-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=> resetHomepagePhoto(btn.dataset.hphReset));
+  });
+}
+
+async function saveHomepagePhoto(key){
+  const row = document.querySelector(`[data-hph-key="${key}"]`);
+  const statusEl = row.querySelector('[data-hph-status]');
+  const urlInput = row.querySelector('[data-hph-url]');
+  const pastedUrl = urlInput.value.trim();
+  const file = (renderHomepagePhotos._files || {})[key];
+
+  if(!file && !pastedUrl){
+    statusEl.textContent = 'Choose a file or paste a link first.';
+    statusEl.style.color = '#D70015';
+    return;
+  }
+  statusEl.style.color = 'var(--mid)';
+  statusEl.textContent = 'Saving…';
+  try{
+    let finalUrl = pastedUrl;
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `siteImages/${key}_${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      finalUrl = await getDownloadURL(sref);
+    }
+    await setDoc(doc(db,'siteImages',key), { url: finalUrl, updatedAt: serverTimestamp() });
+    if(renderHomepagePhotos._files) delete renderHomepagePhotos._files[key];
+    phOverridesCache[key] = finalUrl; // shared cache — the original Photos tab picks this up automatically too
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved — live on the website now.';
+    showToast('Photo updated — live on the website now.', 'success');
+    renderHomepagePhotos();
+  }catch(err){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + err.message;
+    showToast('Could not save photo: ' + err.message, 'error');
+  }
+}
+
+async function resetHomepagePhoto(key){
+  if(!confirm('Reset this photo back to the original?')) return;
+  try{
+    await deleteDoc(doc(db,'siteImages',key));
+    delete phOverridesCache[key];
+    showToast('Photo reset to original.', 'info');
+    renderHomepagePhotos();
+  }catch(e){ alert('Could not reset: ' + e.message); }
+}
+
+// ══════════════ HOMEPAGE PAGE-TAB — Web Text sub-view ══════════════
+// This is a genuinely new feature — the handoff notes explicitly that
+// no text editor exists anywhere in this dashboard yet. Rather than
+// design this from scratch, the registry and save/reset logic below
+// are ported directly from the main admin panel's own proven,
+// already-tested Text Editor (owner-desk-7k2m9x.html) — same keys,
+// same Firestore collection (textOverrides), so content edited here
+// is fully interchangeable with the main admin, not a separate system.
+const TEXT_REGISTRY = [
+  {key:'who-we-are-p1', label:'Homepage — "Who We Are" Paragraph 1', group:'Who We Are', defaultContent:"Foodie Love started in 2025 with one conviction — that food prepared with genuine care tastes completely different. Not just better."},
+  {key:'who-we-are-p2', label:'Homepage — "Who We Are" Paragraph 2', group:'Who We Are', defaultContent:"We source seasonal produce from local Victorian growers and craft every dish with care, every single day."},
+  {key:'who-we-are-btn-label', label:'Homepage — "Who We Are" Button Text', group:'Who We Are', defaultContent:"Order Catering"},
+  {key:'bento-breakfast-title', label:'Homepage — "What We Offer" Breakfast Title', group:'What We Offer', defaultContent:"Breakfast & Brunch"},
+  {key:'bento-breakfast-desc', label:'Homepage — "What We Offer" Breakfast Description', group:'What We Offer', defaultContent:"Poached eggs, sourdough toasts, muffins and wraps — fresh every morning."},
+  {key:'bento-entrees-title', label:'Homepage — "What We Offer" Grab and Go Title', group:'What We Offer', defaultContent:"Grab and Go"},
+  {key:'bento-entrees-desc', label:'Homepage — "What We Offer" Entrees Description', group:'What We Offer', defaultContent:"Pistachio salmon, lamb cutlets and plant-forward bowls — restaurant quality."},
+  {key:'bento-catering-title', label:'Homepage — "What We Offer" Catering Title', group:'What We Offer', defaultContent:"Catering & Grazing Boxes"},
+  {key:'bento-catering-desc', label:'Homepage — "What We Offer" Catering Description', group:'What We Offer', defaultContent:"Grazing boards, dessert cups and full event catering. Order online."},
+  {key:'hgal-grazing-caption', label:'Homepage — "From Our Kitchen" Caption 1', group:'Homepage Gallery', defaultContent:"Grazing Board"},
+  {key:'hgal-salmon-caption', label:'Homepage — "From Our Kitchen" Caption 2', group:'Homepage Gallery', defaultContent:"Pistachio Salmon"},
+  {key:'hgal-lamb-caption', label:'Homepage — "From Our Kitchen" Caption 3', group:'Homepage Gallery', defaultContent:"Lamb Cutlets"},
+  {key:'hgal-flatwhite-caption', label:'Homepage — "From Our Kitchen" Caption 4', group:'Homepage Gallery', defaultContent:"Flat White"},
+  {key:'hgal-waffle-caption', label:'Homepage — "From Our Kitchen" Caption 5', group:'Homepage Gallery', defaultContent:"Berry Waffle"},
+  {key:'hgal-dessert-caption', label:'Homepage — "From Our Kitchen" Caption 6', group:'Homepage Gallery', defaultContent:"Dessert Cups"},
+  {key:'hgal-burger-caption', label:'Homepage — "From Our Kitchen" Caption 7', group:'Homepage Gallery', defaultContent:"Cheese Burger"},
+  {key:'hgal-fruit-caption', label:'Homepage — "From Our Kitchen" Caption 8', group:'Homepage Gallery', defaultContent:"Fruit Platter"},
+];
+let hpTextOverridesCache = {};
+
+async function loadHomepageText(){
+  const listEl = document.getElementById('hpTextList');
+  if(!listEl) return;
+  try{
+    const snap = await getDocs(collection(db,'textOverrides'));
+    hpTextOverridesCache = {};
+    snap.docs.forEach(d=>{ hpTextOverridesCache[d.id] = d.data(); });
+    renderHomepageText();
+  }catch(err){
+    listEl.innerHTML = `<p style="color:#D70015;text-align:center;padding:2rem">Could not load text: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+function renderHomepageText(){
+  const listEl = document.getElementById('hpTextList');
+  if(!listEl) return;
+  const groups = {};
+  TEXT_REGISTRY.forEach(t=>{ (groups[t.group]=groups[t.group]||[]).push(t); });
+
+  let html = '';
+  Object.keys(groups).forEach(groupName=>{
+    html += `<div class="mm-section-h">${escapeHtml(groupName)}</div>`;
+    groups[groupName].forEach(t=>{
+      const o = hpTextOverridesCache[t.key] || {};
+      const currentContent = o.content !== undefined ? o.content : t.defaultContent;
+      html += `<div class="panel" style="margin-bottom:1rem;padding:1rem" data-hptext-key="${t.key}">
+        <p style="font-weight:700;font-size:.82rem;margin-bottom:.6rem">${escapeHtml(t.label)}</p>
+        <textarea rows="2" data-hptext-content="${t.key}" style="width:100%;font-family:inherit;padding:.5rem;border:1px solid var(--border);border-radius:8px">${escapeHtml(currentContent)}</textarea>
+        <div style="display:flex;gap:.7rem;margin-top:.6rem;flex-wrap:wrap;align-items:center">
+          <label style="font-size:.75rem;color:var(--lt)">Color <input type="color" value="${o.color||'#7A705C'}" data-hptext-color="${t.key}" style="vertical-align:middle"></label>
+          <button class="mm-btn-sm" data-hptext-save="${t.key}">Save</button>
+          <button class="mm-btn-sm" data-hptext-reset="${t.key}">Reset to Original</button>
+          <span data-hptext-status="${t.key}" style="font-size:.75rem"></span>
+        </div>
+      </div>`;
+    });
+  });
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('[data-hptext-save]').forEach(btn=>{
+    btn.addEventListener('click', ()=> saveHomepageText(btn.dataset.hptextSave));
+  });
+  listEl.querySelectorAll('[data-hptext-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=> resetHomepageText(btn.dataset.hptextReset));
+  });
+}
+
+async function saveHomepageText(key){
+  const row = document.querySelector(`[data-hptext-key="${key}"]`);
+  const statusEl = row.querySelector('[data-hptext-status]');
+  const content = row.querySelector('[data-hptext-content]').value;
+  const color = row.querySelector('[data-hptext-color]').value;
+  statusEl.style.color = 'var(--mid)'; statusEl.textContent = 'Saving…';
+  try{
+    await setDoc(doc(db,'textOverrides',key), { content, color, updatedAt: serverTimestamp() }, { merge:true });
+    hpTextOverridesCache[key] = { ...(hpTextOverridesCache[key]||{}), content, color };
+    statusEl.style.color = '#1E8A3B'; statusEl.textContent = '✅ Saved — live now';
+    showToast('Text updated — live on the website now.', 'success');
+    setTimeout(()=>{ if(statusEl) statusEl.textContent=''; }, 3000);
+  }catch(e){
+    statusEl.style.color = '#D70015'; statusEl.textContent = '❌ ' + e.message;
+    showToast('Could not save text: ' + e.message, 'error');
+  }
+}
+
+async function resetHomepageText(key){
+  if(!confirm('Reset this text block back to its original wording and styling?')) return;
+  try{
+    await deleteDoc(doc(db,'textOverrides',key));
+    delete hpTextOverridesCache[key];
+    showToast('Text reset to original.', 'info');
+    renderHomepageText();
+  }catch(e){ alert('Could not reset: ' + e.message); }
+}
 
 // ═══════════════ OFFERS / DISCOUNTS (promotions) ═══════════════
 let ofPromosCache = [];
@@ -2094,6 +2708,221 @@ async function runOrderSearchOS(){
 }
 document.getElementById('osSearchBtn')?.addEventListener('click', runOrderSearchOS);
 document.getElementById('osInput')?.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') runOrderSearchOS(); });
+
+// ═══════════════ BLOG POSTS ═══════════════
+let blgPostsCache = [];
+
+async function loadBlogPostsBLG(){
+  const listEl = document.getElementById('blgListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'blogPosts'), orderBy('createdAt','desc')));
+    blgPostsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderBlogPostsBLG();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load posts: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderBlogPostsBLG(){
+  const listEl = document.getElementById('blgListWrap');
+  if(!blgPostsCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No posts yet — write your first one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + blgPostsCache.map(p=>`
+    <div class="mm-item-row">
+      ${p.photo ? `<img class="mm-item-thumb" src="${escapeHtml(p.photo)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(p.title)}</div>
+        <div class="mm-item-desc">${escapeHtml(p.excerpt||'')}</div>
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-blg-delete="${p.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-blg-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const p = blgPostsCache.find(x=>x.id===btn.dataset.blgDelete);
+      if(!confirm(`Delete "${p?.title}" permanently? This removes it from the live blog immediately.`)) return;
+      try{
+        await deleteDoc(doc(db,'blogPosts',btn.dataset.blgDelete));
+        loadBlogPostsBLG();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('blgSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('blgPostStatus');
+  const title = document.getElementById('blgTitle').value.trim();
+  const excerpt = document.getElementById('blgExcerpt').value.trim();
+  const body = document.getElementById('blgBody').value.trim();
+
+  if(!title || !body){ statusEl.textContent = 'Please add at least a title and the post content.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Publishing…'; statusEl.style.color = 'var(--mid)';
+  try{
+    let photoUrl = null;
+    const file = document.getElementById('blgPhotoFile').files[0];
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `blogPosts/${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      photoUrl = await getDownloadURL(sref);
+    }
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '-' + Date.now().toString().slice(-5);
+    await addDoc(collection(db,'blogPosts'), { title, excerpt, body, photo: photoUrl, slug, createdAt: serverTimestamp() });
+    statusEl.textContent = '✅ Published — live on your blog now.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('blgTitle').value = '';
+    document.getElementById('blgExcerpt').value = '';
+    document.getElementById('blgBody').value = '';
+    document.getElementById('blgPhotoFile').value = '';
+    loadBlogPostsBLG();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ MUSIC PLAYLIST ═══════════════
+let plTracksCache = [];
+
+async function loadPlaylistPL(){
+  const listEl = document.getElementById('plListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'sonicHubPlaylist'), orderBy('createdAt','asc')));
+    plTracksCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderPlaylistPL();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load playlist: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderPlaylistPL(){
+  const listEl = document.getElementById('plListWrap');
+  if(!plTracksCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No tracks yet — add your first one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + plTracksCache.map(t=>`
+    <div class="mm-item-row">
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(t.title)}</div>
+        <div class="mm-item-desc">${escapeHtml(t.artist||'')}${t.license ? ' · '+escapeHtml(t.license) : ''}</div>
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-pl-delete="${t.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-pl-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const t = plTracksCache.find(x=>x.id===btn.dataset.plDelete);
+      if(!confirm(`Remove "${t?.title}" from the playlist?`)) return;
+      try{
+        await deleteDoc(doc(db,'sonicHubPlaylist',btn.dataset.plDelete));
+        loadPlaylistPL();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('plSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('plStatus');
+  const title = document.getElementById('plTitle').value.trim();
+  const artist = document.getElementById('plArtist').value.trim();
+  const license = document.getElementById('plLicense').value.trim();
+  const file = document.getElementById('plFile').files[0];
+
+  if(!title){ statusEl.textContent = 'Please enter a track title.'; statusEl.style.color = '#D70015'; return; }
+  if(!file){ statusEl.textContent = 'Please choose an MP3 file.'; statusEl.style.color = '#D70015'; return; }
+  if(!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg'){
+    statusEl.textContent = 'Please upload an MP3 file.'; statusEl.style.color = '#D70015'; return;
+  }
+  if(file.size > 20*1024*1024){
+    statusEl.textContent = 'That file is larger than 20MB — please use a smaller/shorter track.'; statusEl.style.color = '#D70015'; return;
+  }
+
+  statusEl.textContent = 'Uploading…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const storagePath = `sonicHubPlaylist/${Date.now()}_${file.name}`;
+    const sref = ref(storage, storagePath);
+    await uploadBytes(sref, file);
+    const url = await getDownloadURL(sref);
+    await addDoc(collection(db,'sonicHubPlaylist'), { title, artist, license, src: url, storagePath, createdAt: serverTimestamp() });
+    statusEl.textContent = '✅ Added to playlist.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('plTitle').value = '';
+    document.getElementById('plArtist').value = '';
+    document.getElementById('plLicense').value = '';
+    document.getElementById('plFile').value = '';
+    loadPlaylistPL();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
+
+// ═══════════════ INSTAGRAM FEED ═══════════════
+let igPostsCache = [];
+
+async function loadInstagramIG(){
+  const listEl = document.getElementById('igListWrap');
+  try{
+    const snap = await getDocs(query(collection(db,'instagramPosts'), orderBy('createdAt','desc')));
+    igPostsCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderInstagramIG();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load posts: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderInstagramIG(){
+  const listEl = document.getElementById('igListWrap');
+  if(!igPostsCache.length){
+    listEl.innerHTML = '<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">No posts yet — add your first one above.</div>';
+    return;
+  }
+  listEl.innerHTML = '<div class="panel">' + igPostsCache.map(p=>`
+    <div class="mm-item-row">
+      ${p.photoUrl ? `<img class="mm-item-thumb" src="${escapeHtml(p.photoUrl)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(p.caption||'(no caption)')}</div>
+        ${p.link ? `<div class="mm-item-desc">${escapeHtml(p.link)}</div>` : ''}
+      </div>
+      <div class="mm-item-actions"><button class="mm-btn-sm mm-btn-danger" data-ig-delete="${p.id}">Delete</button></div>
+    </div>`).join('') + '</div>';
+
+  listEl.querySelectorAll('[data-ig-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm('Remove this post from the feed?')) return;
+      try{
+        await deleteDoc(doc(db,'instagramPosts',btn.dataset.igDelete));
+        loadInstagramIG();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+
+document.getElementById('igSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('igSaveStatus');
+  const file = document.getElementById('igPhotoFile').files[0];
+  const caption = document.getElementById('igCaption').value.trim();
+  const link = document.getElementById('igLink').value.trim();
+
+  if(!file){ statusEl.textContent = 'Please choose a photo first.'; statusEl.style.color = '#D70015'; return; }
+
+  statusEl.textContent = 'Uploading…'; statusEl.style.color = 'var(--mid)';
+  try{
+    const compressed = await compressImageForUpload(file);
+    const sref = ref(storage, `instagramPostPhotos/${Date.now()}_${file.name}`);
+    await uploadBytes(sref, compressed);
+    const photoUrl = await getDownloadURL(sref);
+    await addDoc(collection(db,'instagramPosts'), { photoUrl, caption, link, createdAt: serverTimestamp() });
+    statusEl.textContent = '✅ Added.'; statusEl.style.color = '#1E8A3B';
+    document.getElementById('igPhotoFile').value = '';
+    document.getElementById('igCaption').value = '';
+    document.getElementById('igLink').value = '';
+    loadInstagramIG();
+  }catch(e){
+    statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#D70015';
+  }
+});
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
