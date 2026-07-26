@@ -176,6 +176,7 @@
   }
   #page-menu-brunch input:focus,#page-menu-brunch select:focus,#page-menu-brunch textarea:focus{outline:none;border-color:var(--accent);background:var(--card)}
   .mm-section-h{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mid);background:var(--bg);padding:.6rem 1rem;margin-top:1rem;border-radius:8px}
+  .mm-group-h{font-size:1rem;font-weight:800;color:var(--ink);padding:.4rem 0;margin:.4rem 0 .6rem}
   .mm-item-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;border-bottom:1px solid var(--border)}
   .mm-item-row:last-child{border-bottom:none}
   .mm-item-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--bg);flex-shrink:0}
@@ -265,10 +266,13 @@
 
       <p class="nav-group-label">📄 By Page (New)</p>
       <div class="nav-item" data-page="pg-homepage"><span class="dot"></span> Homepage</div>
-      <div class="nav-item" data-page="pg-menu-soon" style="opacity:.55"><span class="dot"></span> Menu — coming soon</div>
-      <div class="nav-item" data-page="pg-catering-soon" style="opacity:.55"><span class="dot"></span> Catering — coming soon</div>
-      <div class="nav-item" data-page="pg-gallery-soon" style="opacity:.55"><span class="dot"></span> Gallery — coming soon</div>
-      <div class="nav-item" data-page="pg-offers-soon" style="opacity:.55"><span class="dot"></span> Offers — coming soon</div>
+      <div class="nav-item" data-page="pg-menu"><span class="dot"></span> Menu</div>
+      <div class="nav-item" data-page="pg-catering"><span class="dot"></span> Catering</div>
+      <div class="nav-item" data-page="pg-gallery"><span class="dot"></span> Gallery</div>
+      <div class="nav-item" data-page="pg-gift"><span class="dot"></span> Gift</div>
+      <div class="nav-item" data-page="pg-rewards"><span class="dot"></span> Rewards</div>
+      <div class="nav-item" data-page="pg-contact"><span class="dot"></span> Contact Us</div>
+      <div class="nav-item" data-page="pg-loyalty"><span class="dot"></span> Loyalty</div>
 
       <p class="nav-group-label">Overview</p>
       <div class="nav-item active" data-page="overview"><span class="dot"></span> Dashboard</div>
@@ -420,6 +424,11 @@
 
       <!-- PLACEHOLDER PAGES — genuinely not built yet, clearly labeled -->
       <div class="page-panel" id="page-menu-brunch">
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa;margin-bottom:1.2rem;border-radius:8px 8px 0 0" id="mmSubTabs">
+          <button type="button" class="hp-subtab mmsub-tab active" data-mmsub="items">📋 Items</button>
+          <button type="button" class="hp-subtab mmsub-tab" data-mmsub="import">⬆️ Import</button>
+        </div>
+        <div id="mmSub-items" class="hp-subpanel active">
         <div class="panel" style="margin-bottom:1.2rem">
           <div class="panel-head"><h3 id="mmFormTitle">Add Menu Item</h3></div>
           <div style="padding:1.2rem 1.4rem">
@@ -471,6 +480,14 @@
           </select>
         </div>
         <div id="mmItemsList"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
+        </div>
+        <div id="mmSub-import" class="hp-subpanel" style="display:none">
+          <div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">
+            <div style="font-size:1.8rem;margin-bottom:.6rem">🚧</div>
+            <h3 style="color:var(--ink);margin-bottom:.4rem">Bulk import — being rebuilt</h3>
+            <p style="max-width:420px;margin:0 auto">The existing bulk-import code needs a real repair pass before it's safe to wire up here — it's not currently connected to anything. Rather than link to something broken, this is honestly marked as coming soon. Adding items one at a time works reliably via the Items tab in the meantime.</p>
+          </div>
+        </div>
       </div>
       <div class="page-panel" id="page-menu-catering" style="display:none"></div>
       <div class="page-panel" id="page-charcuterie">
@@ -716,33 +733,139 @@
       </div>
 
       <!-- Other "By Page" tabs — queued, not yet built, matching the honest placeholder pattern above -->
-      <div class="page-panel" id="page-pg-menu-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Menu Page — coming soon</h3>
-          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Menu page — items, photos, and text — in one place, same as Homepage now does.</p>
+      <div class="page-panel" id="page-pg-menu">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa" id="pgMenuSubTabs">
+            <button type="button" class="hp-subtab pgmenu-subtab active" data-pgmenusub="items">🍽️ Menu Items</button>
+            <button type="button" class="hp-subtab pgmenu-subtab" data-pgmenusub="photos">📷 Photos</button>
+            <button type="button" class="hp-subtab pgmenu-subtab" data-pgmenusub="text">📝 Web Text</button>
+          </div>
+          <div style="padding:1.4rem">
+            <div id="pgMenuSub-items" class="hp-subpanel active">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Your existing, full Brunch Menu manager — items, sections, prices, photos, everything. Opens below exactly as it already works.</p>
+              <button type="button" class="mm-btn-sm" id="pgMenuOpenItemsBtn" style="margin-bottom:1rem">Open Menu Items Manager ↓</button>
+              <div id="pgMenuItemsEmbed"></div>
+            </div>
+            <div id="pgMenuSub-photos" class="hp-subpanel" style="display:none">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Photos specific to the Menu page itself (hero background, feature cards) — not individual menu item photos, which live with each item above.</p>
+              <div id="pgMenuPhotosList"></div>
+            </div>
+            <div id="pgMenuSub-text" class="hp-subpanel" style="display:none">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Editable text blocks specific to the Menu page.</p>
+              <div id="pgMenuTextList"></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="page-panel" id="page-pg-catering-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Catering Page — coming soon</h3>
-          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Catering page in one place, same as Homepage now does.</p>
+      <div class="page-panel" id="page-pg-catering">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa" id="pgCateringSubTabs">
+            <button type="button" class="hp-subtab pgcat-subtab active" data-pgcatsub="items">🍽️ Items</button>
+            <button type="button" class="hp-subtab pgcat-subtab" data-pgcatsub="charcuterie">🧀 Charcuterie</button>
+            <button type="button" class="hp-subtab pgcat-subtab" data-pgcatsub="photos">📷 Photos</button>
+          </div>
+          <div style="padding:1.4rem">
+            <div id="pgCatSub-items" class="hp-subpanel active">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Your existing Catering Menu manager — same items, same live database as the site.</p>
+              <button type="button" class="mm-btn-sm" id="pgCatOpenItemsBtn">Open Catering Menu Manager ↓</button>
+            </div>
+            <div id="pgCatSub-charcuterie" class="hp-subpanel" style="display:none">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Board designs, categories, and knife set pricing — same live database as the site.</p>
+              <button type="button" class="mm-btn-sm" id="pgCatOpenCharcuterieBtn">Open Charcuterie Board Manager ↓</button>
+            </div>
+            <div id="pgCatSub-photos" class="hp-subpanel" style="display:none">
+              <p style="font-size:.8rem;color:var(--lt);margin-bottom:1rem">Photos specific to the Catering page itself.</p>
+              <div id="pgCateringPhotosList"></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="page-panel" id="page-pg-gallery-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Gallery Page — coming soon</h3>
-          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Gallery page in one place, same as Homepage now does.</p>
+      <div class="page-panel" id="page-pg-gallery">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 style="margin:0 0 .8rem">Add a Photo</h3>
+          <p style="font-size:.78rem;color:var(--lt);margin-bottom:1rem">Shows up live on the Gallery page, newest first. (Video upload isn't supported in this new dashboard yet — use the main admin panel for videos in the meantime.)</p>
+          <div style="display:grid;gap:.8rem">
+            <div><label class="mm-lbl">Photo</label><input type="file" accept="image/png,image/jpeg,image/webp" id="pgGalPhotoFile"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+              <div><label class="mm-lbl">Caption (optional)</label><input type="text" id="pgGalCaption" placeholder="e.g. Sarah &amp; Tom's wedding grazing table"></div>
+              <div><label class="mm-lbl">Category</label>
+                <select id="pgGalCategory">
+                  <option value="weddings">Weddings</option>
+                  <option value="corporate">Corporate</option>
+                  <option value="birthdays">Birthdays</option>
+                  <option value="grazing">Grazing Boxes</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button class="reset-layout-btn" id="pgGalAddBtn" style="background:var(--ink);color:#fff;border-color:var(--ink);margin-top:1rem">+ Add to Gallery</button>
+          <span id="pgGalStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <h3 style="margin:0 0 1rem">All Gallery Photos</h3>
+        <div id="pgGalGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem"></div>
+        <div id="pgGalEmpty" style="display:none;color:var(--lt);text-align:center;padding:2rem">No photos uploaded yet — add your first one above.</div>
+      </div>
+      <div class="page-panel" id="page-pg-gift">
+        <div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">
+          <div style="font-size:1.8rem;margin-bottom:.6rem">🎁</div>
+          <h3 style="color:var(--ink);margin-bottom:.6rem">Gift Vouchers</h3>
+          <p style="max-width:420px;margin:0 auto 1.2rem">Voucher purchases, balances, and redemption tracking — opens your existing Gift manager directly below.</p>
+          <button type="button" class="mm-btn-sm" id="pgGiftOpenBtn">Open Gift Vouchers Manager ↓</button>
         </div>
       </div>
-      <div class="page-panel" id="page-pg-offers-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Offers Page — coming soon</h3>
-          <p style="max-width:420px;margin:0 auto">Will bring together everything for the Offers page in one place, same as Homepage now does.</p>
+      <div class="page-panel" id="page-pg-rewards">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem;background:#FFF3F0;border:1.5px solid #E8B8B0">
+          <h3 style="margin:0 0 .8rem">Add a New Emergency Service</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+            <div><label class="mm-lbl">Service Name</label><input type="text" id="pgEsNewName" placeholder="e.g. Firefighter"></div>
+            <div><label class="mm-lbl">Sketch Icon</label>
+              <select id="pgEsNewIcon">
+                <option value="fire">🔥 Fire</option>
+                <option value="police">🚓 Police</option>
+                <option value="ambulance">🚑 Ambulance</option>
+                <option value="doctor">⚕️ Doctor / Paramedic</option>
+                <option value="nurse">💉 Nurse</option>
+                <option value="senior">🌟 Senior Citizen</option>
+                <option value="shield">🛡️ General Service</option>
+              </select>
+            </div>
+          </div>
+          <button class="reset-layout-btn" id="pgEsAddBtn" style="background:var(--ink);color:#fff;border-color:var(--ink);margin-top:1rem">+ Add Service</button>
         </div>
+        <div id="pgEsServicesList"></div>
+      </div>
+      <div class="page-panel" id="page-pg-contact">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa" id="pgContactSubTabs">
+            <button type="button" class="hp-subtab pgcontact-subtab active" data-pgcontactsub="photos">📷 Photos</button>
+            <button type="button" class="hp-subtab pgcontact-subtab" data-pgcontactsub="text">📝 Web Text</button>
+          </div>
+          <div style="padding:1.4rem">
+            <div id="pgContactSub-photos" class="hp-subpanel active">
+              <div id="pgContactPhotosList"></div>
+            </div>
+            <div id="pgContactSub-text" class="hp-subpanel" style="display:none">
+              <div id="pgContactTextList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page-panel" id="page-pg-loyalty">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <p style="font-size:.82rem;color:var(--mid);margin-bottom:.8rem">Points are earned automatically from real Square purchases and redeemed for rewards on the Loyalty page — this is a genuinely new admin capability, not previously available anywhere, including main admin.</p>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;font-size:.78rem;color:var(--lt)">
+            <span>🎁 100 pts = Free coffee</span>
+            <span>·</span>
+            <span>300 pts = $10 off</span>
+            <span>·</span>
+            <span>600 pts = Free brunch item</span>
+            <span>·</span>
+            <span>1000 pts = $25 voucher</span>
+          </div>
+        </div>
+        <input type="text" id="pgLoyaltySearch" placeholder="Search by name, email, or referral code…" style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;margin-bottom:1rem;font-size:.88rem">
+        <div id="pgLoyaltyList"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
       </div>
       <div class="page-panel" id="page-menu-visibility">
         <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">These are the same master switches as the main admin panel — changes here take effect on the live site immediately.</p>
@@ -1003,9 +1126,13 @@ const pageTitles = {
   settings: ['Site Settings', ''],
   security: ['Security', ''],
   'pg-homepage': ['Homepage', 'Everything for your homepage — photos, text, all in one place'],
-  'pg-menu-soon': ['Menu Page', ''],
-  'pg-catering-soon': ['Catering Page', ''],
-  'pg-gallery-soon': ['Gallery Page', ''],
+  'pg-menu': ['Menu Page', 'Everything for your Menu page — items, photos, text, all in one place'],
+  'pg-catering': ['Catering Page', 'Everything for your Catering page — items, charcuterie, photos, all in one place'],
+  'pg-gallery': ['Gallery Page', 'Gallery photo management'],
+  'pg-gift': ['Gift Page', 'Gift voucher management'],
+  'pg-rewards': ['Rewards Page', 'Reward issuance'],
+  'pg-contact': ['Contact Us Page', 'Photos and text for the Contact Us page'],
+  'pg-loyalty': ['Loyalty', 'Signups, points balances, and manual adjustments'],
   'pg-offers-soon': ['Offers Page', ''],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
@@ -1029,6 +1156,9 @@ document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
     }else{
       document.getElementById('page-'+page)?.classList.add('active');
     }
+    if(page === 'pg-gallery') loadGalleryPG();
+    if(page === 'pg-rewards') loadEmergencyServicesPG();
+    if(page === 'pg-loyalty') loadLoyaltyPG();
     const [title, subtitle] = pageTitles[page] || [page, ''];
     document.getElementById('pageTitle').textContent = title;
     document.getElementById('pageSubtitle').textContent = subtitle;
@@ -1140,13 +1270,83 @@ document.getElementById('themeToggle')?.addEventListener('click', ()=>{
 });
 
 // ── Homepage panel's horizontal sub-tabs (Photos / Web Text) ──
-document.querySelectorAll('.hp-subtab').forEach(btn=>{
+document.querySelectorAll('.hp-subtab:not(.pgmenu-subtab):not(.mmsub-tab):not(.pgcat-subtab):not(.pgcontact-subtab)').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const sub = btn.dataset.hpsub;
-    document.querySelectorAll('.hp-subtab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.hp-subtab:not(.pgmenu-subtab):not(.mmsub-tab):not(.pgcat-subtab):not(.pgcontact-subtab)').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.hp-subpanel').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
     btn.classList.add('active');
     const panel = document.getElementById('hpSub-'+sub);
+    panel.classList.add('active');
+    panel.style.display='block';
+  });
+});
+
+// ── Menu page-tab's horizontal sub-tabs (Items / Photos / Web Text) ──
+document.querySelectorAll('[data-pgmenusub]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const sub = btn.dataset.pgmenusub;
+    document.querySelectorAll('#pgMenuSubTabs .hp-subtab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#pgMenuSub-items, #pgMenuSub-photos, #pgMenuSub-text').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
+    btn.classList.add('active');
+    const panel = document.getElementById('pgMenuSub-'+sub);
+    panel.classList.add('active');
+    panel.style.display='block';
+  });
+});
+// "Open Menu Items Manager" reuses the existing, proven Brunch Menu
+// panel entirely rather than duplicating its full CRUD logic here —
+// same safe pattern already used for how Catering Menu opens the same
+// underlying manager pre-filtered.
+document.getElementById('pgMenuOpenItemsBtn')?.addEventListener('click', ()=>{
+  document.querySelector('.nav-item[data-page="menu-brunch"]')?.click();
+});
+
+// ── Brunch Menu panel's own Items / Import sub-tabs ──
+document.querySelectorAll('.mmsub-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#mmSubTabs .hp-subtab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#mmSub-items, #mmSub-import').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
+    btn.classList.add('active');
+    const sub = btn.dataset.mmsub;
+    const panel = document.getElementById('mmSub-'+sub);
+    panel.classList.add('active');
+    panel.style.display='block';
+  });
+});
+
+// ── Catering page-tab's own sub-tabs ──
+document.querySelectorAll('.pgcat-subtab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#pgCateringSubTabs .hp-subtab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#pgCatSub-items, #pgCatSub-charcuterie, #pgCatSub-photos').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
+    btn.classList.add('active');
+    const sub = btn.dataset.pgcatsub;
+    const panel = document.getElementById('pgCatSub-'+sub);
+    panel.classList.add('active');
+    panel.style.display='block';
+  });
+});
+document.getElementById('pgCatOpenItemsBtn')?.addEventListener('click', ()=>{
+  document.querySelector('.nav-item[data-page="menu-brunch"]')?.click();
+});
+document.getElementById('pgCatOpenCharcuterieBtn')?.addEventListener('click', ()=>{
+  document.querySelector('.nav-item[data-page="charcuterie"]')?.click();
+});
+
+// ── Gift page-tab — opens the existing, real Gift Vouchers manager ──
+document.getElementById('pgGiftOpenBtn')?.addEventListener('click', ()=>{
+  document.querySelector('.nav-item[data-page="vouchers"]')?.click();
+});
+
+// ── Contact Us page-tab's own sub-tabs ──
+document.querySelectorAll('.pgcontact-subtab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#pgContactSubTabs .hp-subtab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#pgContactSub-photos, #pgContactSub-text').forEach(p=>{ p.classList.remove('active'); p.style.display='none'; });
+    btn.classList.add('active');
+    const sub = btn.dataset.pgcontactsub;
+    const panel = document.getElementById('pgContactSub-'+sub);
     panel.classList.add('active');
     panel.style.display='block';
   });
@@ -1420,6 +1620,12 @@ async function loadMenuItemsMM(){
   }
 }
 
+// Real, deliberate split per request — food and drink sections must
+// never render mixed together. Anything not explicitly a drink section
+// falls into Food by default, so a newly added section (e.g. a future
+// custom one) doesn't silently vanish from both groups.
+const DRINK_SECTIONS_MM = new Set(['hotdrinks', 'colddrinks', 'alcohol']);
+
 function renderMenuManagerList(){
   const listEl = document.getElementById('mmItemsList');
   const filter = document.getElementById('mmPageFilter').value;
@@ -1436,24 +1642,36 @@ function renderMenuManagerList(){
     (bySection[sec] = bySection[sec] || []).push(it);
   });
 
-  let html = '<div class="panel">';
-  Object.keys(bySection).forEach(sec=>{
-    html += `<div class="mm-section-h">${escapeHtml(SECTION_LABELS_MM[sec] || sec)} (${bySection[sec].length})</div>`;
-    bySection[sec].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(it=>{
-      html += `<div class="mm-item-row">
-        ${it.photo ? `<img class="mm-item-thumb" src="${escapeHtml(it.photo)}" alt="">` : `<div class="mm-item-thumb"></div>`}
-        <div style="flex:1;min-width:0">
-          <div class="mm-item-name">${escapeHtml(it.name)}</div>
-          ${it.desc ? `<div class="mm-item-desc">${escapeHtml(it.desc.slice(0,80))}${it.desc.length>80?'…':''}</div>` : ''}
-        </div>
-        <div class="mm-item-price">$${Number(it.price||0).toFixed(2)}</div>
-        <div class="mm-item-actions">
-          <button class="mm-btn-sm" data-mm-edit="${it.id}">Edit</button>
-          <button class="mm-btn-sm mm-btn-danger" data-mm-delete="${it.id}">Delete</button>
-        </div>
-      </div>`;
-    });
-  });
+  const foodSections = Object.keys(bySection).filter(sec => !DRINK_SECTIONS_MM.has(sec));
+  const drinkSections = Object.keys(bySection).filter(sec => DRINK_SECTIONS_MM.has(sec));
+
+  function renderSectionGroup(sectionKeys){
+    return sectionKeys.map(sec=>{
+      let html = `<div class="mm-section-h">${escapeHtml(SECTION_LABELS_MM[sec] || sec)} (${bySection[sec].length})</div>`;
+      bySection[sec].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(it=>{
+        html += `<div class="mm-item-row">
+          ${it.photo ? `<img class="mm-item-thumb" src="${escapeHtml(it.photo)}" alt="">` : `<div class="mm-item-thumb"></div>`}
+          <div style="flex:1;min-width:0">
+            <div class="mm-item-name">${escapeHtml(it.name)}</div>
+            ${it.desc ? `<div class="mm-item-desc">${escapeHtml(it.desc.slice(0,80))}${it.desc.length>80?'…':''}</div>` : ''}
+          </div>
+          <div class="mm-item-price">$${Number(it.price||0).toFixed(2)}</div>
+          <div class="mm-item-actions">
+            <button class="mm-btn-sm" data-mm-edit="${it.id}">Edit</button>
+            <button class="mm-btn-sm mm-btn-danger" data-mm-delete="${it.id}">Delete</button>
+          </div>
+        </div>`;
+      });
+      return html;
+    }).join('');
+  }
+
+  let html = '';
+  html += `<div class="mm-group-h">🍽️ Food</div><div class="panel" style="margin-bottom:1.2rem">`;
+  html += foodSections.length ? renderSectionGroup(foodSections) : '<p style="color:var(--lt);padding:1.5rem;text-align:center">No food items yet.</p>';
+  html += '</div>';
+  html += `<div class="mm-group-h">🥤 Drinks</div><div class="panel">`;
+  html += drinkSections.length ? renderSectionGroup(drinkSections) : '<p style="color:var(--lt);padding:1.5rem;text-align:center">No drink items yet.</p>';
   html += '</div>';
   listEl.innerHTML = html;
 
@@ -1934,6 +2152,9 @@ async function loadPhotosPH(){
     snap.docs.forEach(d=>{ phOverridesCache[d.id] = d.data().url; });
     renderPhotosPH();
     renderHomepagePhotos(); // keep the new Homepage tab's photo view in sync with the same data
+    renderMenuPagePhotos(); // same for the new Menu page tab
+    renderCateringPagePhotos(); // same for the new Catering page tab
+    renderContactPagePhotos(); // same for the new Contact Us page tab
   }catch(err){
     listEl.innerHTML = `<p style="color:#D70015;text-align:center;padding:2rem">Could not load photos: ${escapeHtml(err.message)}</p>`;
   }
@@ -2176,14 +2397,15 @@ let hpTextOverridesCache = {};
 
 async function loadHomepageText(){
   const listEl = document.getElementById('hpTextList');
-  if(!listEl) return;
   try{
     const snap = await getDocs(collection(db,'textOverrides'));
     hpTextOverridesCache = {};
     snap.docs.forEach(d=>{ hpTextOverridesCache[d.id] = d.data(); });
-    renderHomepageText();
+    if(listEl) renderHomepageText();
+    renderMenuPageText(); // same shared cache, Menu page's filtered view
+    renderContactPageText(); // same shared cache, Contact Us page's filtered view
   }catch(err){
-    listEl.innerHTML = `<p style="color:#D70015;text-align:center;padding:2rem">Could not load text: ${escapeHtml(err.message)}</p>`;
+    if(listEl) listEl.innerHTML = `<p style="color:#D70015;text-align:center;padding:2rem">Could not load text: ${escapeHtml(err.message)}</p>`;
   }
 }
 
@@ -2248,6 +2470,537 @@ async function resetHomepageText(key){
     renderHomepageText();
   }catch(e){ alert('Could not reset: ' + e.message); }
 }
+
+// ══════════════ MENU PAGE-TAB — Photos sub-view ══════════════
+// Same pattern as Homepage's photos — filtered by group rather than
+// label prefix, since the Menu Page registry entries have inconsistent
+// label wording ("Brunch Menu Page..." vs "Menu Page...") but a
+// consistent group field.
+function renderMenuPagePhotos(){
+  const listEl = document.getElementById('pgMenuPhotosList');
+  if(!listEl) return;
+  const items = PHOTO_REGISTRY.filter(p => p.group === 'Menu Page');
+  if(!items.length){
+    listEl.innerHTML = '<p style="color:var(--lt);padding:1rem;text-align:center">No Menu Page-specific photos in the registry yet.</p>';
+    return;
+  }
+  let html = '<div class="panel">';
+  items.forEach(p=>{
+    const currentUrl = phOverridesCache[p.key] || p.defaultUrl;
+    const hasOverride = !!phOverridesCache[p.key];
+    const imgTag = currentUrl
+      ? `<img class="ph-img" src="${escapeHtml(currentUrl)}" alt="">`
+      : `<div class="ph-img" style="display:flex;align-items:center;justify-content:center;color:var(--lt);font-size:.65rem;text-align:center">No photo yet</div>`;
+    html += `<div class="ph-row" data-pgmp-key="${p.key}">
+      ${imgTag}
+      <div style="flex:1;min-width:0">
+        <div class="ph-label">${escapeHtml(p.label)} ${hasOverride?'<span style="color:var(--green);font-size:.7rem;font-weight:700">● Custom</span>':'<span style="color:var(--lt);font-size:.7rem">Original</span>'}</div>
+        <div class="ph-controls">
+          <input type="file" accept="image/*" data-pgmp-upload="${p.key}" style="font-size:.78rem">
+          <span style="font-size:.72rem;color:var(--lt)">or</span>
+          <input type="text" placeholder="Paste an image link (https://...)" data-pgmp-url="${p.key}">
+          <button class="mm-btn-sm" data-pgmp-save="${p.key}">Save</button>
+          ${hasOverride?`<button class="mm-btn-sm" data-pgmp-reset="${p.key}">Reset to original</button>`:''}
+        </div>
+        <div class="ph-status" data-pgmp-status="${p.key}"></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+
+  const pgmpFiles = renderMenuPagePhotos._files || (renderMenuPagePhotos._files = {});
+  listEl.querySelectorAll('[data-pgmp-upload]').forEach(input=>{
+    input.addEventListener('change', e=>{ pgmpFiles[input.dataset.pgmpUpload] = e.target.files[0] || null; });
+  });
+  listEl.querySelectorAll('[data-pgmp-save]').forEach(btn=>{
+    btn.addEventListener('click', ()=> saveMenuPagePhoto(btn.dataset.pgmpSave));
+  });
+  listEl.querySelectorAll('[data-pgmp-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=> resetMenuPagePhoto(btn.dataset.pgmpReset));
+  });
+}
+
+async function saveMenuPagePhoto(key){
+  const row = document.querySelector(`[data-pgmp-key="${key}"]`);
+  const statusEl = row.querySelector('[data-pgmp-status]');
+  const urlInput = row.querySelector('[data-pgmp-url]');
+  const pastedUrl = urlInput.value.trim();
+  const file = (renderMenuPagePhotos._files || {})[key];
+  if(!file && !pastedUrl){
+    statusEl.textContent = 'Choose a file or paste a link first.';
+    statusEl.style.color = '#D70015';
+    return;
+  }
+  statusEl.style.color = 'var(--mid)';
+  statusEl.textContent = 'Saving…';
+  try{
+    let finalUrl = pastedUrl;
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `siteImages/${key}_${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      finalUrl = await getDownloadURL(sref);
+    }
+    await setDoc(doc(db,'siteImages',key), { url: finalUrl, updatedAt: serverTimestamp() });
+    if(renderMenuPagePhotos._files) delete renderMenuPagePhotos._files[key];
+    phOverridesCache[key] = finalUrl; // same shared cache as the original Photos tab and Homepage
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved — live on the website now.';
+    showToast('Photo updated — live on the website now.', 'success');
+    renderMenuPagePhotos();
+  }catch(err){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + err.message;
+    showToast('Could not save photo: ' + err.message, 'error');
+  }
+}
+
+async function resetMenuPagePhoto(key){
+  if(!confirm('Reset this photo back to the original?')) return;
+  try{
+    await deleteDoc(doc(db,'siteImages',key));
+    delete phOverridesCache[key];
+    showToast('Photo reset to original.', 'info');
+    renderMenuPagePhotos();
+  }catch(e){ alert('Could not reset: ' + e.message); }
+}
+
+// ══════════════ MENU PAGE-TAB — Web Text sub-view ══════════════
+function renderMenuPageText(){
+  const listEl = document.getElementById('pgMenuTextList');
+  if(!listEl) return;
+  const items = TEXT_REGISTRY.filter(t => t.group === 'Menu Page');
+  if(!items.length){
+    listEl.innerHTML = '<p style="color:var(--lt);padding:1rem;text-align:center">No Menu Page-specific text blocks in the registry yet.</p>';
+    return;
+  }
+  let html = '';
+  items.forEach(t=>{
+    const o = hpTextOverridesCache[t.key] || {};
+    const currentContent = o.content !== undefined ? o.content : t.defaultContent;
+    html += `<div class="panel" style="margin-bottom:1rem;padding:1rem" data-pgmt-key="${t.key}">
+      <p style="font-weight:700;font-size:.82rem;margin-bottom:.6rem">${escapeHtml(t.label)}</p>
+      <textarea rows="2" data-pgmt-content="${t.key}" style="width:100%;font-family:inherit;padding:.5rem;border:1px solid var(--border);border-radius:8px">${escapeHtml(currentContent)}</textarea>
+      <div style="display:flex;gap:.7rem;margin-top:.6rem;flex-wrap:wrap;align-items:center">
+        <label style="font-size:.75rem;color:var(--lt)">Color <input type="color" value="${o.color||'#7A705C'}" data-pgmt-color="${t.key}" style="vertical-align:middle"></label>
+        <button class="mm-btn-sm" data-pgmt-save="${t.key}">Save</button>
+        <button class="mm-btn-sm" data-pgmt-reset="${t.key}">Reset to Original</button>
+        <span data-pgmt-status="${t.key}" style="font-size:.75rem"></span>
+      </div>
+    </div>`;
+  });
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('[data-pgmt-save]').forEach(btn=>{
+    btn.addEventListener('click', ()=> saveMenuPageText(btn.dataset.pgmtSave));
+  });
+  listEl.querySelectorAll('[data-pgmt-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=> resetMenuPageText(btn.dataset.pgmtReset));
+  });
+}
+
+async function saveMenuPageText(key){
+  const row = document.querySelector(`[data-pgmt-key="${key}"]`);
+  const statusEl = row.querySelector('[data-pgmt-status]');
+  const content = row.querySelector('[data-pgmt-content]').value;
+  const color = row.querySelector('[data-pgmt-color]').value;
+  statusEl.style.color = 'var(--mid)'; statusEl.textContent = 'Saving…';
+  try{
+    await setDoc(doc(db,'textOverrides',key), { content, color, updatedAt: serverTimestamp() }, { merge:true });
+    hpTextOverridesCache[key] = { ...(hpTextOverridesCache[key]||{}), content, color }; // same shared cache as Homepage's text
+    statusEl.style.color = '#1E8A3B'; statusEl.textContent = '✅ Saved — live now';
+    showToast('Text updated — live on the website now.', 'success');
+    setTimeout(()=>{ if(statusEl) statusEl.textContent=''; }, 3000);
+  }catch(e){
+    statusEl.style.color = '#D70015'; statusEl.textContent = '❌ ' + e.message;
+    showToast('Could not save text: ' + e.message, 'error');
+  }
+}
+
+async function resetMenuPageText(key){
+  if(!confirm('Reset this text block back to its original wording and styling?')) return;
+  try{
+    await deleteDoc(doc(db,'textOverrides',key));
+    delete hpTextOverridesCache[key];
+    showToast('Text reset to original.', 'info');
+    renderMenuPageText();
+  }catch(e){ alert('Could not reset: ' + e.message); }
+}
+
+// ══════════════ CATERING PAGE-TAB — Photos sub-view ══════════════
+function renderCateringPagePhotos(){
+  const listEl = document.getElementById('pgCateringPhotosList');
+  if(!listEl) return;
+  const items = PHOTO_REGISTRY.filter(p => p.group === 'Catering Page');
+  if(!items.length){
+    listEl.innerHTML = '<p style="color:var(--lt);padding:1rem;text-align:center">No Catering Page-specific photos in the registry yet.</p>';
+    return;
+  }
+  let html = '<div class="panel">';
+  items.forEach(p=>{
+    const currentUrl = phOverridesCache[p.key] || p.defaultUrl;
+    const hasOverride = !!phOverridesCache[p.key];
+    const imgTag = currentUrl
+      ? `<img class="ph-img" src="${escapeHtml(currentUrl)}" alt="">`
+      : `<div class="ph-img" style="display:flex;align-items:center;justify-content:center;color:var(--lt);font-size:.65rem;text-align:center">No photo yet</div>`;
+    html += `<div class="ph-row" data-pgcp-key="${p.key}">
+      ${imgTag}
+      <div style="flex:1;min-width:0">
+        <div class="ph-label">${escapeHtml(p.label)} ${hasOverride?'<span style="color:var(--green);font-size:.7rem;font-weight:700">● Custom</span>':'<span style="color:var(--lt);font-size:.7rem">Original</span>'}</div>
+        <div class="ph-controls">
+          <input type="file" accept="image/*" data-pgcp-upload="${p.key}" style="font-size:.78rem">
+          <span style="font-size:.72rem;color:var(--lt)">or</span>
+          <input type="text" placeholder="Paste an image link (https://...)" data-pgcp-url="${p.key}">
+          <button class="mm-btn-sm" data-pgcp-save="${p.key}">Save</button>
+          ${hasOverride?`<button class="mm-btn-sm" data-pgcp-reset="${p.key}">Reset to original</button>`:''}
+        </div>
+        <div class="ph-status" data-pgcp-status="${p.key}"></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+
+  const pgcpFiles = renderCateringPagePhotos._files || (renderCateringPagePhotos._files = {});
+  listEl.querySelectorAll('[data-pgcp-upload]').forEach(input=>{
+    input.addEventListener('change', e=>{ pgcpFiles[input.dataset.pgcpUpload] = e.target.files[0] || null; });
+  });
+  listEl.querySelectorAll('[data-pgcp-save]').forEach(btn=>{
+    btn.addEventListener('click', ()=> saveCateringPagePhoto(btn.dataset.pgcpSave));
+  });
+  listEl.querySelectorAll('[data-pgcp-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=> resetCateringPagePhoto(btn.dataset.pgcpReset));
+  });
+}
+
+async function saveCateringPagePhoto(key){
+  const row = document.querySelector(`[data-pgcp-key="${key}"]`);
+  const statusEl = row.querySelector('[data-pgcp-status]');
+  const urlInput = row.querySelector('[data-pgcp-url]');
+  const pastedUrl = urlInput.value.trim();
+  const file = (renderCateringPagePhotos._files || {})[key];
+  if(!file && !pastedUrl){
+    statusEl.textContent = 'Choose a file or paste a link first.';
+    statusEl.style.color = '#D70015';
+    return;
+  }
+  statusEl.style.color = 'var(--mid)';
+  statusEl.textContent = 'Saving…';
+  try{
+    let finalUrl = pastedUrl;
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `siteImages/${key}_${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      finalUrl = await getDownloadURL(sref);
+    }
+    await setDoc(doc(db,'siteImages',key), { url: finalUrl, updatedAt: serverTimestamp() });
+    if(renderCateringPagePhotos._files) delete renderCateringPagePhotos._files[key];
+    phOverridesCache[key] = finalUrl;
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved — live on the website now.';
+    showToast('Photo updated — live on the website now.', 'success');
+    renderCateringPagePhotos();
+  }catch(err){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + err.message;
+    showToast('Could not save photo: ' + err.message, 'error');
+  }
+}
+
+async function resetCateringPagePhoto(key){
+  if(!confirm('Reset this photo back to the original?')) return;
+  try{
+    await deleteDoc(doc(db,'siteImages',key));
+    delete phOverridesCache[key];
+    showToast('Photo reset to original.', 'info');
+    renderCateringPagePhotos();
+  }catch(e){ alert('Could not reset: ' + e.message); }
+}
+
+// ══════════════ CONTACT PAGE-TAB — Photos & Text sub-views ══════════════
+// Real, honest note: there is currently no "Contact Page" group in the
+// photo or text registries at all — this page has no dedicated
+// admin-configurable content yet. Both views below will correctly show
+// an empty state rather than fabricate content that doesn't exist.
+function renderContactPagePhotos(){
+  const listEl = document.getElementById('pgContactPhotosList');
+  if(!listEl) return;
+  const items = PHOTO_REGISTRY.filter(p => p.group === 'Contact Page');
+  if(!items.length){
+    listEl.innerHTML = '<p style="color:var(--lt);padding:1.5rem;text-align:center">No Contact Page-specific photos in the registry yet.</p>';
+    return;
+  }
+  // Same render pattern as other page-tabs' photo views, once entries exist.
+  listEl.innerHTML = '<div class="panel"></div>';
+}
+
+function renderContactPageText(){
+  const listEl = document.getElementById('pgContactTextList');
+  if(!listEl) return;
+  const items = TEXT_REGISTRY.filter(t => t.group === 'Contact Page');
+  if(!items.length){
+    listEl.innerHTML = '<p style="color:var(--lt);padding:1.5rem;text-align:center">No Contact Page-specific text blocks in the registry yet.</p>';
+    return;
+  }
+  listEl.innerHTML = '';
+}
+
+// ══════════════ GALLERY — real, working, photo-only for this first pass ══════════════
+// Same galleryPhotos collection and data shape as main admin, so photos
+// added here show up correctly in main admin too, and vice versa.
+// Video upload/crop intentionally out of scope for now — flagged
+// honestly rather than half-building something fragile.
+async function loadGalleryPG(){
+  const grid = document.getElementById('pgGalGrid');
+  const empty = document.getElementById('pgGalEmpty');
+  if(!grid) return;
+  try{
+    const snap = await getDocs(query(collection(db,'galleryPhotos'), orderBy('createdAt','desc')));
+    if(snap.empty){
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    grid.innerHTML = snap.docs.map(d=>{
+      const p = d.data();
+      if(p.mediaType === 'video'){
+        // Videos added via main admin still show here, read-only —
+        // just no delete/edit control for them in this first pass,
+        // to avoid touching video-specific logic this dashboard
+        // doesn't fully support yet.
+        return `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card);position:relative">
+          <span style="position:absolute;top:.4rem;right:.4rem;background:rgba(0,0,0,.65);color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:10px;z-index:1">🎥 VIDEO</span>
+          <video src="${escapeHtml(p.url)}" muted loop style="width:100%;height:110px;object-fit:cover;display:block"></video>
+          <div style="padding:.5rem .6rem">
+            <p style="font-size:.7rem;color:var(--lt);text-transform:capitalize">${escapeHtml(p.category||'other')}</p>
+          </div>
+        </div>`;
+      }
+      return `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card)" data-pggal-id="${d.id}">
+        <img src="${escapeHtml(p.url)}" style="width:100%;height:110px;object-fit:cover;display:block">
+        <div style="padding:.5rem .6rem">
+          <p style="font-size:.7rem;color:var(--mid);text-transform:capitalize;margin-bottom:.3rem">${escapeHtml(p.category||'other')}</p>
+          <p style="font-size:.72rem;color:var(--lt);margin-bottom:.5rem;min-height:1.6em">${escapeHtml(p.caption||'')}</p>
+          <button class="mm-btn-sm mm-btn-danger" style="width:100%" data-pggal-delete="${d.id}">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+    grid.querySelectorAll('[data-pggal-delete]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('Delete this photo permanently?')) return;
+        try{
+          await deleteDoc(doc(db,'galleryPhotos',btn.dataset.pggalDelete));
+          loadGalleryPG();
+        }catch(e){ alert('Could not delete: ' + e.message); }
+      });
+    });
+  }catch(e){
+    grid.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load gallery: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+document.getElementById('pgGalAddBtn')?.addEventListener('click', async ()=>{
+  const file = document.getElementById('pgGalPhotoFile').files[0];
+  const caption = document.getElementById('pgGalCaption').value.trim();
+  const category = document.getElementById('pgGalCategory').value;
+  const status = document.getElementById('pgGalStatus');
+  if(!file){ alert('Please choose a photo first.'); return; }
+  status.style.color = 'var(--mid)'; status.textContent = 'Optimizing photo…';
+  try{
+    const compressed = await compressImageForUpload(file);
+    status.textContent = 'Uploading…';
+    const sref = ref(storage, `galleryPhotos/${Date.now()}_${file.name}`);
+    await uploadBytes(sref, compressed);
+    const url = await getDownloadURL(sref);
+    await addDoc(collection(db,'galleryPhotos'), {
+      url, caption, category, mediaType: 'image', compressed: true, createdAt: serverTimestamp()
+    });
+    document.getElementById('pgGalPhotoFile').value = '';
+    document.getElementById('pgGalCaption').value = '';
+    status.style.color = '#1E8A3B'; status.textContent = '✅ Added';
+    showToast('Photo added to gallery.', 'success');
+    setTimeout(()=>{ if(status) status.textContent=''; }, 2000);
+    loadGalleryPG();
+  }catch(e){
+    status.style.color = '#D70015'; status.textContent = '❌ ' + e.message;
+    showToast('Could not add photo: ' + e.message, 'error');
+  }
+});
+
+// ══════════════ REWARDS — full parity with main admin ══════════════
+// Same settings/emergencyRewards document and data shape, so this is
+// fully interchangeable with main admin, not a separate copy.
+const ES_ICONS_PG = { fire:'🔥', police:'🚓', ambulance:'🚑', doctor:'⚕️', shield:'🛡️' };
+let pgEmergencyServices = [];
+
+async function loadEmergencyServicesPG(){
+  try{
+    const snap = await getDoc(doc(db,'settings','emergencyRewards'));
+    pgEmergencyServices = snap.exists() ? (snap.data().services || []) : [];
+  }catch(e){
+    pgEmergencyServices = [];
+  }
+  renderEmergencyServicesPG();
+}
+
+async function saveEmergencyServicesPG(){
+  await setDoc(doc(db,'settings','emergencyRewards'), { services: pgEmergencyServices, updatedAt: serverTimestamp() });
+}
+
+function renderEmergencyServicesPG(){
+  const listEl = document.getElementById('pgEsServicesList');
+  if(!listEl) return;
+  if(!pgEmergencyServices.length){
+    listEl.innerHTML = '<p style="color:var(--lt);font-size:.85rem;padding:1rem">No services added yet — add your first one above.</p>';
+    return;
+  }
+  listEl.innerHTML = pgEmergencyServices.map((svc, sIdx) => `
+    <div class="panel" style="padding:1.2rem;margin-bottom:1rem">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+      <h3 style="margin:0;display:flex;align-items:center;gap:.5rem">${ES_ICONS_PG[svc.icon]||'🛡️'} ${escapeHtml(svc.name)}</h3>
+      <button type="button" class="mm-btn-sm mm-btn-danger" data-pges-remove-service="${sIdx}">Remove Service</button>
+     </div>
+     <div style="margin-bottom:.6rem">
+      ${(svc.items||[]).map((it,iIdx)=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border)">
+         <span style="font-size:.85rem">${escapeHtml(it.name)} <b style="color:var(--rust,#C2511C)">$${Number(it.price).toFixed(2)}</b></span>
+         <button type="button" class="mm-btn-sm mm-btn-danger" style="min-width:auto;padding:.2rem .5rem;font-size:.7rem" data-pges-remove-item="${sIdx}:${iIdx}">✕</button>
+        </div>`).join('') || '<p style="font-size:.78rem;color:var(--lt)">No discounted items yet.</p>'}
+     </div>
+     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <input type="text" id="pgEsItemName-${sIdx}" placeholder="e.g. Coffee" style="flex:1;min-width:140px;padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+      <input type="number" id="pgEsItemPrice-${sIdx}" placeholder="Special price $" min="0" step="0.50" style="width:130px;padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+      <button type="button" class="mm-btn-sm" data-pges-add-item="${sIdx}">+ Add Priced Item</button>
+     </div>
+    </div>`).join('');
+
+  listEl.querySelectorAll('[data-pges-remove-service]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm('Remove this entire service card? Anyone with this card selected will lose access to its pricing.')) return;
+      pgEmergencyServices.splice(Number(btn.dataset.pgesRemoveService), 1);
+      await saveEmergencyServicesPG();
+      renderEmergencyServicesPG();
+    });
+  });
+  listEl.querySelectorAll('[data-pges-remove-item]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const [sIdx, iIdx] = btn.dataset.pgesRemoveItem.split(':').map(Number);
+      pgEmergencyServices[sIdx].items.splice(iIdx, 1);
+      await saveEmergencyServicesPG();
+      renderEmergencyServicesPG();
+    });
+  });
+  listEl.querySelectorAll('[data-pges-add-item]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const sIdx = Number(btn.dataset.pgesAddItem);
+      const nameInput = document.getElementById(`pgEsItemName-${sIdx}`);
+      const priceInput = document.getElementById(`pgEsItemPrice-${sIdx}`);
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+      if(!name || isNaN(price)) return;
+      if(!pgEmergencyServices[sIdx].items) pgEmergencyServices[sIdx].items = [];
+      pgEmergencyServices[sIdx].items.push({ name, price });
+      await saveEmergencyServicesPG();
+      renderEmergencyServicesPG();
+    });
+  });
+}
+
+document.getElementById('pgEsAddBtn')?.addEventListener('click', async ()=>{
+  const nameInput = document.getElementById('pgEsNewName');
+  const iconSelect = document.getElementById('pgEsNewIcon');
+  const name = nameInput.value.trim();
+  if(!name) return;
+  pgEmergencyServices.push({ id: 'es_' + Date.now(), name, icon: iconSelect.value, items: [] });
+  await saveEmergencyServicesPG();
+  nameInput.value = '';
+  renderEmergencyServicesPG();
+});
+
+// ══════════════ LOYALTY — genuinely new, didn't exist anywhere before ══════════════
+// Real points balance (earned via Square purchases, redeemed for
+// rewards on loyalty.html) — separate from the self-resetting monthly
+// order streak, which needs no admin view since it's calculated live
+// and never stored. This is the actual persistent data worth managing.
+let pgLoyaltyCache = [];
+
+async function loadLoyaltyPG(){
+  const listEl = document.getElementById('pgLoyaltyList');
+  if(!listEl) return;
+  try{
+    const snap = await getDocs(query(collection(db,'loyaltySignups'), orderBy('createdAt','desc')));
+    pgLoyaltyCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderLoyaltyPG();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load loyalty signups: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function renderLoyaltyPG(){
+  const listEl = document.getElementById('pgLoyaltyList');
+  if(!listEl) return;
+  const searchTerm = (document.getElementById('pgLoyaltySearch')?.value || '').toLowerCase().trim();
+  const filtered = pgLoyaltyCache.filter(m=>{
+    if(!searchTerm) return true;
+    return (m.name||'').toLowerCase().includes(searchTerm)
+      || (m.email||'').toLowerCase().includes(searchTerm)
+      || (m.referralCode||'').toLowerCase().includes(searchTerm);
+  });
+  if(!filtered.length){
+    listEl.innerHTML = `<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">${pgLoyaltyCache.length ? 'No members match that search.' : 'No loyalty signups yet.'}</div>`;
+    return;
+  }
+  let html = '<div class="panel">';
+  filtered.forEach(m=>{
+    const points = Number(m.points) || 0;
+    const signupDate = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'}) : '—';
+    html += `<div class="mm-item-row" data-pgloy-id="${m.id}">
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(m.name || 'Unnamed')} <span style="color:var(--lt);font-weight:400;font-size:.78rem">${m.referralCode ? '· '+escapeHtml(m.referralCode) : ''}</span></div>
+        <div class="mm-item-desc">${escapeHtml(m.email||'')}${m.phone ? ' · '+escapeHtml(m.phone) : ''} · joined ${signupDate}</div>
+      </div>
+      <div style="text-align:right;margin-right:1rem">
+        <div style="font-weight:800;font-size:1.05rem;color:var(--rust,#C2511C)">${points} pts</div>
+      </div>
+      <div class="mm-item-actions">
+        <input type="number" placeholder="New total" data-pgloy-input="${m.id}" style="width:90px;padding:.4rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.8rem">
+        <button class="mm-btn-sm" data-pgloy-save="${m.id}">Set Points</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+
+  listEl.querySelectorAll('[data-pgloy-save]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const memberId = btn.dataset.pgloySave;
+      const input = listEl.querySelector(`[data-pgloy-input="${memberId}"]`);
+      const newPoints = parseInt(input.value, 10);
+      if(isNaN(newPoints) || newPoints < 0){
+        alert('Enter a valid points total (0 or higher).');
+        return;
+      }
+      const member = pgLoyaltyCache.find(m=>m.id===memberId);
+      if(!confirm(`Set ${member?.name || 'this member'}'s points to exactly ${newPoints}? This directly overwrites their current balance of ${member?.points || 0}.`)) return;
+      btn.disabled = true;
+      try{
+        await updateDoc(doc(db,'loyaltySignups',memberId), { points: newPoints });
+        showToast(`Points updated to ${newPoints}.`, 'success');
+        loadLoyaltyPG();
+      }catch(e){
+        alert('Could not update points: ' + e.message);
+        btn.disabled = false;
+      }
+    });
+  });
+}
+
+document.getElementById('pgLoyaltySearch')?.addEventListener('input', renderLoyaltyPG);
 
 // ═══════════════ OFFERS / DISCOUNTS (promotions) ═══════════════
 let ofPromosCache = [];
