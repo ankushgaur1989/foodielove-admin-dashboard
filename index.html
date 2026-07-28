@@ -323,6 +323,7 @@
       <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
 
       <p class="nav-group-label">Settings</p>
+      <a href="https://foodielove.com.au/#fl-edit" target="_blank" class="nav-item" style="text-decoration:none;color:inherit;background:linear-gradient(135deg,rgba(194,81,28,.12),rgba(200,147,47,.12));border:1px solid rgba(194,81,28,.3);border-radius:8px;font-weight:700">✨ Edit Live Site</a>
       <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
       <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
@@ -4134,6 +4135,68 @@ document.getElementById('cmPostBtn')?.addEventListener('click', async ()=>{
 });
 lazyLoad('community', loadCommunity);
 </script>
+
+
+<style>
+/* ══ PROFESSIONAL POLISH LAYER (July 2026) ══
+   A consistent design system pass over every panel: uniform controls,
+   disciplined spacing, contained text, calm tables. Additive — refines
+   the existing look rather than replacing it. */
+
+/* Every control shares one voice */
+.page-panel input:not([type=checkbox]):not([type=radio]),
+.page-panel select, .page-panel textarea{
+  font:inherit; font-size:.85rem; color:inherit; background:#fff;
+  border:1.5px solid var(--rule,#E3D6BA); border-radius:8px;
+  padding:.55rem .75rem; transition:border-color .15s, box-shadow .15s;
+  max-width:100%; min-width:0;
+}
+.page-panel input:focus, .page-panel select:focus, .page-panel textarea:focus{
+  outline:none; border-color:var(--rust,#C2511C);
+  box-shadow:0 0 0 3px rgba(194,81,28,.12);
+}
+.page-panel label{display:block; margin-bottom:.25rem}
+
+/* Buttons: one system, two intents */
+.page-panel .btn{
+  font:inherit; font-size:.78rem; font-weight:700; letter-spacing:.01em;
+  border:none; border-radius:8px; padding:.5rem .95rem; cursor:pointer;
+  background:var(--rust,#C2511C); color:#fff;
+  transition:transform .12s, filter .15s, box-shadow .15s;
+}
+.page-panel .btn:hover{filter:brightness(1.07); box-shadow:0 3px 10px rgba(194,81,28,.25)}
+.page-panel .btn:active{transform:translateY(1px)}
+.page-panel .btn:disabled{opacity:.55; cursor:default; transform:none; box-shadow:none}
+
+/* Tables: quiet, readable, contained */
+.page-panel table{border-collapse:collapse; width:100%}
+.page-panel thead th{
+  font-size:.68rem; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--mid,#8A7A68); font-weight:800; padding:.55rem .5rem;
+  border-bottom:2px solid var(--rule,#E3D6BA); white-space:nowrap;
+  position:sticky; top:0; background:#fff; z-index:2;
+}
+.page-panel tbody td{padding:.6rem .5rem; vertical-align:middle;
+  overflow-wrap:anywhere; word-break:break-word}
+.page-panel tbody tr{transition:background .12s}
+.page-panel tbody tr:hover{background:rgba(194,81,28,.04)}
+
+/* Nothing ever escapes its box */
+.page-panel .panel{overflow:hidden}
+.page-panel .panel > *{min-width:0}
+.page-panel h3, .page-panel h4, .page-panel p{overflow-wrap:anywhere}
+.page-panel [style*="overflow-x:auto"]{scrollbar-width:thin}
+
+/* Spacing rhythm between stacked panels */
+.page-panel .panel + .panel{margin-top:1rem}
+
+/* Phone widths: forms stack, tables scroll within themselves */
+@media(max-width:640px){
+  .page-panel [style*="grid-template-columns"]{grid-template-columns:1fr !important}
+  .page-panel table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap}
+  .page-panel thead th{position:static}
+}
+</style>
 
 </body>
 </html>
