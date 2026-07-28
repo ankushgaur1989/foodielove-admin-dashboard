@@ -910,8 +910,34 @@
           <tbody id="bkTbody"><tr><td colspan="9" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
         </table></div></div>
       </div>
-      <div class="page-panel" id="page-floorplan"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Floor Plan</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
-      <div class="page-panel" id="page-customers"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Customer History</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-floorplan">
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .4rem;font-size:1rem">Tables</h3>
+  <p style="color:var(--mid);font-size:.8rem;margin:0 0 1rem">These tables drive booking capacity on the website — same data your main admin\'s Floor Plan edits.</p>
+  <div id="fp2List" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"><span style="color:var(--mid);font-size:.85rem">Loading…</span></div>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end">
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Table name</label><input id="fp2Name" placeholder="Table 5" style="padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Seats</label><input id="fp2Seats" type="number" min="1" value="4" style="width:90px;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <label style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;padding-bottom:.6rem"><input type="checkbox" id="fp2Chess"> Chess table ♟️</label>
+   <button id="fp2AddBtn" class="btn">Add table</button>
+   <button id="fp2SaveBtn" class="btn" style="background:var(--olive,#4B5A3A)">Save all changes</button>
+  </div>
+  <p id="fp2Status" style="font-size:.8rem;color:var(--mid);margin:.6rem 0 0"></p>
+ </div>
+</div>
+      <div class="page-panel" id="page-customers">
+ <div class="panel" style="padding:1.4rem">
+  <div style="display:flex;gap:.7rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+   <input id="custSearch" placeholder="Search name, email or phone…" style="flex:1;min-width:200px;padding:.6rem .8rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;font-size:.85rem">
+   <button id="custRefreshBtn" class="btn">Refresh</button>
+  </div>
+  <p id="custStatus" style="color:var(--mid);font-size:.8rem;margin:0 0 .8rem">Built live from your real orders — one row per customer.</p>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.82rem" id="custTable">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">Customer</th><th style="padding:.5rem">Contact</th><th style="padding:.5rem">Orders</th><th style="padding:.5rem">Total spent</th><th style="padding:.5rem">Last order</th></tr></thead>
+   <tbody id="custTbody"><tr><td colspan="5" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+ </div>
+</div>
       <div class="page-panel" id="page-loyalty">
         <div class="widget-toolbar"><p>Every customer with a saved profile — name, loyalty card number, contact details</p></div>
         <div class="panel"><div style="overflow-x:auto"><table>
@@ -956,8 +982,47 @@
           <tbody id="gvTbody"><tr><td colspan="6" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
         </table></div></div>
       </div>
-      <div class="page-panel" id="page-discounts"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Discounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
-      <div class="page-panel" id="page-community"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Community / Charity</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-discounts">
+ <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">Create a promo code</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:.8rem">
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Code</label><input id="dcCode" placeholder="WELCOME10" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;text-transform:uppercase"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Type</label><select id="dcType" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"><option value="percent">% off</option><option value="fixed">$ off</option></select></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Value</label><input id="dcValue" type="number" min="1" placeholder="10" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Applies to</label><select id="dcScope" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"><option value="all">Whole order</option><option value="menu">Menu items only</option><option value="catering">Catering only</option></select></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Expires</label><input id="dcEnd" type="date" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Uses per customer</label><input id="dcMaxUses" type="number" min="1" value="1" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+  </div>
+  <button id="dcCreateBtn" class="btn">Create code</button>
+  <span id="dcStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+ </div>
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">Existing codes</h3>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.82rem">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">Code</th><th style="padding:.5rem">Discount</th><th style="padding:.5rem">Scope</th><th style="padding:.5rem">Expires</th><th style="padding:.5rem">Status</th><th style="padding:.5rem"></th></tr></thead>
+   <tbody id="dcTbody"><tr><td colspan="6" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+ </div>
+</div>
+      <div class="page-panel" id="page-community">
+ <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">New community board post</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.7rem;margin-bottom:.8rem">
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Type</label><select id="cmType" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"><option value="notice">Notice</option><option value="charity">Charity update</option><option value="event">Community event</option></select></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Title</label><input id="cmTitle" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Amount (charity $, optional)</label><input id="cmAmount" type="number" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Photo URL (optional)</label><input id="cmPhoto" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+  </div>
+  <label style="font-size:.72rem;font-weight:700;color:var(--mid)">Description</label>
+  <textarea id="cmDesc" rows="3" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;margin-bottom:.8rem"></textarea>
+  <button id="cmPostBtn" class="btn">Publish post</button>
+  <span id="cmStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+ </div>
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">Published posts</h3>
+  <div id="cmList" style="display:flex;flex-direction:column;gap:.6rem"><span style="color:var(--mid);font-size:.85rem">Loading…</span></div>
+ </div>
+</div>
       <div class="page-panel" id="page-sales">
         <div class="stat-row">
           <div class="stat-card"><p class="lbl">Gross Sales</p><p class="val" id="ssGross">$0</p></div>
@@ -975,8 +1040,38 @@
           <div id="ssRefundsByReason" style="padding:1rem 1.4rem"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
         </div>
       </div>
-      <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
-      <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-payments">
+ <div class="panel" style="padding:1.4rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:.9rem">
+   <h3 style="margin:0;font-size:1rem">Card payments &amp; refunds</h3>
+   <button id="pmRefreshBtn" class="btn">Refresh</button>
+  </div>
+  <p style="color:var(--mid);font-size:.8rem;margin:0 0 .9rem">Recent orders paid online. Refunds go through Square for real — same as the main admin.</p>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.82rem">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">Order</th><th style="padding:.5rem">Customer</th><th style="padding:.5rem">Paid</th><th style="padding:.5rem">Method</th><th style="padding:.5rem">Date</th><th style="padding:.5rem"></th></tr></thead>
+   <tbody id="pmTbody"><tr><td colspan="6" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+ </div>
+</div>
+      <div class="page-panel" id="page-staff">
+ <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">Staff accounts</h3>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.82rem">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">Name / Email</th><th style="padding:.5rem">Discounts used this month</th><th style="padding:.5rem"></th></tr></thead>
+   <tbody id="stTbody"><tr><td colspan="3" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+ </div>
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .4rem;font-size:1rem">Add a staff member</h3>
+  <p style="color:var(--mid);font-size:.8rem;margin:0 0 .8rem">They must first create a normal account on the website login page. Then paste their User UID here (Firebase Console → Authentication → copy icon next to their email).</p>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end">
+   <div style="flex:1;min-width:220px"><label style="font-size:.72rem;font-weight:700;color:var(--mid)">User UID</label><input id="stUid" placeholder="xK92mQ…" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Display name</label><input id="stName" placeholder="Sam" style="padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+   <button id="stAddBtn" class="btn">Add as staff</button>
+  </div>
+  <p id="stStatus" style="font-size:.8rem;color:var(--mid);margin:.6rem 0 0"></p>
+ </div>
+</div>
       <div class="page-panel" id="page-photos">
         <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Every photo on the live site, organized by section. Upload a file or paste an image link — changes go live on foodielove.com.au immediately.</p>
         <div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1rem">
@@ -987,8 +1082,41 @@
         </div>
         <div id="phList"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
       </div>
-      <div class="page-panel" id="page-settings"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Site Settings</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
-      <div class="page-panel" id="page-security"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Security</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
+      <div class="page-panel" id="page-settings">
+ <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+  <h3 style="margin:0 0 .4rem;font-size:1rem">Square environment</h3>
+  <p style="color:var(--mid);font-size:.8rem;margin:0 0 .9rem">Controls whether the website charges real cards (Production) or free test cards (Sandbox). Same switch as the main admin — takes effect instantly, no redeploy.</p>
+  <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+   <span id="setSqMode" style="font-weight:800;font-size:.9rem">…</span>
+   <button id="setSqToggleBtn" class="btn">Switch</button>
+   <span id="setSqStatus" style="font-size:.8rem;color:var(--mid)"></span>
+  </div>
+ </div>
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">Quick links</h3>
+  <p style="font-size:.85rem;margin:0 0 .5rem"><a href="https://foodielove.com.au/owner-desk-7k2m9x.html" target="_blank" style="color:var(--rust,#C2511C);font-weight:700">Open the main admin ↗</a> — for anything not in this dashboard yet.</p>
+  <p style="font-size:.85rem;margin:0"><a href="https://app.netlify.com" target="_blank" style="color:var(--rust,#C2511C);font-weight:700">Netlify deploys ↗</a> · <a href="https://console.firebase.google.com" target="_blank" style="color:var(--rust,#C2511C);font-weight:700">Firebase console ↗</a> · <a href="https://squareup.com/dashboard" target="_blank" style="color:var(--rust,#C2511C);font-weight:700">Square ↗</a></p>
+ </div>
+</div>
+      <div class="page-panel" id="page-security">
+ <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:.9rem">
+   <h3 style="margin:0;font-size:1rem">Fraud &amp; threat log</h3>
+   <button id="secRefreshBtn" class="btn">Refresh</button>
+  </div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">When</th><th style="padding:.5rem">Type</th><th style="padding:.5rem">Route</th><th style="padding:.5rem">IP</th></tr></thead>
+   <tbody id="secFraudTbody"><tr><td colspan="4" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+ </div>
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .9rem;font-size:1rem">Website error log</h3>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.8rem">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">When</th><th style="padding:.5rem">Page</th><th style="padding:.5rem">Error</th><th style="padding:.5rem"></th></tr></thead>
+   <tbody id="secErrTbody"><tr><td colspan="4" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+ </div>
+</div>
     </div>
   </div>
 </div>
@@ -3781,5 +3909,231 @@ async function loadVouchersRV(){
   }
 }
 </script>
+
+<script type="module">
+// ══ NEW SECTIONS — Customers, Discounts, Floor Plan, Payments, Security,
+// Settings, Staff, Community (built July 2026). Additive module: re-uses
+// the already-initialized Firebase app rather than touching the main
+// script. Each section lazy-loads its data the first time its nav item
+// is opened, so the dashboard's startup stays as fast as before. ══
+import { getApps, getApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const app2 = getApp(); const auth2 = getAuth(app2); const db2 = getFirestore(app2);
+const esc2 = v => String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '$'+(Number(n)||0).toFixed(2);
+const when = ts => { try{ const d = ts?.toDate ? ts.toDate() : new Date(ts); return d.toLocaleString('en-AU',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); }catch(e){ return '—'; } };
+// Refunds run through the MAIN site's functions (this dashboard is a separate site with no backend of its own).
+const MAIN_SITE = 'https://foodielove.com.au';
+
+const loaded = {};
+function lazyLoad(pid, fn){
+  document.querySelectorAll(`[data-page="${pid}"]`).forEach(el => el.addEventListener('click', ()=>{ if(!loaded[pid]){ loaded[pid]=true; fn().catch(e=>console.error(pid+' load failed:', e)); } }));
+}
+
+// ── CUSTOMERS ── built live from orders: one row per unique customer.
+let custRows = [];
+async function loadCustomers(){
+  const tb = document.getElementById('custTbody');
+  const snap = await getDocs(collection(db2,'orders'));
+  const map = {};
+  snap.docs.forEach(d => {
+    const o = d.data();
+    const key = (o.email||o.mobile||'unknown').toString().toLowerCase().trim();
+    if(!map[key]) map[key] = { name:o.name||'—', email:o.email||'', mobile:o.mobile||'', count:0, total:0, last:null };
+    map[key].count++; map[key].total += Number(o.total)||0;
+    const t = o.createdAt?.toDate ? o.createdAt.toDate() : null;
+    if(t && (!map[key].last || t > map[key].last)) map[key].last = t;
+    if(o.name) map[key].name = o.name;
+  });
+  custRows = Object.values(map).sort((a,b)=>b.total-a.total);
+  renderCustomers();
+  document.getElementById('custStatus').textContent = custRows.length + ' customers, built from ' + snap.size + ' orders.';
+}
+function renderCustomers(){
+  const q = (document.getElementById('custSearch').value||'').toLowerCase();
+  const rows = custRows.filter(c => !q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.mobile.includes(q));
+  document.getElementById('custTbody').innerHTML = rows.length ? rows.map(c => `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-weight:600">${esc2(c.name)}</td><td style="padding:.5rem;font-size:.76rem">${esc2(c.email)}<br>${esc2(c.mobile)}</td><td style="padding:.5rem">${c.count}</td><td style="padding:.5rem;font-weight:700">${money(c.total)}</td><td style="padding:.5rem;font-size:.76rem">${c.last ? when(c.last) : '—'}</td></tr>`).join('') : '<tr><td colspan="5" style="padding:1rem;color:var(--mid)">No matches.</td></tr>';
+}
+document.getElementById('custSearch')?.addEventListener('input', renderCustomers);
+document.getElementById('custRefreshBtn')?.addEventListener('click', loadCustomers);
+lazyLoad('customers', loadCustomers);
+
+// ── DISCOUNTS ── same promotions collection the checkout verifies against.
+async function loadDiscounts(){
+  const snap = await getDocs(collection(db2,'promotions'));
+  const tb = document.getElementById('dcTbody');
+  const now = new Date();
+  tb.innerHTML = snap.size ? snap.docs.map(d => {
+    const p = d.data();
+    const expired = p.endDate && new Date(p.endDate) < now;
+    const status = !p.isActive ? 'Off' : expired ? 'Expired' : 'Active';
+    const color = status==='Active' ? 'var(--olive,#4B5A3A)' : 'var(--mid)';
+    return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-weight:800">${esc2(p.code)}</td><td style="padding:.5rem">${p.discountType==='percent' ? esc2(p.discountValue)+'%' : money(p.discountValue)}</td><td style="padding:.5rem">${esc2(p.applicableCategory||'all')}</td><td style="padding:.5rem">${esc2(p.endDate||'Never')}</td><td style="padding:.5rem;font-weight:700;color:${color}">${status}</td><td style="padding:.5rem;text-align:right"><button class="btn" data-dctoggle="${d.id}" data-active="${p.isActive?'1':''}" style="font-size:.7rem;padding:.3rem .7rem">${p.isActive?'Turn off':'Turn on'}</button> <button class="btn" data-dcdel="${d.id}" style="font-size:.7rem;padding:.3rem .7rem;background:#C24A1E">Delete</button></td></tr>`;
+  }).join('') : '<tr><td colspan="6" style="padding:1rem;color:var(--mid)">No promo codes yet.</td></tr>';
+  tb.querySelectorAll('[data-dctoggle]').forEach(b => b.addEventListener('click', async ()=>{ await updateDoc(doc(db2,'promotions',b.dataset.dctoggle), { isActive: !b.dataset.active }); loadDiscounts(); }));
+  tb.querySelectorAll('[data-dcdel]').forEach(b => b.addEventListener('click', async ()=>{ if(confirm('Delete this promo code permanently?')){ await deleteDoc(doc(db2,'promotions',b.dataset.dcdel)); loadDiscounts(); } }));
+}
+document.getElementById('dcCreateBtn')?.addEventListener('click', async ()=>{
+  const st = document.getElementById('dcStatus');
+  const code = document.getElementById('dcCode').value.trim().toUpperCase();
+  const discountValue = Number(document.getElementById('dcValue').value);
+  if(!code || !discountValue){ st.textContent = 'Code and value are required.'; return; }
+  st.textContent = 'Saving…';
+  await addDoc(collection(db2,'promotions'), {
+    code, discountType: document.getElementById('dcType').value, discountValue,
+    applicableCategory: document.getElementById('dcScope').value,
+    endDate: document.getElementById('dcEnd').value || null,
+    maxUsesPerCustomer: Number(document.getElementById('dcMaxUses').value)||1,
+    isActive: true, createdAt: serverTimestamp()
+  });
+  st.textContent = '✓ Created — live on checkout immediately.';
+  document.getElementById('dcCode').value=''; document.getElementById('dcValue').value='';
+  loadDiscounts();
+});
+lazyLoad('discounts', loadDiscounts);
+
+// ── FLOOR PLAN ── edits the exact settings/floorPlan document the
+// booking capacity check reads; same shape the main admin writes.
+let fp2Tables = [];
+function renderFp2(){
+  const list = document.getElementById('fp2List');
+  list.innerHTML = fp2Tables.length ? fp2Tables.map((t,i) => `<div style="display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"><strong style="flex:1">${t.isChess?'♟️ ':''}${esc2(t.name)}</strong><span style="color:var(--mid);font-size:.8rem">${esc2(t.seats)} seats</span><button class="btn" data-fp2del="${i}" style="font-size:.68rem;padding:.25rem .6rem;background:#C24A1E">Remove</button></div>`).join('') : '<span style="color:var(--mid);font-size:.85rem">No tables yet — add your first below.</span>';
+  list.querySelectorAll('[data-fp2del]').forEach(b => b.addEventListener('click', ()=>{ fp2Tables.splice(Number(b.dataset.fp2del),1); renderFp2(); }));
+}
+async function loadFloorplan(){
+  const snap = await getDoc(doc(db2,'settings','floorPlan'));
+  fp2Tables = (snap.exists() && Array.isArray(snap.data().tables)) ? snap.data().tables : [];
+  renderFp2();
+}
+document.getElementById('fp2AddBtn')?.addEventListener('click', ()=>{
+  const name = document.getElementById('fp2Name').value.trim();
+  const seats = Number(document.getElementById('fp2Seats').value)||4;
+  if(!name) return;
+  fp2Tables.push({ name, seats, isChess: document.getElementById('fp2Chess').checked });
+  document.getElementById('fp2Name').value='';
+  renderFp2();
+});
+document.getElementById('fp2SaveBtn')?.addEventListener('click', async ()=>{
+  const st = document.getElementById('fp2Status'); st.textContent = 'Saving…';
+  await setDoc(doc(db2,'settings','floorPlan'), { tables: fp2Tables, updatedAt: serverTimestamp() });
+  st.textContent = '✓ Saved — booking capacity updates immediately.';
+});
+lazyLoad('floorplan', loadFloorplan);
+
+// ── PAYMENTS & REFUNDS ── real Square refunds via the main site's
+// authenticated function; this dashboard sends the same owner ID token.
+async function loadPayments(){
+  const tb = document.getElementById('pmTbody');
+  const snap = await getDocs(query(collection(db2,'orders'), orderBy('createdAt','desc'), limit(60)));
+  const rows = snap.docs.map(d => ({id:d.id, ...d.data()})).filter(o => o.payMethod && o.payMethod !== 'cash');
+  tb.innerHTML = rows.length ? rows.map(o => `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-weight:700">${esc2(o.orderRef||o.id)}</td><td style="padding:.5rem">${esc2(o.name||'—')}</td><td style="padding:.5rem;font-weight:700">${money(o.total)}</td><td style="padding:.5rem">${esc2(o.payMethod)}</td><td style="padding:.5rem;font-size:.76rem">${when(o.createdAt)}</td><td style="padding:.5rem;text-align:right">${o.refunded ? '<span style="color:var(--mid);font-weight:700">Refunded</span>' : `<button class="btn" data-pmrefund="${esc2(o.orderRef||o.id)}" data-amount="${Number(o.total)||0}" style="font-size:.7rem;padding:.3rem .7rem;background:#C24A1E">Refund…</button>`}</td></tr>`).join('') : '<tr><td colspan="6" style="padding:1rem;color:var(--mid)">No online-paid orders found.</td></tr>';
+  tb.querySelectorAll('[data-pmrefund]').forEach(b => b.addEventListener('click', async ()=>{
+    const orderRef = b.dataset.pmrefund, full = Number(b.dataset.amount)||0;
+    const pctRaw = prompt(`Refund how much of ${money(full)} for ${orderRef}?\nType a percentage (e.g. 100 for full, 50 for half):`, '100');
+    if(pctRaw === null) return;
+    const pct = Math.max(1, Math.min(100, Number(pctRaw)||0));
+    const amount = Math.round(full * pct) / 100;
+    const refundReason = prompt('Reason (shown in your records):', 'Requested by customer') || 'Other';
+    if(!confirm(`Refund ${pct}% (${money(amount)}) for ${orderRef}?\nThis sends a REAL refund through Square if the order was card-paid.`)) return;
+    b.disabled = true; b.textContent = '…';
+    try{
+      const idToken = await auth2.currentUser.getIdToken();
+      const resp = await fetch(MAIN_SITE + '/.netlify/functions/refund-square-payment', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+        body: JSON.stringify({ orderRef, amount, percent: String(pct), refundReason })
+      });
+      const result = await resp.json();
+      if(resp.ok && result.success){ alert('✓ Refund of '+money(amount)+' sent through Square.'); loadPayments(); return; }
+      alert('Refund did not go through: ' + (result.error || 'Unknown error'));
+    }catch(e){ alert('Could not reach the refund service: ' + e.message); }
+    b.disabled = false; b.textContent = 'Refund…';
+  }));
+}
+document.getElementById('pmRefreshBtn')?.addEventListener('click', loadPayments);
+lazyLoad('payments', loadPayments);
+
+// ── SECURITY ── the same fraudLog + errorLogs your Netlify functions and
+// site pages write to; owner-only readable per Firestore rules.
+async function loadSecurity(){
+  const [fraudSnap, errSnap] = await Promise.all([
+    getDocs(query(collection(db2,'fraudLog'), orderBy('loggedAt','desc'), limit(40))).catch(()=>({docs:[],size:0})),
+    getDocs(query(collection(db2,'errorLogs'), orderBy('loggedAt','desc'), limit(40))).catch(()=>({docs:[],size:0}))
+  ]);
+  document.getElementById('secFraudTbody').innerHTML = fraudSnap.size ? fraudSnap.docs.map(d => { const f=d.data(); return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-size:.74rem">${when(f.loggedAt)}</td><td style="padding:.5rem;font-weight:700">${esc2(f.type)}</td><td style="padding:.5rem">${esc2(f.route||'—')}</td><td style="padding:.5rem;font-size:.74rem">${esc2(f.ip||'—')}</td></tr>`; }).join('') : '<tr><td colspan="4" style="padding:1rem;color:var(--olive,#4B5A3A);font-weight:700">✓ Nothing logged — all quiet.</td></tr>';
+  const errTb = document.getElementById('secErrTbody');
+  errTb.innerHTML = errSnap.size ? errSnap.docs.map(d => { const e=d.data(); return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-size:.74rem">${esc2(e.loggedAt && e.loggedAt.toDate ? when(e.loggedAt) : (e.loggedAt||'—'))}</td><td style="padding:.5rem">${esc2(e.page||'—')}</td><td style="padding:.5rem;font-size:.76rem">${esc2((e.message||'').slice(0,120))}</td><td style="padding:.5rem;text-align:right"><button class="btn" data-secdel="${d.id}" style="font-size:.68rem;padding:.25rem .6rem">Clear</button></td></tr>`; }).join('') : '<tr><td colspan="4" style="padding:1rem;color:var(--olive,#4B5A3A);font-weight:700">✓ No errors logged.</td></tr>';
+  errTb.querySelectorAll('[data-secdel]').forEach(b => b.addEventListener('click', async ()=>{ await deleteDoc(doc(db2,'errorLogs',b.dataset.secdel)); loadSecurity(); }));
+}
+document.getElementById('secRefreshBtn')?.addEventListener('click', loadSecurity);
+lazyLoad('security', loadSecurity);
+
+// ── SETTINGS ── the same settings/squareEnvironment doc every payment
+// function reads. Fails safe: display-only until the doc loads.
+async function loadSettings(){
+  const modeEl = document.getElementById('setSqMode');
+  const snap = await getDoc(doc(db2,'settings','squareEnvironment')).catch(()=>null);
+  const mode = (snap && snap.exists() && snap.data().mode === 'sandbox') ? 'sandbox' : 'production';
+  modeEl.textContent = mode === 'sandbox' ? '🧪 SANDBOX (test cards, no real money)' : '🟢 PRODUCTION (real payments)';
+  modeEl.style.color = mode === 'sandbox' ? 'var(--rust,#C2511C)' : 'var(--olive,#4B5A3A)';
+  const btn = document.getElementById('setSqToggleBtn');
+  btn.onclick = async ()=>{
+    const target = mode === 'sandbox' ? 'production' : 'sandbox';
+    if(!confirm(`Switch Square to ${target.toUpperCase()}?\n\n${target==='production' ? 'The website will charge REAL cards.' : 'The website will only accept Square test cards — real cards will decline.'}`)) return;
+    document.getElementById('setSqStatus').textContent = 'Switching…';
+    await setDoc(doc(db2,'settings','squareEnvironment'), { mode: target, updatedAt: serverTimestamp() });
+    document.getElementById('setSqStatus').textContent = '✓ Switched — effective on the very next payment.';
+    loadSettings();
+  };
+}
+lazyLoad('settings', loadSettings);
+
+// ── STAFF ── same staffUsers docs the order-discount security rule checks.
+async function loadStaff(){
+  const tb = document.getElementById('stTbody');
+  const snap = await getDocs(collection(db2,'staffUsers'));
+  tb.innerHTML = snap.size ? snap.docs.map(d => { const u=d.data(); return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem"><strong>${esc2(u.name||'—')}</strong><br><span style="font-size:.74rem;color:var(--mid)">${esc2(u.email||d.id)}</span></td><td style="padding:.5rem">${esc2(u.monthlyDiscountUses??0)} / 2</td><td style="padding:.5rem;text-align:right"><button class="btn" data-strm="${d.id}" style="font-size:.7rem;padding:.3rem .7rem;background:#C24A1E">Remove</button></td></tr>`; }).join('') : '<tr><td colspan="3" style="padding:1rem;color:var(--mid)">No staff accounts yet.</td></tr>';
+  tb.querySelectorAll('[data-strm]').forEach(b => b.addEventListener('click', async ()=>{ if(confirm('Remove this staff member? They keep their normal customer account but lose staff access and discounts.')){ await deleteDoc(doc(db2,'staffUsers',b.dataset.strm)); loadStaff(); } }));
+}
+document.getElementById('stAddBtn')?.addEventListener('click', async ()=>{
+  const uid = document.getElementById('stUid').value.trim();
+  const name = document.getElementById('stName').value.trim();
+  const st = document.getElementById('stStatus');
+  if(!uid){ st.textContent = 'Paste their User UID first.'; return; }
+  st.textContent = 'Adding…';
+  await setDoc(doc(db2,'staffUsers',uid), { name: name||'', monthlyDiscountUses: 0, addedAt: serverTimestamp() });
+  st.textContent = '✓ Added — staff access is live for them right now.';
+  document.getElementById('stUid').value=''; document.getElementById('stName').value='';
+  loadStaff();
+});
+lazyLoad('staff', loadStaff);
+
+// ── COMMUNITY ── same communityPosts collection community.html displays.
+async function loadCommunity(){
+  const list = document.getElementById('cmList');
+  const snap = await getDocs(query(collection(db2,'communityPosts'), orderBy('createdAt','desc')));
+  list.innerHTML = snap.size ? snap.docs.map(d => { const p=d.data(); return `<div style="display:flex;gap:.8rem;align-items:flex-start;padding:.7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:10px"><div style="flex:1"><span style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--rust,#C2511C)">${esc2(p.type||'notice')}</span><h4 style="margin:.15rem 0 .25rem;font-size:.92rem">${esc2(p.title)}</h4><p style="margin:0;font-size:.8rem;color:var(--mid)">${esc2((p.description||'').slice(0,160))}</p>${p.amount ? `<p style="margin:.3rem 0 0;font-weight:800;color:var(--olive,#4B5A3A)">${money(p.amount)}</p>` : ''}</div><button class="btn" data-cmdel="${d.id}" style="font-size:.68rem;padding:.25rem .6rem;background:#C24A1E">Delete</button></div>`; }).join('') : '<span style="color:var(--mid);font-size:.85rem">No posts yet.</span>';
+  list.querySelectorAll('[data-cmdel]').forEach(b => b.addEventListener('click', async ()=>{ if(confirm('Delete this post from the community board?')){ await deleteDoc(doc(db2,'communityPosts',b.dataset.cmdel)); loadCommunity(); } }));
+}
+document.getElementById('cmPostBtn')?.addEventListener('click', async ()=>{
+  const st = document.getElementById('cmStatus');
+  const title = document.getElementById('cmTitle').value.trim();
+  if(!title){ st.textContent = 'A title is required.'; return; }
+  st.textContent = 'Publishing…';
+  await addDoc(collection(db2,'communityPosts'), {
+    type: document.getElementById('cmType').value, title,
+    description: document.getElementById('cmDesc').value.trim(),
+    amount: Number(document.getElementById('cmAmount').value)||null,
+    photoUrl: document.getElementById('cmPhoto').value.trim()||null,
+    createdAt: serverTimestamp()
+  });
+  st.textContent = '✓ Published — live on the community page now.';
+  document.getElementById('cmTitle').value=''; document.getElementById('cmDesc').value=''; document.getElementById('cmAmount').value=''; document.getElementById('cmPhoto').value='';
+  loadCommunity();
+});
+lazyLoad('community', loadCommunity);
+</script>
+
 </body>
 </html>
