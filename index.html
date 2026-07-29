@@ -279,6 +279,7 @@
 
       <p class="nav-group-label">Orders</p>
       <div class="nav-item" data-page="orders"><span class="dot"></span> Orders</div>
+      <div class="nav-item" data-page="analytics"><span class="dot"></span> Analytics</div>
 
       <p class="nav-group-label">Menu</p>
       <div class="nav-item" data-page="menu-brunch"><span class="dot"></span> Brunch Menu</div>
@@ -300,8 +301,6 @@
 
       <p class="nav-group-label">Coming Soon</p>
       <div class="nav-item" data-page="websitesecurity" style="opacity:.55"><span class="dot"></span> Website Security</div>
-      <div class="nav-item" data-page="analytics-soon" style="opacity:.55"><span class="dot"></span> Analytics</div>
-      <div class="nav-item" data-page="gallery-soon" style="opacity:.55"><span class="dot"></span> Gallery</div>
 
       <p class="nav-group-label">Bookings</p>
       <div class="nav-item" data-page="bookings"><span class="dot"></span> Reservations</div>
@@ -689,19 +688,28 @@
           <p style="max-width:400px;margin:0 auto">This section is reserved for the security tools already in the main admin panel — this is a placeholder tab, not yet built here.</p>
         </div>
       </div>
-      <div class="page-panel" id="page-analytics-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Analytics — coming soon</h3>
-          <p style="max-width:400px;margin:0 auto">Reserved for real site analytics, matching the main admin panel — not yet built here.</p>
+      <div class="page-panel" id="page-analytics">
+        <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><p class="lbl">Total Revenue (all time)</p><p class="val" id="anTotalRevenue">$0</p></div>
+          <div class="stat-card"><p class="lbl">Total Orders</p><p class="val" id="anTotalOrders">0</p></div>
+          <div class="stat-card"><p class="lbl">Average Order Value</p><p class="val" id="anAOV">$0</p></div>
+          <div class="stat-card"><p class="lbl">Revenue — Last 7 Days</p><p class="val" id="anWeekRevenue">$0</p></div>
         </div>
-      </div>
-      <div class="page-panel" id="page-gallery-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Gallery — coming soon</h3>
-          <p style="max-width:400px;margin:0 auto">Reserved for the Gallery page's management tools — not yet built here.</p>
+        <div class="panel" style="margin-top:1rem">
+          <div class="panel-head"><h3>Revenue — Last 14 Days</h3></div>
+          <div id="anChart" style="padding:1.2rem 1.4rem;display:flex;align-items:flex-end;gap:.4rem;height:180px"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
+          <div class="panel">
+            <div class="panel-head"><h3>Top Selling Items (all time)</h3></div>
+            <div id="anTopItems" style="padding:.8rem 1.4rem 1.2rem"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Orders by Fulfillment Type</h3></div>
+            <div id="anFulfillType" style="padding:.8rem 1.4rem 1.2rem"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
+          </div>
+        </div>
+        <p style="font-size:.72rem;color:var(--lt);margin:.8rem 0 0;padding:0 .2rem">For GST, refunds, discounts, and surcharge breakdowns, see the Sales &amp; Expenses page — this page focuses on trends, not accounting totals.</p>
       </div>
 
       <!-- ══ NEW "BY PAGE" NAVIGATION — Homepage (fully built) ══ -->
@@ -1213,8 +1221,7 @@ const pageTitles = {
   overview: ['Dashboard', 'A quick summary of what\'s happening right now'],
   orders: ['Orders', 'Live data from your production database'],
   websitesecurity: ['Website Security', 'Coming soon'],
-  'analytics-soon': ['Analytics', 'Coming soon'],
-  'gallery-soon': ['Gallery', 'Coming soon'],
+  'analytics': ['Analytics', 'Revenue trends and top sellers'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
   charcuterie: ['Charcuterie Board', 'Board designs, categories, and items customers pick from'],
@@ -1275,6 +1282,7 @@ document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
     }else{
       document.getElementById('page-'+page)?.classList.add('active');
     }
+    if(page === 'analytics') loadAnalytics();
     if(page === 'pg-gallery') loadGalleryPG();
     if(page === 'pg-rewards') loadEmergencyServicesPG();
     if(page === 'pg-loyalty') loadLoyaltyPG();
@@ -3950,6 +3958,84 @@ function renderCustomers(){
 document.getElementById('custSearch')?.addEventListener('input', renderCustomers);
 document.getElementById('custRefreshBtn')?.addEventListener('click', loadCustomers);
 lazyLoad('customers', loadCustomers);
+
+// ── ANALYTICS ── reads the full orders collection (not the 50-order
+// cap used on the Dashboard widgets) so trends reflect the real
+// history. Financial totals (GST, refunds, discounts) stay on the
+// Sales & Expenses page — this page is about trends, not accounting.
+async function loadAnalytics(){
+  const chartEl = document.getElementById('anChart');
+  const topEl = document.getElementById('anTopItems');
+  const fulfillEl = document.getElementById('anFulfillType');
+  try{
+    const snap = await getDocs(collection(db2,'orders'));
+    const orders = snap.docs.map(d => ({id:d.id, ...d.data()}))
+      .filter(o => o.createdAt?.toDate);
+
+    const totalRevenue = orders.reduce((s,o) => s + (Number(o.total)||0), 0);
+    document.getElementById('anTotalRevenue').textContent = money(totalRevenue);
+    document.getElementById('anTotalOrders').textContent = orders.length;
+    document.getElementById('anAOV').textContent = money(orders.length ? totalRevenue/orders.length : 0);
+
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7*24*60*60*1000);
+    const weekRevenue = orders.filter(o => o.createdAt.toDate() >= sevenDaysAgo)
+      .reduce((s,o) => s + (Number(o.total)||0), 0);
+    document.getElementById('anWeekRevenue').textContent = money(weekRevenue);
+
+    // Revenue by day, last 14 days
+    const days = [];
+    for(let i=13; i>=0; i--){
+      const d = new Date(now.getTime() - i*24*60*60*1000);
+      days.push({ key: d.toDateString(), label: d.toLocaleDateString('en-AU',{day:'numeric',month:'short'}), total: 0 });
+    }
+    const dayMap = Object.fromEntries(days.map(d => [d.key, d]));
+    orders.forEach(o => {
+      const key = o.createdAt.toDate().toDateString();
+      if(dayMap[key]) dayMap[key].total += Number(o.total)||0;
+    });
+    const maxDay = Math.max(1, ...days.map(d => d.total));
+    chartEl.innerHTML = days.map(d => `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:.3rem">
+        <span style="font-size:.62rem;color:var(--mid)">${d.total ? '$'+Math.round(d.total) : ''}</span>
+        <div style="width:100%;background:var(--olive,#4B5A3A);border-radius:3px 3px 0 0;height:${Math.max(2,(d.total/maxDay)*130)}px" title="${esc2(d.label)}: ${money(d.total)}"></div>
+        <span style="font-size:.6rem;color:var(--lt);writing-mode:vertical-rl;text-orientation:mixed;height:36px">${esc2(d.label)}</span>
+      </div>`).join('');
+
+    // Top selling items, all time
+    const itemCounts = {};
+    orders.forEach(o => {
+      (o.items||[]).forEach(it => {
+        const name = it.name || 'Unknown item';
+        itemCounts[name] = (itemCounts[name]||0) + (Number(it.qty)||1);
+      });
+    });
+    const topItems = Object.entries(itemCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    topEl.innerHTML = topItems.length
+      ? '<ol style="margin:0;padding-left:1.2rem">' + topItems.map(([name,count]) =>
+          `<li style="padding:.3rem 0;font-size:.85rem">${esc2(name)} <span style="color:var(--mid);float:right">×${count}</span></li>`).join('') + '</ol>'
+      : '<p style="color:var(--lt);font-size:.85rem">No item data yet.</p>';
+
+    // Orders by fulfillment type
+    const typeCounts = {};
+    orders.forEach(o => {
+      const t = o.fulfillType || 'unspecified';
+      typeCounts[t] = (typeCounts[t]||0) + 1;
+    });
+    const typeEntries = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
+    fulfillEl.innerHTML = typeEntries.length
+      ? typeEntries.map(([type,count]) => {
+          const pct = orders.length ? Math.round((count/orders.length)*100) : 0;
+          return `<div style="margin-bottom:.6rem">
+            <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.25rem"><span style="text-transform:capitalize">${esc2(type)}</span><span style="color:var(--mid)">${count} (${pct}%)</span></div>
+            <div style="background:var(--rule,#EDE4D2);border-radius:6px;height:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--olive,#4B5A3A)"></div></div>
+          </div>`;
+        }).join('')
+      : '<p style="color:var(--lt);font-size:.85rem">No order data yet.</p>';
+  }catch(err){
+    chartEl.innerHTML = `<p style="color:#D70015;font-size:.85rem">Could not load analytics: ${esc2(err.message)}</p>`;
+  }
+}
 
 // ── DISCOUNTS ── same promotions collection the checkout verifies against.
 async function loadDiscounts(){
