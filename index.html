@@ -280,6 +280,7 @@
       <p class="nav-group-label">Orders</p>
       <div class="nav-item" data-page="orders"><span class="dot"></span> Orders</div>
       <div class="nav-item" data-page="analytics"><span class="dot"></span> Analytics</div>
+      <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses</div>
 
       <p class="nav-group-label">Menu</p>
       <div class="nav-item" data-page="menu-brunch"><span class="dot"></span> Brunch Menu</div>
@@ -318,6 +319,7 @@
 
       <p class="nav-group-label">Reports</p>
       <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; Expenses</div>
+      <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses Tracker</div>
       <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
 
       <p class="nav-group-label">Settings</p>
@@ -710,6 +712,70 @@
           </div>
         </div>
         <p style="font-size:.72rem;color:var(--lt);margin:.8rem 0 0;padding:0 .2rem">For GST, refunds, discounts, and surcharge breakdowns, see the Sales &amp; Expenses page — this page focuses on trends, not accounting totals.</p>
+      </div>
+
+      <div class="page-panel" id="page-expenses">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa" id="expSubTabs">
+            <button type="button" class="hp-subtab expsub-tab active" data-expsub="add">➕ Add Expense</button>
+            <button type="button" class="hp-subtab expsub-tab" data-expsub="all">📋 All Expenses</button>
+            <button type="button" class="hp-subtab expsub-tab" data-expsub="fy">📊 Financial Year Report</button>
+          </div>
+
+          <div id="expsub-add" class="expsub-panel" style="padding:1.4rem">
+            <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Track what you spend running the business. For your own records only — doesn't connect to any bank account. Uses the same <code>expenses</code> collection as the main admin, so entries show up in both places.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+              <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Description</label><input id="expDesc2" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px" placeholder="e.g. Netlify subscription"></div>
+              <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Category</label>
+                <select id="expCategory2" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px">
+                  <option>Hosting &amp; Domain</option><option>Software &amp; Subscriptions</option><option>Payment Processing Fees</option>
+                  <option>SMS &amp; Notifications</option><option>Marketing &amp; Advertising</option><option>Equipment &amp; Supplies</option>
+                  <option>Professional Services</option><option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+              <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Amount ($ AUD)</label><input id="expAmount2" type="number" step="0.01" min="0" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+              <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Date</label><input id="expDate2" type="date" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+              <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Repeats</label>
+                <select id="expRepeats2" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px">
+                  <option value="">Doesn't repeat</option><option value="weekly">Weekly</option><option value="fortnightly">Fortnightly</option>
+                  <option value="monthly">Monthly</option><option value="yearly">Yearly</option>
+                </select>
+              </div>
+              <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Receipt (optional)</label><input id="expReceiptFile2" type="file" accept="image/*,.pdf" style="width:100%;padding:.4rem 0"></div>
+            </div>
+            <div style="margin-bottom:.8rem"><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Notes (optional)</label><input id="expNotes2" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></div>
+            <button id="addExpenseBtn2" class="btn">+ Add Expense</button>
+            <button id="cancelEditExpenseBtn2" class="btn" style="display:none;background:var(--mid)">Cancel Edit</button>
+            <span id="expSaveStatus2" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+          </div>
+
+          <div id="expsub-all" class="expsub-panel" style="padding:1.4rem;display:none">
+            <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+              <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#EDE4D2)"><th style="padding:.5rem">Date</th><th style="padding:.5rem">Description</th><th style="padding:.5rem">Category</th><th style="padding:.5rem">Amount</th><th style="padding:.5rem">Repeats</th><th style="padding:.5rem">Receipt</th><th style="padding:.5rem">Action</th></tr></thead>
+              <tbody id="expensesTbody2"></tbody>
+            </table>
+            <p id="expensesEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No expenses recorded yet.</p>
+          </div>
+
+          <div id="expsub-fy" class="expsub-panel" style="padding:1.4rem;display:none">
+            <div style="display:flex;gap:.8rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem">
+              <div style="flex:1;min-width:160px"><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Financial Year (1 Jul – 30 Jun)</label><select id="expFYSelect2" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"></select></div>
+              <button id="genFYReportBtn2" class="btn">Generate Report</button>
+              <button id="downloadFYCsvBtn2" class="btn" style="display:none;background:var(--mid)">Download CSV</button>
+            </div>
+            <div id="fyReportArea2" style="display:none">
+              <div class="stat-row" id="fyCategoryStats2" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></div>
+              <div class="stat-row" style="grid-template-columns:repeat(2,1fr);margin-top:1rem">
+                <div class="stat-card"><p class="lbl">Total for this Financial Year</p><p class="val" id="fyGrandTotal2">$0.00</p></div>
+                <div class="stat-card"><p class="lbl">GST Included</p><p class="val" id="fyGstTotal2">$0.00</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ══ NEW "BY PAGE" NAVIGATION — Homepage (fully built) ══ -->
@@ -1222,6 +1288,7 @@ const pageTitles = {
   orders: ['Orders', 'Live data from your production database'],
   websitesecurity: ['Website Security', 'Coming soon'],
   'analytics': ['Analytics', 'Revenue trends and top sellers'],
+  'expenses': ['Expenses', 'Track business costs and financial year totals'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
   charcuterie: ['Charcuterie Board', 'Board designs, categories, and items customers pick from'],
@@ -1283,6 +1350,7 @@ document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
       document.getElementById('page-'+page)?.classList.add('active');
     }
     if(page === 'analytics') loadAnalytics();
+    if(page === 'expenses') loadExpensesPG();
     if(page === 'pg-gallery') loadGalleryPG();
     if(page === 'pg-rewards') loadEmergencyServicesPG();
     if(page === 'pg-loyalty') loadLoyaltyPG();
@@ -3918,8 +3986,10 @@ async function loadVouchersRV(){
 import { getApps, getApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getStorage, ref as sRef2, uploadBytes as sUpload2, getDownloadURL as sUrl2 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
 
 const app2 = getApp(); const auth2 = getAuth(app2); const db2 = getFirestore(app2);
+const storage2 = getStorage(app2);
 const esc2 = v => String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = n => '$'+(Number(n)||0).toFixed(2);
 const when = ts => { try{ const d = ts?.toDate ? ts.toDate() : new Date(ts); return d.toLocaleString('en-AU',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); }catch(e){ return '—'; } };
@@ -4210,6 +4280,230 @@ document.getElementById('cmPostBtn')?.addEventListener('click', async ()=>{
   loadCommunity();
 });
 lazyLoad('community', loadCommunity);
+
+// ── EXPENSES ── same 'expenses' collection the main admin uses, so
+// entries show up in both places. Receipt-photo AI scanning and live
+// Twilio/Square cost pulling are NOT included here — those need a
+// Netlify Function, and this dashboard's repo has no backend of its
+// own yet. Everything else (add/edit/delete, recurring, FY report,
+// CSV export) works exactly like the main admin.
+document.querySelectorAll('.expsub-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.expsub-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.expsub-panel').forEach(p=>p.style.display='none');
+    document.getElementById('expsub-'+btn.dataset.expsub).style.display='block';
+    if(btn.dataset.expsub === 'all') loadExpensesPG();
+    if(btn.dataset.expsub === 'fy') populateFYSelect();
+  });
+});
+
+let allExpensesCache2 = [];
+let editingExpenseId2 = null;
+
+function nextRepeatDate2(dateStr, repeats){
+  const d = new Date(dateStr + 'T00:00:00');
+  if(repeats === 'weekly') d.setDate(d.getDate() + 7);
+  else if(repeats === 'fortnightly') d.setDate(d.getDate() + 14);
+  else if(repeats === 'monthly') d.setMonth(d.getMonth() + 1);
+  else if(repeats === 'yearly') d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().slice(0,10);
+}
+
+async function processRecurringExpenses2(){
+  const today = new Date().toISOString().slice(0,10);
+  const due = allExpensesCache2.filter(e => e.repeats && e.nextDueDate && e.nextDueDate <= today);
+  if(!due.length) return false;
+  for(const e of due){
+    await addDoc(collection(db2,'expenses'), {
+      description: e.description, category: e.category, amount: e.amount,
+      date: e.nextDueDate, notes: e.notes || '', repeats: e.repeats,
+      receiptUrl: null, createdAt: serverTimestamp()
+    });
+    await updateDoc(doc(db2,'expenses', e.id), { nextDueDate: nextRepeatDate2(e.nextDueDate, e.repeats) });
+  }
+  return true;
+}
+
+function resetExpenseForm2(){
+  editingExpenseId2 = null;
+  document.getElementById('expDesc2').value = '';
+  document.getElementById('expAmount2').value = '';
+  document.getElementById('expDate2').value = '';
+  document.getElementById('expNotes2').value = '';
+  document.getElementById('expRepeats2').value = '';
+  document.getElementById('expCategory2').selectedIndex = 0;
+  document.getElementById('addExpenseBtn2').textContent = '+ Add Expense';
+  document.getElementById('cancelEditExpenseBtn2').style.display = 'none';
+}
+document.getElementById('cancelEditExpenseBtn2')?.addEventListener('click', resetExpenseForm2);
+
+async function loadExpensesPG(){
+  const tbody = document.getElementById('expensesTbody2');
+  const empty = document.getElementById('expensesEmpty2');
+  if(!tbody) return;
+  try{
+    const snap = await getDocs(query(collection(db2,'expenses'), orderBy('date','desc')));
+    allExpensesCache2 = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    const createdAny = await processRecurringExpenses2();
+    if(createdAny){
+      const snap2 = await getDocs(query(collection(db2,'expenses'), orderBy('date','desc')));
+      allExpensesCache2 = snap2.docs.map(d=>({id:d.id, ...d.data()}));
+    }
+    if(!allExpensesCache2.length){
+      tbody.innerHTML = ''; empty.style.display = 'block'; return;
+    }
+    empty.style.display = 'none';
+    const REPEAT_LABELS = {weekly:'Weekly', fortnightly:'Fortnightly', monthly:'Monthly', yearly:'Yearly'};
+    tbody.innerHTML = allExpensesCache2.map(e => `
+      <tr style="border-bottom:1px solid var(--rule,#EDE4D2)">
+        <td style="padding:.5rem">${esc2(e.date||'')}</td>
+        <td style="padding:.5rem">${esc2(e.description||'')}</td>
+        <td style="padding:.5rem">${esc2(e.category||'')}</td>
+        <td style="padding:.5rem;font-weight:700">${money(e.amount)}</td>
+        <td style="padding:.5rem;font-size:.78rem">${e.repeats ? esc2(REPEAT_LABELS[e.repeats]||e.repeats) : '—'}</td>
+        <td style="padding:.5rem">${e.receiptUrl ? `<a href="${esc2(e.receiptUrl)}" target="_blank" rel="noopener">View</a>` : '—'}</td>
+        <td style="padding:.5rem;text-align:right"><button class="btn" data-edit-exp2="${e.id}" style="font-size:.68rem;padding:.3rem .6rem;margin-right:.3rem">Edit</button><button class="btn" data-del-exp2="${e.id}" style="font-size:.68rem;padding:.3rem .6rem;background:#C24A1E">Delete</button></td>
+      </tr>`).join('');
+    tbody.querySelectorAll('[data-edit-exp2]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const exp = allExpensesCache2.find(x=>x.id===btn.dataset.editExp2);
+        if(!exp) return;
+        editingExpenseId2 = exp.id;
+        document.getElementById('expDesc2').value = exp.description || '';
+        document.getElementById('expCategory2').value = exp.category || '';
+        document.getElementById('expAmount2').value = exp.amount || '';
+        document.getElementById('expDate2').value = exp.date || '';
+        document.getElementById('expNotes2').value = exp.notes || '';
+        document.getElementById('expRepeats2').value = exp.repeats || '';
+        document.getElementById('addExpenseBtn2').textContent = 'Save Changes';
+        document.getElementById('cancelEditExpenseBtn2').style.display = 'inline-block';
+        document.querySelector('.expsub-tab[data-expsub="add"]').click();
+      });
+    });
+    tbody.querySelectorAll('[data-del-exp2]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('Delete this expense record? This cannot be undone.')) return;
+        try{ await deleteDoc(doc(db2,'expenses',btn.dataset.delExp2)); loadExpensesPG(); }
+        catch(e){ alert('Could not delete: '+e.message); }
+      });
+    });
+  }catch(err){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    empty.textContent = 'Could not load expenses: ' + err.message;
+  }
+}
+
+document.getElementById('addExpenseBtn2')?.addEventListener('click', async ()=>{
+  const description = document.getElementById('expDesc2').value.trim();
+  const category = document.getElementById('expCategory2').value;
+  const amount = parseFloat(document.getElementById('expAmount2').value);
+  const date = document.getElementById('expDate2').value;
+  const notes = document.getElementById('expNotes2').value.trim();
+  const repeats = document.getElementById('expRepeats2').value;
+  const receiptFile = document.getElementById('expReceiptFile2').files[0];
+  const status = document.getElementById('expSaveStatus2');
+
+  if(!description || !date || !amount || amount <= 0){
+    alert('Please fill in at least a description, amount, and date.');
+    return;
+  }
+  const addBtn = document.getElementById('addExpenseBtn2');
+  addBtn.disabled = true;
+  status.style.color = 'var(--mid)';
+  status.textContent = receiptFile ? 'Uploading receipt…' : 'Saving…';
+  try{
+    let receiptUrl = '';
+    if(receiptFile){
+      const fileRef = sRef2(storage2, `receipts/${Date.now()}_${receiptFile.name}`);
+      await sUpload2(fileRef, receiptFile);
+      receiptUrl = await sUrl2(fileRef);
+    }
+    const docData = { description, category, amount, date, notes, repeats: repeats || null };
+    if(receiptFile) docData.receiptUrl = receiptUrl;
+    docData.nextDueDate = repeats ? nextRepeatDate2(date, repeats) : null;
+
+    if(editingExpenseId2){
+      await updateDoc(doc(db2,'expenses',editingExpenseId2), docData);
+      status.textContent = '✓ Changes saved';
+    }else{
+      docData.receiptUrl = receiptUrl || null;
+      docData.createdAt = serverTimestamp();
+      await addDoc(collection(db2,'expenses'), docData);
+      status.textContent = '✓ Added';
+    }
+    resetExpenseForm2();
+    status.style.color = 'var(--olive,#4B5A3A)';
+    setTimeout(()=>status.textContent='', 2500);
+    loadExpensesPG();
+  }catch(e){
+    alert('Could not save expense: ' + e.message);
+    status.textContent = '';
+  }finally{
+    addBtn.disabled = false;
+  }
+});
+
+function populateFYSelect(){
+  const sel = document.getElementById('expFYSelect2');
+  if(sel.options.length) return;
+  const nowYear = new Date().getFullYear();
+  const startYear = nowYear - 4;
+  for(let y = nowYear + 1; y >= startYear; y--){
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = `FY ${y}–${(y+1).toString().slice(2)}`;
+    sel.appendChild(opt);
+  }
+}
+
+let lastFYReportRows2 = [];
+document.getElementById('genFYReportBtn2')?.addEventListener('click', ()=>{
+  const fyStartYear = parseInt(document.getElementById('expFYSelect2').value, 10);
+  const fyStart = `${fyStartYear}-07-01`;
+  const fyEnd = `${fyStartYear+1}-06-30`;
+  const rows = allExpensesCache2.filter(e => e.date >= fyStart && e.date <= fyEnd);
+  lastFYReportRows2 = rows;
+
+  const byCategory = {};
+  let grandTotal = 0, gstTotal = 0;
+  rows.forEach(e=>{
+    const cat = e.category || 'Other';
+    byCategory[cat] = (byCategory[cat]||0) + (Number(e.amount)||0);
+    grandTotal += Number(e.amount)||0;
+    gstTotal += Number(e.gstAmount)||0;
+  });
+  const statsEl = document.getElementById('fyCategoryStats2');
+  const cats = Object.keys(byCategory);
+  statsEl.innerHTML = cats.length
+    ? cats.map(cat => `<div class="stat-card"><p class="lbl">${esc2(cat)}</p><p class="val">${money(byCategory[cat])}</p></div>`).join('')
+    : '<p style="color:var(--mid);font-style:italic;grid-column:1/-1">No expenses recorded in this financial year.</p>';
+  document.getElementById('fyGrandTotal2').textContent = money(grandTotal);
+  document.getElementById('fyGstTotal2').textContent = money(gstTotal);
+  document.getElementById('fyReportArea2').style.display = 'block';
+  document.getElementById('downloadFYCsvBtn2').style.display = rows.length ? 'inline-block' : 'none';
+});
+
+document.getElementById('downloadFYCsvBtn2')?.addEventListener('click', ()=>{
+  if(!lastFYReportRows2.length) return;
+  const fyLabel = document.getElementById('expFYSelect2').selectedOptions[0].textContent;
+  const header = ['Date','Description','Category','Amount (AUD)','GST Included (AUD)','Notes'];
+  const csvRows = [header.join(',')];
+  lastFYReportRows2.forEach(e=>{
+    const cells = [e.date||'', e.description||'', e.category||'', (Number(e.amount)||0).toFixed(2), (Number(e.gstAmount)||0).toFixed(2), e.notes||''];
+    csvRows.push(cells.map(c=>{
+      const s = String(c);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+    }).join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `foodielove-expenses-${fyLabel.replace(/\s/g,'')}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
 </script>
 
 
