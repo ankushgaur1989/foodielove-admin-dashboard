@@ -328,6 +328,9 @@
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
 
+      <p class="nav-group-label">Meta</p>
+      <div class="nav-item" data-page="featureTracker"><span class="dot"></span> Feature Parity</div>
+
       <div class="footnote">Isolated build — separate from the main website. Reads and writes the same live data as the main admin — changes here go live immediately, same as there.</div>
     </nav>
 
@@ -1183,6 +1186,27 @@
   </table></div>
  </div>
 </div>
+      <div class="page-panel" id="page-featureTracker">
+ <div class="panel" style="padding:1.4rem">
+  <p style="color:var(--mid);font-size:.85rem;margin:0 0 1rem">What's the same, thinner, or missing compared to the main admin. This list lives in Firestore — the same data either admin reads, so a status change here shows up in the main admin's Feature Parity tab too, and vice versa.</p>
+  <div id="featureTrackerWrap2">Loading…</div>
+  <details style="margin-top:1.2rem">
+   <summary style="font-size:.78rem;color:var(--mid);cursor:pointer">+ Add a feature manually</summary>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.6rem;max-width:640px">
+    <input type="text" id="featNewCategory2" placeholder="Category, e.g. Menu &amp; Food" style="padding:.6rem .8rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;font-family:inherit;font-size:.85rem"/>
+    <input type="text" id="featNewName2" placeholder="Feature name" style="padding:.6rem .8rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;font-family:inherit;font-size:.85rem"/>
+    <input type="text" id="featNewDesc2" placeholder="Description (optional)" style="padding:.6rem .8rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;font-family:inherit;font-size:.85rem;grid-column:1/3"/>
+    <select id="featNewStatus2" style="padding:.6rem .8rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px;font-family:inherit;font-size:.85rem">
+     <option value="common">In Both</option>
+     <option value="partial" selected>Partial In New</option>
+     <option value="old-only">Old Admin Only</option>
+     <option value="new-only">New Admin Only</option>
+    </select>
+    <button class="btn" id="featAddBtn2">+ Add</button>
+   </div>
+  </details>
+ </div>
+</div>
     </div>
   </div>
 </div>
@@ -1318,6 +1342,7 @@ const pageTitles = {
   photos: ['Photos', 'Every photo on the live site, in one place'],
   settings: ['Site Settings', ''],
   security: ['Security', ''],
+  featureTracker: ['Feature Parity', 'What matches, differs, or is missing between this admin and the main one'],
   'pg-homepage': ['Homepage', 'Everything for your homepage — photos, text, all in one place'],
   'pg-menu': ['Menu Page', 'Everything for your Menu page — items, photos, text, all in one place'],
   'pg-catering': ['Catering Page', 'Everything for your Catering page — items, charcuterie, photos, all in one place'],
@@ -4028,6 +4053,166 @@ function renderCustomers(){
 document.getElementById('custSearch')?.addEventListener('input', renderCustomers);
 document.getElementById('custRefreshBtn')?.addEventListener('click', loadCustomers);
 lazyLoad('customers', loadCustomers);
+
+// ── FEATURE PARITY TRACKER ──
+// Same Firestore collection ('featureTracker') as the main admin's
+// Feature Parity tab reads and writes — so a status change here shows
+// up there next time that tab opens, and vice versa. No separate sync
+// step; it's one shared list either admin happens to be looking at.
+const FEATURE_STATUS_META2 = {
+  'common':   { label: 'In Both', bg: '#E3F5E8', color: '#1E7D3C' },
+  'partial':  { label: 'Partial In New', bg: '#FFF3D6', color: '#8A5A00' },
+  'old-only': { label: 'Old Admin Only', bg: '#F0EBE0', color: 'var(--mid)' },
+  'new-only': { label: 'New Admin Only', bg: '#E3EEFD', color: '#1D5FAD' }
+};
+let featureTrackerCache2 = [];
+const FEATURE_MASTER_LIST2 = [
+  { category: 'Dashboard & Overview', name: 'Dashboard', description: 'Landing view — quick search, recent enquiries, bento summary cards', status: 'partial' },
+  { category: 'Dashboard & Overview', name: 'Data Usage → Overview', description: 'Real document counts per Firestore collection ("Refresh Counts")', status: 'old-only' },
+  { category: 'Menu & Food', name: 'Brunch Menu', description: 'Full item CRUD — name, price, section, description, photo. Also holds Catering items via a page filter.', status: 'common' },
+  { category: 'Menu & Food', name: 'Catering Menu', description: 'Same underlying data as Brunch Menu, filtered to catering-page items', status: 'partial' },
+  { category: 'Menu & Food', name: 'Charcuterie Board', description: 'Board design options (3 styles, $25 min), category management, knife set add-on price', status: 'partial' },
+  { category: 'Menu & Food', name: 'Macro Bowl (Gym Junkies)', description: 'Old Gym Junkies ingredient data — reference/import source for Vital Bowls', status: 'partial' },
+  { category: 'Menu & Food', name: 'Vital Bowls', description: '"Build Your Own Salad Bowl" — base/protein/topping/dressing ingredients, base price, bowl photo', status: 'old-only' },
+  { category: 'Homepage & Site Content', name: 'Visibility', description: 'Ordering live/off, Menu/Catering live toggles, section + item visibility, homepage carousel, Vital Bowls settings, bookings open/closed', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Gallery', description: 'Photo gallery management for gallery.html', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Photos', description: 'Site-wide photo registry (hero images, section photos, etc.)', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Web Text Editor', description: 'Site-wide editable text blocks', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Photo Consistency Tool', description: 'Bulk re-compress existing photos, with real error surfacing', status: 'old-only' },
+  { category: 'Homepage & Site Content', name: 'Feature Flags', description: 'Toggle experimental/in-progress features on/off sitewide', status: 'old-only' },
+  { category: 'Homepage & Site Content', name: 'Blog Posts', description: 'Blog CRUD for blog.html', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Music Playlist', description: 'Sonic Hub playlist management', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Instagram Feed', description: 'Instagram post curation for the homepage feed', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Events', description: 'Events CRUD for events.html', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Community Board', description: 'Community post management', status: 'partial' },
+  { category: 'Homepage & Site Content', name: 'Countdown Banner', description: 'Homepage countdown banner content + scheduling', status: 'partial' },
+  { category: 'Orders & Operations', name: 'Reservations', description: 'Table booking management, accept/reject, bookings open/closed toggle', status: 'partial' },
+  { category: 'Orders & Operations', name: 'Floor Plan', description: 'Table layout/count configuration (drives booking capacity checks)', status: 'partial' },
+  { category: 'Orders & Operations', name: 'All Orders', description: 'Full order list. Old admin: statuses + payment editing. New admin: view-only so far.', status: 'partial' },
+  { category: 'Orders & Operations', name: 'Catering Requests', description: 'Corporate/catering enquiry management', status: 'old-only' },
+  { category: 'Orders & Operations', name: 'Search Orders', description: 'Find a customer/order by any single detail', status: 'partial' },
+  { category: 'Orders & Operations', name: 'Kitchen Display (KDS)', description: 'Live kitchen ticket display', status: 'old-only' },
+  { category: 'Orders & Operations', name: 'Uber', description: 'Uber Direct delivery integration/booking', status: 'old-only' },
+  { category: 'Sales, Analytics & Square', name: 'Sales (Reports)', description: 'Sales comparison reports', status: 'partial' },
+  { category: 'Sales, Analytics & Square', name: 'Analytics', description: 'Site analytics dashboard', status: 'partial' },
+  { category: 'Sales, Analytics & Square', name: 'High-Risk Orders', description: 'Fraud/risk flagged order review', status: 'old-only' },
+  { category: 'Sales, Analytics & Square', name: 'Square: Connection & OAuth', description: 'Square account linking', status: 'old-only' },
+  { category: 'Sales, Analytics & Square', name: 'Square: Sales & Catalog Sync', description: 'Nightly sales dashboard, Menu ↔ Square catalog two-way sync', status: 'old-only' },
+  { category: 'Money', name: 'Gift Cards', description: 'Square gift card management', status: 'old-only' },
+  { category: 'Money', name: 'Gift Vouchers', description: 'Gift voucher purchases, balances, redemption tracking', status: 'partial' },
+  { category: 'Money', name: 'Emergency Rewards', description: 'Emergency/manual loyalty reward issuance', status: 'partial' },
+  { category: 'Money', name: 'Expenses', description: 'Business expense tracking', status: 'common' },
+  { category: 'Money', name: 'Merchandise', description: 'Merch item CRUD', status: 'partial' },
+  { category: 'Money', name: 'Offers / Discounts', description: 'Promotions/discount codes — new admin has two nav entries into the same system', status: 'partial' },
+  { category: 'Site Control', name: 'Maintenance Mode', description: 'Full-site maintenance toggle', status: 'partial' },
+  { category: 'Site Control', name: 'Page Visibility', description: 'Per-page live/hidden toggles', status: 'old-only' },
+  { category: 'Staff, Careers & Security', name: 'Staff', description: 'Staff account management, discount permissions', status: 'partial' },
+  { category: 'Staff, Careers & Security', name: 'Careers', description: 'Job posting management, application review', status: 'old-only' },
+  { category: 'Staff, Careers & Security', name: 'Security', description: 'Passkey management, account security settings. New admin also has a second, disabled "Website Security" nav entry not wired up yet.', status: 'partial' },
+  { category: 'Staff, Careers & Security', name: 'Security Guard', description: 'Automated daily security check reports', status: 'old-only' },
+  { category: 'Staff, Careers & Security', name: 'Website Doctor (Linter)', description: 'Layout audit / broken-element scanner', status: 'old-only' },
+  { category: 'Account', name: 'Profile', description: "Owner's own display name/account settings", status: 'partial' },
+  { category: 'New In Parallel Admin', name: 'Customer History', description: 'Built live from orders — one row per unique customer, spend and order count', status: 'new-only' },
+  { category: 'New In Parallel Admin', name: 'Payments', description: 'Dedicated payments section', status: 'new-only' },
+  { category: 'New In Parallel Admin', name: 'Settings', description: 'Consolidated settings page (old admin spreads these across many specific tabs)', status: 'new-only' },
+  { category: 'New In Parallel Admin', name: 'Command Palette (⌘K)', description: 'Keyboard-driven navigation across the new admin, auto-built from the sidebar', status: 'new-only' },
+  { category: 'New In Parallel Admin', name: 'Dark Mode', description: 'Site-wide dark theme toggle', status: 'new-only' },
+  { category: 'New In Parallel Admin', name: 'Toast Notifications', description: 'Non-blocking success/error notifications', status: 'new-only' }
+];
+async function loadFeatureTracker2(){
+  const wrap = document.getElementById('featureTrackerWrap2');
+  try{
+    const snap = await getDocs(collection(db2,'featureTracker'));
+    featureTrackerCache2 = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    // Self-seeding, same as the main admin's copy of this tab — whichever
+    // admin gets opened first is the one that creates the master list in
+    // Firestore. Existing items' status is never touched on reseed.
+    const existingKeys = new Set(featureTrackerCache2.map(f=>f.category+'|'+f.name));
+    for(const item of FEATURE_MASTER_LIST2){
+      const key = item.category+'|'+item.name;
+      if(existingKeys.has(key)) continue;
+      try{
+        const ref = await addDoc(collection(db2,'featureTracker'), { ...item, createdAtMs: Date.now(), createdAt: serverTimestamp() });
+        featureTrackerCache2.push({ id: ref.id, ...item, createdAtMs: Date.now() });
+      }catch(syncErr){ /* one failing item doesn't block the rest */ }
+    }
+  }catch(e){ featureTrackerCache2 = []; if(wrap) wrap.innerHTML = '<p style="color:var(--mid);font-size:.85rem">Could not load — ' + esc2(e.message) + '</p>'; return; }
+  renderFeatureTracker2();
+}
+function renderFeatureTracker2(){
+  const wrap = document.getElementById('featureTrackerWrap2');
+  if(!wrap) return;
+  const counts = { common:0, partial:0, 'old-only':0, 'new-only':0 };
+  featureTrackerCache2.forEach(f=>{ if(counts[f.status]!==undefined) counts[f.status]++; });
+  const summaryHtml = Object.entries(FEATURE_STATUS_META2).map(([key,meta])=>
+    `<span style="display:inline-flex;align-items:center;gap:.4rem;background:${meta.bg};color:${meta.color};font-weight:700;font-size:.78rem;border-radius:20px;padding:.35rem .9rem;margin:0 .4rem .4rem 0">${meta.label}: ${counts[key]||0}</span>`
+  ).join('');
+  const categories = [];
+  const byCategory = {};
+  featureTrackerCache2.forEach(f=>{
+    if(!byCategory[f.category]){ byCategory[f.category]=[]; categories.push(f.category); }
+    byCategory[f.category].push(f);
+  });
+  const catHtml = categories.map(cat=>{
+    const rows = byCategory[cat].map(f=>{
+      const meta = FEATURE_STATUS_META2[f.status] || FEATURE_STATUS_META2['old-only'];
+      return `<div style="display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .3rem;border-bottom:1px solid var(--rule,#E3D6BA)" data-feature-id="${f.id}">
+        <div style="flex:1">
+          <div style="font-size:.85rem;font-weight:600">${esc2(f.name)}</div>
+          <div style="font-size:.76rem;color:var(--mid);margin-top:.15rem">${esc2(f.description||'')}</div>
+        </div>
+        <select data-feature-status2="${f.id}" style="background:${meta.bg};color:${meta.color};font-weight:700;font-size:.74rem;border:none;border-radius:20px;padding:.35rem .7rem;cursor:pointer;flex-shrink:0">
+          ${Object.entries(FEATURE_STATUS_META2).map(([key,m])=>`<option value="${key}" ${f.status===key?'selected':''}>${m.label}</option>`).join('')}
+        </select>
+        <button type="button" data-feature-delete2="${f.id}" style="background:none;border:none;color:var(--lt,#999);cursor:pointer;font-size:.85rem;padding:.2rem .4rem;flex-shrink:0">✕</button>
+      </div>`;
+    }).join('');
+    return `<div class="panel" style="padding:1.2rem;margin-bottom:1rem"><h3 style="margin:0 0 .6rem;font-size:.95rem">${esc2(cat)}</h3><div>${rows}</div></div>`;
+  }).join('');
+  wrap.innerHTML = `<div style="margin-bottom:1.2rem">${summaryHtml}</div>${catHtml}`;
+  wrap.querySelectorAll('[data-feature-status2]').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      const id = sel.dataset.featureStatus2;
+      const newStatus = sel.value;
+      try{
+        await updateDoc(doc(db2,'featureTracker',id), { status: newStatus });
+        const f = featureTrackerCache2.find(x=>x.id===id);
+        if(f) f.status = newStatus;
+        renderFeatureTracker2();
+      }catch(e){ alert('Could not update status: ' + e.message); }
+    });
+  });
+  wrap.querySelectorAll('[data-feature-delete2]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.featureDelete2;
+      if(!confirm('Remove this from the tracker?')) return;
+      try{
+        await deleteDoc(doc(db2,'featureTracker',id));
+        featureTrackerCache2 = featureTrackerCache2.filter(x=>x.id!==id);
+        renderFeatureTracker2();
+      }catch(e){ alert('Could not delete: ' + e.message); }
+    });
+  });
+}
+async function addFeatureManually2(){
+  const catInput = document.getElementById('featNewCategory2');
+  const nameInput = document.getElementById('featNewName2');
+  const descInput = document.getElementById('featNewDesc2');
+  const statusInput = document.getElementById('featNewStatus2');
+  const category = catInput.value.trim();
+  const name = nameInput.value.trim();
+  if(!category || !name) return;
+  const description = descInput.value.trim();
+  const status = statusInput.value;
+  try{
+    const ref = await addDoc(collection(db2,'featureTracker'), { category, name, description, status, createdAtMs: Date.now(), createdAt: serverTimestamp() });
+    featureTrackerCache2.push({ id: ref.id, category, name, description, status, createdAtMs: Date.now() });
+    catInput.value=''; nameInput.value=''; descInput.value='';
+    renderFeatureTracker2();
+  }catch(e){ alert('Could not add: ' + e.message); }
+}
+document.getElementById('featAddBtn2')?.addEventListener('click', addFeatureManually2);
+lazyLoad('featureTracker', loadFeatureTracker2);
 
 // ── ANALYTICS ── reads the full orders collection (not the 50-order
 // cap used on the Dashboard widgets) so trends reflect the real
