@@ -4689,6 +4689,18 @@ document.getElementById('downloadFYCsvBtn2')?.addEventListener('click', ()=>{
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 });
+
+// Real bug fix, confirmed via actual click-through testing: the sidebar
+// nav click handler lives in an earlier, separate <script type="module">
+// block - ES modules each get their own isolated top-level scope, so
+// loadAnalytics/loadExpensesPG (defined in THIS module) were never
+// actually reachable from there, despite both being fully built and
+// working functions. Clicking Analytics or Expenses threw "is not
+// defined" every time and never loaded anything. window is the one
+// thing every script on the page shares regardless of module
+// boundaries, so exposing them here is what actually bridges the gap.
+window.loadAnalytics = loadAnalytics;
+window.loadExpensesPG = loadExpensesPG;
 </script>
 
 
