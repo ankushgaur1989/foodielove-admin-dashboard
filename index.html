@@ -300,8 +300,12 @@
       <a href="https://www.foodielove.com.au/kds.html" target="_blank" rel="noopener" class="nav-item" style="display:flex;align-items:center;text-decoration:none;color:inherit"><span class="dot"></span> Kitchen Display (KDS) ↗</a>
       <div class="nav-item" data-page="menu-visibility"><span class="dot"></span> Sections &amp; Visibility</div>
 
-      <p class="nav-group-label">Coming Soon</p>
-      <div class="nav-item" data-page="websitesecurity" style="opacity:.55"><span class="dot"></span> Website Security</div>
+      <p class="nav-group-label">Website Health</p>
+      <div class="nav-item" data-page="websitesecurity"><span class="dot"></span> Website Security</div>
+
+      <p class="nav-group-label">Requests</p>
+      <div class="nav-item" data-page="careers"><span class="dot"></span> Careers</div>
+      <div class="nav-item" data-page="cateringrequests"><span class="dot"></span> Catering Requests</div>
 
       <p class="nav-group-label">Bookings</p>
       <div class="nav-item" data-page="bookings"><span class="dot"></span> Reservations</div>
@@ -314,19 +318,28 @@
       <p class="nav-group-label">Marketing</p>
       <div class="nav-item" data-page="offers"><span class="dot"></span> Offers</div>
       <div class="nav-item" data-page="vouchers"><span class="dot"></span> Gift Vouchers</div>
+      <div class="nav-item" data-page="giftcards"><span class="dot"></span> Gift Cards (Square)</div>
       <div class="nav-item" data-page="discounts"><span class="dot"></span> Discounts</div>
       <div class="nav-item" data-page="community"><span class="dot"></span> Community / Charity</div>
+      <div class="nav-item" data-page="heroslideshow"><span class="dot"></span> Hero Slideshow</div>
+      <div class="nav-item" data-page="emailthemes"><span class="dot"></span> Email Themes</div>
+      <div class="nav-item" data-page="textcontent"><span class="dot"></span> Text Editor</div>
 
       <p class="nav-group-label">Reports</p>
       <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; Expenses</div>
       <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses Tracker</div>
       <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
+      <div class="nav-item" data-page="squaresales"><span class="dot"></span> Square Sales</div>
+      <div class="nav-item" data-page="reports"><span class="dot"></span> Reports &amp; Reset</div>
 
       <p class="nav-group-label">Settings</p>
       <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
       <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
+      <div class="nav-item" data-page="datausage"><span class="dot"></span> Data Usage</div>
+      <div class="nav-item" data-page="scanredeem"><span class="dot"></span> Scan &amp; Redeem</div>
+      <div class="nav-item" data-page="uberintegration"><span class="dot"></span> Uber Integration</div>
 
       <div class="footnote">Isolated build — separate from the main website. Reads and writes the same live data as the main admin — changes here go live immediately, same as there.</div>
     </nav>
@@ -684,12 +697,151 @@
         <div id="igListWrap"><p style="color:var(--lt);padding:2rem;text-align:center">Loading…</p></div>
       </div>
       <div class="page-panel" id="page-websitesecurity">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Website Security — coming soon</h3>
-          <p style="max-width:400px;margin:0 auto">This section is reserved for the security tools already in the main admin panel — this is a placeholder tab, not yet built here.</p>
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--border,#eee);background:#fafafa" id="wsSubTabs">
+            <button type="button" class="hp-subtab wssub-tab active" data-wssub="highrisk">⚠️ High Risk Orders</button>
+            <button type="button" class="hp-subtab wssub-tab" data-wssub="linter">🩺 Website Doctor</button>
+            <button type="button" class="hp-subtab wssub-tab" data-wssub="fraud">🚨 Fraud Log</button>
+          </div>
+          <div id="wssub-highrisk" class="wssub-panel" style="padding:1.4rem">
+            <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Orders over $50 wait here for a quick manual check before prep starts. Payment's already been collected — approving just releases it to the kitchen.</p>
+            <div id="highRiskOrdersList2"><p style="color:var(--lt);text-align:center;padding:2rem">Loading…</p></div>
+          </div>
+          <div id="wssub-linter" class="wssub-panel" style="padding:1.4rem;display:none">
+            <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Scans every public page for styling and HTML issues, using the exact same scanner the main admin uses.</p>
+            <button type="button" class="btn" id="runLinterBtn2">Run Live Layout Scan</button>
+            <div id="linterSpinner2" style="display:none;margin:1.2rem 0;text-align:center;color:var(--mid);font-size:.85rem">Scanning pages — this takes around 20 seconds…</div>
+            <div id="linterResult2" style="margin-top:1.2rem"></div>
+          </div>
+          <div id="wssub-fraud" class="wssub-panel" style="padding:1.4rem;display:none">
+            <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real-time log — rate limits hit, enumeration attempts, coupon-stacking attempts. Worth a glance now and then.</p>
+            <div id="fraudLogList2"><p style="color:var(--lt)">Loading…</p></div>
+          </div>
         </div>
       </div>
+
+      <div class="page-panel" id="page-careers">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <h3 style="margin-top:0">Job Openings</h3>
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Shown on the public Careers page. Toggle off to hide without deleting.</p>
+          <div id="careerJobsWrap2"></div>
+          <button type="button" class="btn" id="addJobBtn2" style="margin-top:.8rem">+ Add Another Role</button><br>
+          <button type="button" class="btn" id="saveJobsBtn2" style="margin-top:.8rem">Save Job Openings</button>
+          <span id="jobsSaveStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div class="panel" style="padding:1.4rem">
+          <h3 style="margin-top:0">Career Applications</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+            <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#EDE4D2)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Name</th><th style="padding:.5rem">Email/Phone</th><th style="padding:.5rem">Role</th><th style="padding:.5rem">Resume</th></tr></thead>
+            <tbody id="careersTbody2"></tbody>
+          </table>
+          <p id="careersEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No applications yet.</p>
+        </div>
+      </div>
+
+      <div class="page-panel" id="page-cateringrequests">
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <h3 style="margin-top:0">Corporate Catering Requests</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+            <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#EDE4D2)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Company</th><th style="padding:.5rem">Contact</th><th style="padding:.5rem">Date Needed</th><th style="padding:.5rem">Guests</th><th style="padding:.5rem">Email/Phone</th></tr></thead>
+            <tbody id="corpTbody2"></tbody>
+          </table>
+          <p id="corpEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No corporate requests yet.</p>
+        </div>
+        <div class="panel" style="padding:1.4rem">
+          <h3 style="margin-top:0">Quote Estimator Leads</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+            <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#EDE4D2)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Name</th><th style="padding:.5rem">Email</th><th style="padding:.5rem">Guests</th><th style="padding:.5rem">Est. Total</th></tr></thead>
+            <tbody id="leadsTbody2"></tbody>
+          </table>
+          <p id="leadsEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No estimator leads yet.</p>
+        </div>
+      </div>
+
+      <div class="page-panel" id="page-giftcards">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Payment is collected immediately at checkout, but the voucher itself waits for your approval before it's emailed.</p>
+        <div id="giftCardsList2"><p style="color:var(--mid)">Loading…</p></div>
+      </div>
+
+      <div class="page-panel" id="page-heroslideshow">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Tick photos from your Gallery to include in the homepage hero rotation, then reorder with the arrows.</p>
+        <div id="heroPicker2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.7rem;margin-bottom:1rem"><p style="color:var(--mid);grid-column:1/-1">Loading gallery photos…</p></div>
+        <h4 style="margin:1.2rem 0 .6rem">Selected order</h4>
+        <div id="heroSelected2" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"><p style="color:var(--lt)">Nothing selected yet.</p></div>
+        <button type="button" class="btn" id="heroSaveBtn2">Save Slideshow Order</button>
+        <span id="heroStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+      </div>
+
+      <div class="page-panel" id="page-emailthemes">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Pick the look for every invoice and receipt email. Switch anytime.</p>
+        <div id="themeGrid2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem"></div>
+      </div>
+
+      <div class="page-panel" id="page-textcontent">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Edit live text blocks by key. Enter the same key used on the site to update it, or add a new one for text you want to make editable.</p>
+        <div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+          <input id="txtKeyInput2" placeholder="text key, e.g. catering_intro" style="flex:1;min-width:200px">
+          <button type="button" class="btn" id="txtLoadBtn2">Load / Create</button>
+        </div>
+        <div id="txtEditorArea2" style="display:none">
+          <textarea id="txtContent2" rows="4" style="width:100%"></textarea>
+          <button type="button" class="btn" id="txtSaveBtn2" style="margin-top:.6rem">Save Text</button>
+          <span id="txtStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <h4 style="margin:1.5rem 0 .6rem">All Overrides Currently Set</h4>
+        <div id="txtAllList2"><p style="color:var(--mid)">Loading…</p></div>
+      </div>
+
+      <div class="page-panel" id="page-squaresales">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real Square sales data, synced nightly (includes in-person terminal sales, not just website orders). Updates once a day, not live.</p>
+        <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:1.2rem">
+          <label style="font-size:.82rem;color:var(--mid)">Show last</label>
+          <select id="sqRangeSelect2"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select>
+        </div>
+        <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><p class="lbl">Net Sales</p><p class="val" id="sqNetSales2">$0</p></div>
+          <div class="stat-card"><p class="lbl">Total Orders</p><p class="val" id="sqOrderCount2">0</p></div>
+          <div class="stat-card"><p class="lbl">Average Order Value</p><p class="val" id="sqAOV2">$0</p></div>
+          <div class="stat-card"><p class="lbl">Refunds</p><p class="val" id="sqRefunds2">$0</p></div>
+        </div>
+        <p id="sqStatus2" style="font-size:.8rem;color:var(--mid);margin-top:1rem"></p>
+      </div>
+
+      <div class="page-panel" id="page-reports">
+        <div class="panel" style="padding:1.4rem;border-color:#C24A1E">
+          <h3 style="margin-top:0;color:#C24A1E">⚠️ Reset Sales to $0</h3>
+          <p style="font-size:.82rem;color:var(--mid);margin:0 0 1rem">Deletes every order in the database — a clean slate before going live for real. This cannot be undone. Type <strong>DELETE ALL ORDERS</strong> to confirm.</p>
+          <input id="resetConfirmInput2" placeholder="Type DELETE ALL ORDERS" style="width:100%;max-width:320px;margin-bottom:.8rem">
+          <br><button type="button" class="btn" id="resetOrdersBtn2" style="background:#C24A1E">Delete All Orders</button>
+          <span id="resetStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
+
+      <div class="page-panel" id="page-datausage">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real document counts in your database right now — useful for noticing if something's growing fast or unexpectedly empty.</p>
+        <div id="usageGrid2" style="display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem"></div>
+        <button type="button" class="btn" id="refreshUsageBtn2">Refresh Counts</button>
+        <a href="https://console.firebase.google.com/project/foodielovecatering-9da7a/firestore/usage" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:inline-block;background:var(--mid)">Open Firebase Console ↗</a>
+      </div>
+
+      <div class="page-panel" id="page-scanredeem">
+        <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Camera scanning isn't available in this dashboard yet — type or paste the code from the customer's QR code instead. Gift vouchers and loyalty points aren't here on purpose; they already redeem through Square directly.</p>
+        <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1rem">
+          <input id="redeemCodeInput2" placeholder="Paste or type reward code">
+          <button type="button" class="btn" id="redeemLookupBtn2">Look Up</button>
+        </div>
+        <div id="redeemResult2"></div>
+      </div>
+
+      <div class="page-panel" id="page-uberintegration">
+        <div class="panel" style="padding:1.4rem;border-color:#06C167">
+          <h3 style="margin-top:0">🚗 Uber Delivery</h3>
+          <p style="font-size:.85rem;color:var(--mid);margin:0 0 1rem">"Book Uber Delivery" is built into the Orders tab — one tap on any delivery order books a real Uber courier. It needs your own Uber Direct business account connected first, the same way Square did.</p>
+          <a href="https://direct.uber.com" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:inline-block;background:#06C167">Open direct.uber.com to Sign Up →</a>
+          <p style="font-size:.78rem;color:var(--mid);margin-top:.8rem">Once signed up, add your Client ID, Client Secret, and Customer ID to Netlify environment variables on the main site, then redeploy — the button in Orders goes live.</p>
+        </div>
+      </div>
+
       <div class="page-panel" id="page-analytics">
         <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
           <div class="stat-card"><p class="lbl">Total Revenue (all time)</p><p class="val" id="anTotalRevenue">$0</p></div>
@@ -1289,6 +1441,18 @@ const pageTitles = {
   websitesecurity: ['Website Security', 'Coming soon'],
   'analytics': ['Analytics', 'Revenue trends and top sellers'],
   'expenses': ['Expenses', 'Track business costs and financial year totals'],
+  'websitesecurity': ['Website Security', 'High-risk orders, live scan, fraud log'],
+  'careers': ['Careers', 'Job openings and applications'],
+  'cateringrequests': ['Catering Requests', 'Corporate quotes and estimator leads'],
+  'giftcards': ['Gift Cards (Square)', 'Approve and track gift voucher orders'],
+  'heroslideshow': ['Hero Slideshow', 'Homepage hero photo rotation'],
+  'emailthemes': ['Email Themes', 'Look of every invoice and receipt'],
+  'textcontent': ['Text Editor', 'Edit live site text blocks'],
+  'squaresales': ['Square Sales', 'Nightly-synced Square sales figures'],
+  'reports': ['Reports & Reset', 'Order data reset'],
+  'datausage': ['Data Usage', 'Live Firestore document counts'],
+  'scanredeem': ['Scan &amp; Redeem', 'Manual code lookup for QR rewards'],
+  'uberintegration': ['Uber Integration', 'Uber Direct delivery setup'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
   charcuterie: ['Charcuterie Board', 'Board designs, categories, and items customers pick from'],
@@ -1351,6 +1515,15 @@ document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
     }
     if(page === 'analytics') loadAnalytics();
     if(page === 'expenses') loadExpensesPG();
+    if(page === 'websitesecurity') loadWebsiteSecurityPG();
+    if(page === 'careers') loadCareersPG();
+    if(page === 'cateringrequests') loadCateringRequestsPG();
+    if(page === 'giftcards') loadGiftCardsPG();
+    if(page === 'heroslideshow') loadHeroSlideshowPG();
+    if(page === 'emailthemes') loadEmailThemesPG();
+    if(page === 'textcontent') loadTextAllOverrides2();
+    if(page === 'squaresales') loadSquareSalesPG();
+    if(page === 'datausage') loadDataUsagePG();
     if(page === 'pg-gallery') loadGalleryPG();
     if(page === 'pg-rewards') loadEmergencyServicesPG();
     if(page === 'pg-loyalty') loadLoyaltyPG();
@@ -3985,7 +4158,7 @@ async function loadVouchersRV(){
 // is opened, so the dashboard's startup stays as fast as before. ══
 import { getApps, getApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, orderBy, limit, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import { getStorage, ref as sRef2, uploadBytes as sUpload2, getDownloadURL as sUrl2 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
 
 const app2 = getApp(); const auth2 = getAuth(app2); const db2 = getFirestore(app2);
@@ -4503,6 +4676,285 @@ document.getElementById('downloadFYCsvBtn2')?.addEventListener('click', ()=>{
   a.href = url; a.download = `foodielove-expenses-${fyLabel.replace(/\s/g,'')}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+});
+
+// ══════════════════════════════════════════════════════════════════
+// BATCH 2 — Website Security hub, Careers, Catering Requests, Gift
+// Cards, Hero Slideshow, Email Themes, Text Editor, Square Sales,
+// Reports/Reset, Data Usage, Scan & Redeem, Uber Integration.
+// Refunds/approvals/scans that need a backend function call the
+// MAIN_SITE's already-deployed Netlify Functions (same pattern as
+// Payments above) rather than duplicating that logic here.
+// ══════════════════════════════════════════════════════════════════
+
+// ── WEBSITE SECURITY HUB (High Risk / Website Doctor / Fraud Log) ──
+document.querySelectorAll('.wssub-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.wssub-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.wssub-panel').forEach(p=>p.style.display='none');
+    document.getElementById('wssub-'+btn.dataset.wssub).style.display='block';
+    if(btn.dataset.wssub === 'fraud') loadFraudLog2();
+  });
+});
+async function loadWebsiteSecurityPG(){ loadHighRiskOrders2(); }
+async function loadHighRiskOrders2(){
+  const listEl = document.getElementById('highRiskOrdersList2');
+  try{
+    const snap = await getDocs(query(collection(db2,'orders'), where('status','==','pending_owner_review')));
+    const orders = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    listEl.innerHTML = orders.length ? orders.map(o => `
+      <div style="padding:.9rem;border:1.5px solid #E8A83C;border-radius:10px;margin-bottom:.8rem">
+        <p style="font-weight:700;margin:0 0 .2rem">${esc2(o.name||'—')} <span style="font-weight:400;color:var(--mid);font-size:.82rem">— ${money(o.total)}</span></p>
+        <p style="font-size:.8rem;color:var(--mid);margin:0">${esc2(o.mobile||o.phone||'No phone')} · ${esc2(o.email||'No email')} · Ref: ${esc2(o.orderRef||o.id)}</p>
+        <div style="margin-top:.6rem"><button class="btn" data-hrapprove="${o.id}" style="margin-right:.4rem">✓ Approve &amp; Send to Kitchen</button><button class="btn" data-hrflag="${o.id}" style="background:#C24A1E">🚩 Flag &amp; Cancel</button></div>
+      </div>`).join('') : '<p style="color:var(--lt);text-align:center;padding:2rem">No orders currently pending review.</p>';
+    listEl.querySelectorAll('[data-hrapprove]').forEach(b=>b.addEventListener('click', async ()=>{ if(confirm('Approve and send to kitchen?')){ await updateDoc(doc(db2,'orders',b.dataset.hrapprove), {status:'preparing'}); loadHighRiskOrders2(); } }));
+    listEl.querySelectorAll('[data-hrflag]').forEach(b=>b.addEventListener('click', async ()=>{ if(confirm('Flag as fraud and cancel this order?')){ await updateDoc(doc(db2,'orders',b.dataset.hrflag), {status:'cancelled', flaggedFraud:true}); loadHighRiskOrders2(); } }));
+  }catch(err){ listEl.innerHTML = `<p style="color:#D70015">Could not load: ${esc2(err.message)}</p>`; }
+}
+document.getElementById('runLinterBtn2')?.addEventListener('click', async ()=>{
+  const btn = document.getElementById('runLinterBtn2'), spinner = document.getElementById('linterSpinner2'), out = document.getElementById('linterResult2');
+  btn.disabled = true; spinner.style.display='block'; out.innerHTML='';
+  try{
+    const idToken = await auth2.currentUser.getIdToken();
+    const resp = await fetch(MAIN_SITE + '/.netlify/functions/run-layout-audit', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken} });
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.error || 'Audit failed');
+    const visual = data.visual||[], syntax = data.syntax||[];
+    out.innerHTML = (visual.length+syntax.length===0)
+      ? '<p style="color:var(--olive,#4B5A3A);font-weight:700">✅ System Status: Secure — zero issues found.</p>'
+      : `<div style="margin-bottom:.8rem"><strong>${visual.length} visual issue(s)</strong>${visual.map(v=>`<p style="font-size:.82rem;margin:.3rem 0">${esc2(v)}</p>`).join('')}</div><div><strong>${syntax.length} syntax issue(s)</strong>${syntax.map(s=>`<p style="font-size:.82rem;margin:.3rem 0">${esc2(s)}</p>`).join('')}</div>`;
+  }catch(err){ out.innerHTML = `<p style="color:#D70015">Could not run scan: ${esc2(err.message)}</p>`; }
+  finally{ btn.disabled=false; spinner.style.display='none'; }
+});
+async function loadFraudLog2(){
+  const el = document.getElementById('fraudLogList2');
+  const snap = await getDocs(query(collection(db2,'fraudLog'), orderBy('loggedAt','desc'), limit(40))).catch(()=>({docs:[],size:0}));
+  el.innerHTML = snap.size ? snap.docs.map(d=>{ const f=d.data(); return `<div style="padding:.6rem 0;border-bottom:1px solid var(--rule,#EDE4D2);font-size:.82rem"><strong>${esc2(f.type)}</strong> — ${esc2(f.route||'—')} <span style="color:var(--lt)">${when(f.loggedAt)}</span></div>`; }).join('') : '<p style="color:var(--olive,#4B5A3A);font-weight:700">✓ Nothing logged — all quiet.</p>';
+}
+
+// ── CAREERS ──
+let careerJobsData2 = [];
+function renderCareerJobsEditor2(){
+  const wrap = document.getElementById('careerJobsWrap2');
+  wrap.innerHTML = careerJobsData2.length ? careerJobsData2.map((job,idx)=>`
+    <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap">
+      <input class="job-title2" data-idx="${idx}" placeholder="Title" value="${esc2(job.title)}" style="flex:2;min-width:140px">
+      <input class="job-type2" data-idx="${idx}" placeholder="Type (e.g. Casual)" value="${esc2(job.type)}" style="flex:1;min-width:100px">
+      <label style="font-size:.78rem"><input type="checkbox" class="job-active2" data-idx="${idx}" ${job.active?'checked':''}> Active</label>
+      <button class="btn" data-jobremove2="${idx}" style="background:#C24A1E">Remove</button>
+    </div>`).join('') : '<p style="color:var(--lt)">No roles yet.</p>';
+  wrap.querySelectorAll('[data-jobremove2]').forEach(b=>b.addEventListener('click', ()=>{ careerJobsData2.splice(Number(b.dataset.jobremove2),1); renderCareerJobsEditor2(); }));
+}
+async function loadCareersPG(){
+  const snap = await getDoc(doc(db2,'settings','careers')).catch(()=>null);
+  careerJobsData2 = (snap && snap.exists() && Array.isArray(snap.data().jobs)) ? snap.data().jobs : [];
+  renderCareerJobsEditor2();
+  const tbody = document.getElementById('careersTbody2'), empty = document.getElementById('careersEmpty2');
+  const asnap = await getDocs(query(collection(db2,'careerApplications'), orderBy('createdAt','desc'))).catch(()=>({docs:[],size:0}));
+  if(!asnap.size){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = asnap.docs.map(d=>{ const a=d.data(); return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-size:.75rem">${when(a.createdAt)}</td><td style="padding:.5rem">${esc2(a.name)}</td><td style="padding:.5rem;font-size:.75rem">${esc2(a.email)}<br>${esc2(a.phone)}</td><td style="padding:.5rem">${esc2(a.role)||'Any'}</td><td style="padding:.5rem">${a.resumeUrl?`<a href="${esc2(a.resumeUrl)}" target="_blank">View</a>`:'—'}</td></tr>`; }).join('');
+}
+document.getElementById('addJobBtn2')?.addEventListener('click', ()=>{ careerJobsData2.push({title:'',type:'',desc:'',active:true}); renderCareerJobsEditor2(); });
+document.getElementById('saveJobsBtn2')?.addEventListener('click', async ()=>{
+  document.querySelectorAll('.job-title2').forEach(el=>{ careerJobsData2[Number(el.dataset.idx)].title = el.value.trim(); });
+  document.querySelectorAll('.job-type2').forEach(el=>{ careerJobsData2[Number(el.dataset.idx)].type = el.value.trim(); });
+  document.querySelectorAll('.job-active2').forEach(el=>{ careerJobsData2[Number(el.dataset.idx)].active = el.checked; });
+  await setDoc(doc(db2,'settings','careers'), { jobs: careerJobsData2 });
+  document.getElementById('jobsSaveStatus2').textContent = '✓ Saved';
+  setTimeout(()=>document.getElementById('jobsSaveStatus2').textContent='', 2000);
+});
+
+// ── CATERING REQUESTS (Corporate + Estimator Leads) ──
+async function loadCateringRequestsPG(){
+  const [corpSnap, leadsSnap] = await Promise.all([
+    getDocs(query(collection(db2,'corporateRequests'), orderBy('createdAt','desc'))).catch(()=>({docs:[],size:0})),
+    getDocs(query(collection(db2,'catering_leads'), orderBy('createdAt','desc'))).catch(()=>({docs:[],size:0}))
+  ]);
+  const corpTb = document.getElementById('corpTbody2'), corpEmpty = document.getElementById('corpEmpty2');
+  corpEmpty.style.display = corpSnap.size ? 'none' : 'block';
+  corpTb.innerHTML = corpSnap.docs.map(d=>{ const c=d.data(); return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-size:.75rem">${when(c.createdAt)}</td><td style="padding:.5rem">${esc2(c.company)}</td><td style="padding:.5rem">${esc2(c.contact)}</td><td style="padding:.5rem">${esc2(c.date)} ${esc2(c.time)}</td><td style="padding:.5rem">${esc2(c.guests)}</td><td style="padding:.5rem;font-size:.75rem">${esc2(c.email)}<br>${esc2(c.phone)}</td></tr>`; }).join('');
+  const leadsTb = document.getElementById('leadsTbody2'), leadsEmpty = document.getElementById('leadsEmpty2');
+  leadsEmpty.style.display = leadsSnap.size ? 'none' : 'block';
+  leadsTb.innerHTML = leadsSnap.docs.map(d=>{ const l=d.data(); return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)"><td style="padding:.5rem;font-size:.75rem">${when(l.createdAt)}</td><td style="padding:.5rem">${esc2(l.name)}</td><td style="padding:.5rem;font-size:.75rem">${esc2(l.email)}</td><td style="padding:.5rem">${esc2(l.guests)}</td><td style="padding:.5rem;font-weight:700">${money(l.estimatedTotal)}</td></tr>`; }).join('');
+}
+
+// ── GIFT CARDS (Square) ── approves via the same function the main admin calls.
+async function loadGiftCardsPG(){
+  const el = document.getElementById('giftCardsList2');
+  const snap = await getDocs(query(collection(db2,'giftVouchers'), where('status','==','pending_approval'))).catch(()=>({docs:[],size:0}));
+  if(!snap.size){ el.innerHTML = '<p style="color:var(--mid);padding:2rem;text-align:center">No gift cards waiting on approval.</p>'; return; }
+  el.innerHTML = snap.docs.map(d=>{ const v=d.data(); return `
+    <div id="gc2-${d.id}" style="padding:.9rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:10px;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem">
+      <div><p style="font-weight:700;margin:0 0 .2rem">${money(v.amount)} — for ${esc2(v.toName||'—')}</p><p style="font-size:.8rem;color:var(--mid);margin:0">From ${esc2(v.fromName||'—')} · Code ${esc2(d.id)}</p></div>
+      <button class="btn" data-gcapprove2="${d.id}">Approve &amp; Send</button>
+    </div>`; }).join('');
+  el.querySelectorAll('[data-gcapprove2]').forEach(b=>b.addEventListener('click', async ()=>{
+    b.disabled = true; b.textContent = 'Sending…';
+    try{
+      const idToken = await auth2.currentUser.getIdToken();
+      const resp = await fetch(MAIN_SITE + '/.netlify/functions/approve-gift-voucher', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken}, body: JSON.stringify({ code: b.dataset.gcapprove2 }) });
+      const result = await resp.json();
+      if(!resp.ok || !result.success) throw new Error(result.error||'Unknown error');
+      document.getElementById('gc2-'+b.dataset.gcapprove2).remove();
+    }catch(e){ alert('Could not approve: '+e.message); b.disabled=false; b.textContent='Approve & Send'; }
+  }));
+}
+
+// ── HERO SLIDESHOW ──
+let heroGalleryPhotos2 = [], heroSelection2 = [];
+async function loadHeroSlideshowPG(){
+  const [gSnap, sSnap] = await Promise.all([
+    getDocs(query(collection(db2,'galleryPhotos'), orderBy('createdAt','desc'), limit(60))),
+    getDoc(doc(db2,'settings','heroSlideshow')).catch(()=>null)
+  ]);
+  heroGalleryPhotos2 = gSnap.docs.map(d=>({id:d.id, ...d.data()})).filter(p=>p.mediaType!=='video');
+  const existing = (sSnap && sSnap.exists() && Array.isArray(sSnap.data().slides)) ? sSnap.data().slides : [];
+  heroSelection2 = existing.map(s => ({ url:s.url, posX:s.posX||50, posY:s.posY||50, zoom:s.zoom||100 }));
+  renderHeroPicker2(); renderHeroSelected2();
+}
+function renderHeroPicker2(){
+  const wrap = document.getElementById('heroPicker2');
+  wrap.innerHTML = heroGalleryPhotos2.length ? heroGalleryPhotos2.map(p => {
+    const picked = heroSelection2.some(s=>s.url===p.url);
+    return `<div data-heropick2="${esc2(p.url)}" style="cursor:pointer;border-radius:8px;overflow:hidden;border:3px solid ${picked?'var(--rust,#C2511C)':'transparent'}"><img src="${esc2(p.thumbUrl||p.url)}" style="width:100%;height:90px;object-fit:cover;display:block"></div>`;
+  }).join('') : '<p style="color:var(--mid);grid-column:1/-1">No gallery photos found — add some under Gallery first.</p>';
+  wrap.querySelectorAll('[data-heropick2]').forEach(el=>el.addEventListener('click', ()=>{
+    const url = el.dataset.heropick2;
+    const idx = heroSelection2.findIndex(s=>s.url===url);
+    if(idx>-1) heroSelection2.splice(idx,1); else heroSelection2.push({url, posX:50, posY:50, zoom:100});
+    renderHeroPicker2(); renderHeroSelected2();
+  }));
+}
+function renderHeroSelected2(){
+  const wrap = document.getElementById('heroSelected2');
+  wrap.innerHTML = heroSelection2.length ? heroSelection2.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem;border:1px solid var(--rule,#EDE4D2);border-radius:8px">
+      <img src="${esc2(s.url)}" style="width:60px;height:44px;object-fit:cover;border-radius:6px">
+      <span style="flex:1;font-size:.8rem">Slide ${i+1}</span>
+      <button class="btn" data-heroup2="${i}" style="padding:.3rem .5rem" ${i===0?'disabled':''}>↑</button>
+      <button class="btn" data-herodown2="${i}" style="padding:.3rem .5rem" ${i===heroSelection2.length-1?'disabled':''}>↓</button>
+    </div>`).join('') : '<p style="color:var(--lt)">Nothing selected yet.</p>';
+  wrap.querySelectorAll('[data-heroup2]').forEach(b=>b.addEventListener('click', ()=>{ const i=Number(b.dataset.heroup2); [heroSelection2[i-1],heroSelection2[i]]=[heroSelection2[i],heroSelection2[i-1]]; renderHeroSelected2(); }));
+  wrap.querySelectorAll('[data-herodown2]').forEach(b=>b.addEventListener('click', ()=>{ const i=Number(b.dataset.herodown2); [heroSelection2[i+1],heroSelection2[i]]=[heroSelection2[i],heroSelection2[i+1]]; renderHeroSelected2(); }));
+}
+document.getElementById('heroSaveBtn2')?.addEventListener('click', async ()=>{
+  const st = document.getElementById('heroStatus2'); st.textContent = 'Saving…';
+  await setDoc(doc(db2,'settings','heroSlideshow'), { slides: heroSelection2, updatedAt: serverTimestamp() });
+  st.textContent = `✓ Saved — ${heroSelection2.length} photo(s) will show on the homepage hero.`;
+  setTimeout(()=>st.textContent='', 3000);
+});
+
+// ── EMAIL THEMES ──
+const EMAIL_THEMES2 = {
+  'warm-rustic': { name:'Warm Rustic', bg:'#f7f1e6', card:'#ffffff', accent:'#c2511c', ink:'#3a2418' },
+  'coastal-blue': { name:'Coastal Blue', bg:'#eaf2f5', card:'#ffffff', accent:'#2f7d9e', ink:'#1f3a44' },
+  'midnight-dark': { name:'Midnight Dark', bg:'#14110f', card:'#211c18', accent:'#d9a94a', ink:'#f0e6d8' },
+  'autumn-harvest': { name:'Autumn Harvest', bg:'#efe3d0', card:'#fbf5e9', accent:'#8c2f39', ink:'#3a2418' },
+  'blush-pastel': { name:'Blush Pastel', bg:'#faf0ee', card:'#ffffff', accent:'#c96b7e', ink:'#4a2f34' },
+  'charcoal-mono': { name:'Charcoal Mono', bg:'#e8e8e8', card:'#ffffff', accent:'#333333', ink:'#1a1a1a' }
+};
+async function loadEmailThemesPG(){
+  const grid = document.getElementById('themeGrid2');
+  let activeId = 'warm-rustic';
+  const snap = await getDoc(doc(db2,'settings','emailTheme')).catch(()=>null);
+  if(snap && snap.exists() && snap.data().activeThemeId) activeId = snap.data().activeThemeId;
+  grid.innerHTML = Object.entries(EMAIL_THEMES2).map(([id,t])=>`
+    <div data-themepick2="${id}" style="cursor:pointer;border-radius:12px;overflow:hidden;border:3px solid ${id===activeId?'var(--rust,#C2511C)':'transparent'}">
+      <div style="background:${t.bg};padding:.9rem"><div style="background:${t.card};border-radius:8px;padding:.6rem"><div style="width:60%;height:7px;background:${t.accent};border-radius:4px;margin-bottom:.3rem"></div><div style="width:80%;height:5px;background:${t.ink};opacity:.4;border-radius:3px"></div></div></div>
+      <div style="padding:.5rem .7rem;background:#fff;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.8rem;font-weight:600">${t.name}</span>${id===activeId?'<span style="color:var(--rust,#C2511C);font-size:.72rem;font-weight:700">✓ Active</span>':''}</div>
+    </div>`).join('');
+  grid.querySelectorAll('[data-themepick2]').forEach(el=>el.addEventListener('click', async ()=>{ await setDoc(doc(db2,'settings','emailTheme'), { activeThemeId: el.dataset.themepick2, updatedAt: serverTimestamp() }); loadEmailThemesPG(); }));
+}
+
+// ── TEXT EDITOR (simplified — generic key/value, not the fixed registry the main admin lists) ──
+async function loadTextAllOverrides2(){
+  const el = document.getElementById('txtAllList2');
+  const snap = await getDocs(collection(db2,'textOverrides')).catch(()=>({docs:[],size:0}));
+  el.innerHTML = snap.size ? snap.docs.map(d=>`<div style="padding:.5rem 0;border-bottom:1px solid var(--rule,#EDE4D2);font-size:.82rem"><strong>${esc2(d.id)}</strong>: ${esc2((d.data().content||'').slice(0,90))} <button class="btn" data-txtedit2="${esc2(d.id)}" style="padding:.2rem .5rem;font-size:.7rem;margin-left:.5rem">Edit</button></div>`).join('') : '<p style="color:var(--lt)">No overrides set yet.</p>';
+  el.querySelectorAll('[data-txtedit2]').forEach(b=>b.addEventListener('click', ()=>{ document.getElementById('txtKeyInput2').value = b.dataset.txtedit2; document.getElementById('txtLoadBtn2').click(); }));
+}
+document.getElementById('txtLoadBtn2')?.addEventListener('click', async ()=>{
+  const key = document.getElementById('txtKeyInput2').value.trim();
+  if(!key) return;
+  const snap = await getDoc(doc(db2,'textOverrides',key)).catch(()=>null);
+  document.getElementById('txtContent2').value = (snap && snap.exists()) ? (snap.data().content||'') : '';
+  document.getElementById('txtEditorArea2').style.display = 'block';
+});
+document.getElementById('txtSaveBtn2')?.addEventListener('click', async ()=>{
+  const key = document.getElementById('txtKeyInput2').value.trim();
+  if(!key) return;
+  await setDoc(doc(db2,'textOverrides',key), { content: document.getElementById('txtContent2').value, updatedAt: serverTimestamp() });
+  document.getElementById('txtStatus2').textContent = '✓ Saved — live on the site now.';
+  setTimeout(()=>document.getElementById('txtStatus2').textContent='', 2500);
+  loadTextAllOverrides2();
+});
+
+// ── SQUARE SALES (reads the nightly-synced squareDailySales docs) ──
+async function loadSquareSalesPG(){
+  const status = document.getElementById('sqStatus2');
+  const days = parseInt(document.getElementById('sqRangeSelect2').value)||30;
+  status.textContent = 'Loading…';
+  const endDate = new Date();
+  const dateKeys = [];
+  for(let i=1;i<=days;i++){ const d=new Date(endDate); d.setDate(d.getDate()-i); dateKeys.push(d.toISOString().slice(0,10)); }
+  const snaps = await Promise.all(dateKeys.map(k=>getDoc(doc(db2,'squareDailySales',k)).catch(()=>null)));
+  const daysData = snaps.filter(s=>s&&s.exists()&&!s.data().error).map(s=>s.data());
+  if(!daysData.length){ status.textContent = 'No synced sales data yet — the nightly sync runs automatically. Check back after the first run.'; return; }
+  const totalNet = daysData.reduce((s,d)=>s+(d.netSales||0),0);
+  const totalOrders = daysData.reduce((s,d)=>s+(d.orderCount||0),0);
+  const totalRefunds = daysData.reduce((s,d)=>s+(d.refunds||0),0);
+  document.getElementById('sqNetSales2').textContent = money(totalNet);
+  document.getElementById('sqOrderCount2').textContent = totalOrders;
+  document.getElementById('sqAOV2').textContent = money(totalOrders?totalNet/totalOrders:0);
+  document.getElementById('sqRefunds2').textContent = money(totalRefunds);
+  status.textContent = `Showing last ${days} days.`;
+}
+document.getElementById('sqRangeSelect2')?.addEventListener('change', loadSquareSalesPG);
+
+// ── REPORTS & RESET ── deletes every order. Destructive — typed confirmation required.
+document.getElementById('resetOrdersBtn2')?.addEventListener('click', async ()=>{
+  const val = document.getElementById('resetConfirmInput2').value.trim();
+  const status = document.getElementById('resetStatus2');
+  if(val !== 'DELETE ALL ORDERS'){ status.textContent = 'Type the exact confirmation phrase first.'; return; }
+  if(!confirm('This permanently deletes every order. Are you absolutely sure?')) return;
+  status.textContent = 'Deleting…';
+  try{
+    const snap = await getDocs(collection(db2,'orders'));
+    for(const d of snap.docs){ await deleteDoc(doc(db2,'orders',d.id)); }
+    status.textContent = `✓ Deleted ${snap.size} orders. Sales reset to $0.`;
+  }catch(e){ status.textContent = 'Could not complete: ' + e.message; }
+});
+
+// ── DATA USAGE ──
+async function loadDataUsagePG(){
+  const grid = document.getElementById('usageGrid2');
+  grid.innerHTML = '<p style="color:var(--mid)">Counting…</p>';
+  const collections = ['orders','menuItems','galleryPhotos','expenses','communityPosts','staffUsers','promotions','corporateRequests','catering_leads','careerApplications','fraudLog','giftVouchers'];
+  const counts = await Promise.all(collections.map(async c => {
+    try{ const s = await getDocs(collection(db2,c)); return [c, s.size]; }catch(e){ return [c, '—']; }
+  }));
+  grid.innerHTML = counts.map(([c,n]) => `<div class="stat-card" style="min-width:140px"><p class="lbl">${esc2(c)}</p><p class="val">${n}</p></div>`).join('');
+}
+document.getElementById('refreshUsageBtn2')?.addEventListener('click', loadDataUsagePG);
+
+// ── SCAN & REDEEM (manual code entry — calls the same redeem-code function) ──
+document.getElementById('redeemLookupBtn2')?.addEventListener('click', async ()=>{
+  const code = document.getElementById('redeemCodeInput2').value.trim();
+  const card = document.getElementById('redeemResult2');
+  if(!code) return;
+  card.innerHTML = '<p style="color:var(--mid)">Checking…</p>';
+  try{
+    const idToken = await auth2.currentUser.getIdToken();
+    const resp = await fetch(MAIN_SITE + '/.netlify/functions/redeem-code', { method:'POST', headers:{'Authorization':'Bearer '+idToken,'Content-Type':'application/json'}, body: JSON.stringify({ code }) });
+    const data = await resp.json();
+    if(!resp.ok || !data.ok) throw new Error(data.message || 'Could not check this code.');
+    const bg = !data.recognized || !data.found ? '#FFF3E0' : !data.valid ? '#FDECEC' : '#E8F7EC';
+    const icon = !data.recognized || !data.found ? '⚠️' : !data.valid ? '❌' : '✅';
+    card.innerHTML = `<div style="background:${bg};padding:1rem;border-radius:10px"><p style="font-weight:700;margin:0 0 .3rem">${icon} ${esc2(data.category||'Result')}</p><p style="font-size:.85rem;margin:0">${esc2(data.message||'')}</p></div>`;
+  }catch(e){ card.innerHTML = `<div style="background:#FDECEC;padding:1rem;border-radius:10px"><p style="font-weight:700;color:#B00020">Error</p><p style="font-size:.85rem">${esc2(e.message)}</p></div>`; }
 });
 </script>
 
