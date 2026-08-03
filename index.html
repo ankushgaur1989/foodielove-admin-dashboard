@@ -338,6 +338,7 @@
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
       <div class="nav-item" data-page="datausage"><span class="dot"></span> Data Usage</div>
+      <div class="nav-item" data-page="photocleanup"><span class="dot"></span> Photo Cleanup</div>
       <div class="nav-item" data-page="scanredeem"><span class="dot"></span> Scan &amp; Redeem</div>
       <div class="nav-item" data-page="uberintegration"><span class="dot"></span> Uber Integration</div>
 
@@ -825,6 +826,15 @@
         <div id="usageGrid2" style="display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem"></div>
         <button type="button" class="btn" id="refreshUsageBtn2">Refresh Counts</button>
         <a href="https://console.firebase.google.com/project/foodielovecatering-9da7a/firestore/usage" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:inline-block;background:var(--mid)">Open Firebase Console ↗</a>
+      </div>
+
+      <div class="page-panel" id="page-photocleanup">
+        <div class="panel" style="padding:1.4rem;background:#EAF4E9;border-color:#7CB342">
+          <h3 style="margin-top:0">⚡ Re-compress All Existing Photos</h3>
+          <p style="font-size:.82rem;color:var(--mid);margin:0 0 1rem">Goes through every existing menu item photo and site photo (hero, cards, logo), shrinks anything genuinely large, skips anything already small enough. Safe to run more than once. Same background job the main admin uses — this just triggers it and watches for progress.</p>
+          <button type="button" class="btn" id="recompressBtn2">Re-compress All Photos</button>
+          <div id="recompressStatus2" style="margin-top:1rem;font-size:.85rem;color:var(--mid)"></div>
+        </div>
       </div>
 
       <div class="page-panel" id="page-scanredeem">
@@ -1475,6 +1485,7 @@ const pageTitles = {
   'squaresales': ['Square Sales', 'Nightly-synced Square sales figures'],
   'reports': ['Reports & Reset', 'Order data reset'],
   'datausage': ['Data Usage', 'Live Firestore document counts'],
+  'photocleanup': ['Photo Cleanup', 'Re-compress all existing site photos'],
   'scanredeem': ['Scan &amp; Redeem', 'Manual code lookup for QR rewards'],
   'uberintegration': ['Uber Integration', 'Uber Direct delivery setup'],
   'menu-brunch': ['Brunch Menu', ''],
@@ -5140,6 +5151,44 @@ document.getElementById('redeemLookupBtn2')?.addEventListener('click', async ()=
     const icon = !data.recognized || !data.found ? '⚠️' : !data.valid ? '❌' : '✅';
     card.innerHTML = `<div style="background:${bg};padding:1rem;border-radius:10px"><p style="font-weight:700;margin:0 0 .3rem">${icon} ${esc2(data.category||'Result')}</p><p style="font-size:.85rem;margin:0">${esc2(data.message||'')}</p></div>`;
   }catch(e){ card.innerHTML = `<div style="background:#FDECEC;padding:1rem;border-radius:10px"><p style="font-weight:700;color:#B00020">Error</p><p style="font-size:.85rem">${esc2(e.message)}</p></div>`; }
+});
+
+// ── PHOTO CLEANUP ── triggers the same background job the main admin
+// uses, then polls the photoRecompressJobs doc for progress.
+document.getElementById('recompressBtn2')?.addEventListener('click', async ()=>{
+  const btn = document.getElementById('recompressBtn2');
+  const statusEl = document.getElementById('recompressStatus2');
+  btn.disabled = true;
+  statusEl.innerHTML = 'Starting…';
+  try{
+    const idToken = await auth2.currentUser.getIdToken();
+    const resp = await fetch(MAIN_SITE + '/.netlify/functions/recompress-existing-photos', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken} });
+    const trigger = await resp.json();
+    if(!resp.ok) throw new Error(trigger.error || 'Could not start');
+    const jobId = trigger.jobId;
+    for(let attempt = 0; attempt < 100; attempt++){
+      await new Promise(r => setTimeout(r, 3000));
+      const jobSnap = await getDoc(doc(db2,'photoRecompressJobs',jobId));
+      if(!jobSnap.exists()) continue;
+      const job = jobSnap.data();
+      if(job.status === 'running' || job.status === 'queued'){
+        statusEl.textContent = `Working… ${job.processed||0} photos checked (${job.compressed||0} compressed, ${job.skipped||0} already fine)`;
+      }
+      if(job.status === 'complete'){
+        statusEl.innerHTML = `✅ Done — checked ${job.processed}, compressed ${job.compressed}, ${job.skipped} already fine.`;
+        btn.disabled = false; return;
+      }
+      if(job.status === 'error'){
+        statusEl.innerHTML = `❌ ${esc2(job.error||'Something went wrong')}`;
+        btn.disabled = false; return;
+      }
+    }
+    statusEl.textContent = 'Still running after 5 minutes — check back shortly.';
+    btn.disabled = false;
+  }catch(e){
+    statusEl.innerHTML = `❌ Could not start: ${esc2(e.message)}`;
+    btn.disabled = false;
+  }
 });
 
 // Real bug fix, confirmed via actual click-through testing: the sidebar
