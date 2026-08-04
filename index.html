@@ -324,6 +324,7 @@
 
       <p class="nav-group-label">Settings</p>
       <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
+      <div class="nav-item" data-page="careers"><span class="dot"></span> Careers</div>
       <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
@@ -1139,6 +1140,26 @@
    <button id="stAddBtn" class="btn">Add as staff</button>
   </div>
   <p id="stStatus" style="font-size:.8rem;color:var(--mid);margin:.6rem 0 0"></p>
+ </div>
+</div>
+      <div class="page-panel" id="page-careers">
+ <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+  <h3 style="margin:0 0 .4rem;font-size:1rem">Job Openings (Careers Page)</h3>
+  <p style="color:var(--mid);font-size:.8rem;margin:0 0 .9rem">These show on your public Careers page under "Open Roles." Leave the toggle off to hide a role without deleting it — handy if a position gets filled but you might reopen it later.</p>
+  <div id="crJobsWrap"></div>
+  <button class="btn" id="crAddJobBtn" style="margin-top:.6rem">+ Add Another Role</button>
+  <br><br>
+  <button class="btn" id="crSaveJobsBtn" style="background:var(--dark,#1D1D1F);color:#fff">Save Job Openings</button>
+  <span id="crJobsSaveStatus" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+ </div>
+ <div class="panel" style="padding:1.4rem">
+  <h3 style="margin:0 0 .4rem;font-size:1rem">Career Applications</h3>
+  <p style="color:var(--mid);font-size:.8rem;margin:0 0 .9rem">From the Careers page — both for posted openings and general "register your interest" submissions.</p>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.82rem">
+   <thead><tr style="text-align:left;border-bottom:2px solid var(--rule,#E3D6BA)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Name</th><th style="padding:.5rem">Email / Phone</th><th style="padding:.5rem">Role</th><th style="padding:.5rem">Message</th><th style="padding:.5rem">Resume</th></tr></thead>
+   <tbody id="crAppsTbody"><tr><td colspan="6" style="padding:1rem;color:var(--mid)">Loading…</td></tr></tbody>
+  </table></div>
+  <p id="crAppsEmpty" style="display:none;color:var(--lt);text-align:center;padding:1rem">No applications yet.</p>
  </div>
 </div>
       <div class="page-panel" id="page-photos">
@@ -4440,6 +4461,81 @@ document.getElementById('stAddBtn')?.addEventListener('click', async ()=>{
   loadStaff();
 });
 lazyLoad('staff', loadStaff);
+
+// ── CAREERS ── same settings/careers doc + careerApplications collection
+// the main admin uses. Job openings stored as {jobs:[{title,type,desc,active}]}.
+let crJobsData = [];
+function renderCareerJobsEditor(){
+  const wrap = document.getElementById('crJobsWrap');
+  if(!crJobsData.length){
+    wrap.innerHTML = '<p style="color:var(--lt);font-style:italic;text-align:center;padding:1rem">No roles added yet — click "+ Add Another Role" below.</p>';
+    return;
+  }
+  wrap.innerHTML = crJobsData.map((job,idx)=>`
+    <div style="border:1.5px solid var(--rule,#E3D6BA);border-radius:10px;padding:.9rem 1rem;margin-bottom:.8rem">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem">
+      <strong style="font-size:.88rem">Role ${idx+1}</strong>
+      <div style="display:flex;align-items:center;gap:.7rem">
+       <label style="font-size:.78rem;display:flex;align-items:center;gap:.35rem"><input type="checkbox" class="cr-job-active" data-idx="${idx}" ${job.active!==false?'checked':''}/> Active</label>
+       <button class="btn" data-cr-remove-job="${idx}" style="font-size:.72rem;padding:.3rem .6rem;background:#C24A1E">Remove</button>
+      </div>
+     </div>
+     <div style="display:grid;grid-template-columns:2fr 1fr;gap:.6rem;margin-bottom:.6rem">
+      <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Job Title</label><input type="text" class="cr-job-title" data-idx="${idx}" value="${esc2(job.title||'')}" placeholder="e.g. Kitchen Hand" style="width:100%;padding:.5rem .65rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"/></div>
+      <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Type</label><input type="text" class="cr-job-type" data-idx="${idx}" value="${esc2(job.type||'')}" placeholder="e.g. Part-time" style="width:100%;padding:.5rem .65rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"/></div>
+     </div>
+     <label style="font-size:.72rem;font-weight:700;color:var(--mid)">Description</label><input type="text" class="cr-job-desc" data-idx="${idx}" value="${esc2(job.desc||'')}" placeholder="A sentence or two about the role" style="width:100%;padding:.5rem .65rem;border:1.5px solid var(--rule,#E3D6BA);border-radius:8px"/>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-cr-remove-job]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ crJobsData.splice(parseInt(btn.dataset.crRemoveJob), 1); renderCareerJobsEditor(); });
+  });
+}
+async function loadCareers(){
+  try{
+    const snap = await getDoc(doc(db2,'settings','careers'));
+    crJobsData = (snap.exists() && Array.isArray(snap.data().jobs)) ? snap.data().jobs : [];
+  }catch(err){ crJobsData = []; }
+  renderCareerJobsEditor();
+
+  const tb = document.getElementById('crAppsTbody');
+  const empty = document.getElementById('crAppsEmpty');
+  try{
+    const appsSnap = await getDocs(query(collection(db2,'careerApplications'), orderBy('createdAt','desc')));
+    if(appsSnap.empty){ tb.innerHTML=''; empty.style.display='block'; }
+    else{
+      empty.style.display='none';
+      tb.innerHTML = appsSnap.docs.map(d=>{
+        const a=d.data();
+        const submitted = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<tr style="border-bottom:1px solid var(--rule,#EDE4D2)">
+          <td style="padding:.5rem;font-size:.72rem">${submitted}</td>
+          <td style="padding:.5rem"><strong>${esc2(a.name)||'—'}</strong></td>
+          <td style="padding:.5rem;font-size:.75rem">${esc2(a.email)||'—'}<br>${esc2(a.phone)||''}</td>
+          <td style="padding:.5rem">${esc2(a.role)||'<span style="color:var(--lt)">Any</span>'}</td>
+          <td style="padding:.5rem;font-size:.78rem;max-width:280px">${esc2(a.message)||'—'}</td>
+          <td style="padding:.5rem">${a.resumeUrl ? `<a href="${esc2(a.resumeUrl)}" target="_blank" rel="noopener" class="btn" style="font-size:.72rem;padding:.3rem .6rem">View</a>` : '<span style="color:var(--lt)">None</span>'}</td>
+        </tr>`;
+      }).join('');
+    }
+  }catch(err){
+    tb.innerHTML = `<tr><td colspan="6" style="padding:1rem;color:#C24A1E">Could not load applications: ${err.message}</td></tr>`;
+  }
+}
+document.getElementById('crAddJobBtn')?.addEventListener('click', ()=>{
+  crJobsData.push({title:'', type:'', desc:'', active:true});
+  renderCareerJobsEditor();
+});
+document.getElementById('crSaveJobsBtn')?.addEventListener('click', async ()=>{
+  document.querySelectorAll('.cr-job-title').forEach(el=>{ crJobsData[parseInt(el.dataset.idx)].title = el.value.trim(); });
+  document.querySelectorAll('.cr-job-type').forEach(el=>{ crJobsData[parseInt(el.dataset.idx)].type = el.value.trim(); });
+  document.querySelectorAll('.cr-job-desc').forEach(el=>{ crJobsData[parseInt(el.dataset.idx)].desc = el.value.trim(); });
+  document.querySelectorAll('.cr-job-active').forEach(el=>{ crJobsData[parseInt(el.dataset.idx)].active = el.checked; });
+  await setDoc(doc(db2,'settings','careers'), { jobs: crJobsData });
+  const status = document.getElementById('crJobsSaveStatus');
+  status.textContent = '✓ Saved';
+  setTimeout(()=>status.textContent='', 2000);
+});
+lazyLoad('careers', loadCareers);
 
 // ── COMMUNITY ── same communityPosts collection community.html displays.
 async function loadCommunity(){
