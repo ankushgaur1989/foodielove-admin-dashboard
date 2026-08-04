@@ -292,6 +292,7 @@
       <div class="nav-item" data-page="countdownbanner"><span class="dot"></span> Countdown Banner</div>
       <div class="nav-item" data-page="profile"><span class="dot"></span> Business Details</div>
       <div class="nav-item" data-page="maintenance"><span class="dot"></span> Maintenance Mode</div>
+      <div class="nav-item" data-page="pagevisibility"><span class="dot"></span> Page Visibility</div>
       <div class="nav-item" data-page="featureflags"><span class="dot"></span> Feature Flags</div>
       <div class="nav-item" data-page="ordersearch"><span class="dot"></span> Search Orders</div>
       <div class="nav-item" data-page="blogposts"><span class="dot"></span> Blog Posts</div>
@@ -649,6 +650,12 @@
           </label>
           <button class="reset-layout-btn" id="maSaveBtn" style="background:var(--ink);color:#fff;border-color:var(--ink)">Save</button>
           <span id="maStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
+      <div class="page-panel" id="page-pagevisibility">
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.85rem;color:var(--mid);margin:0 0 1.2rem;max-width:520px">Take any single page offline without affecting the rest of the site — different from Maintenance Mode, which takes everything down. When a page is off, visiting it directly shows a simple "not available right now" message, and any link to it anywhere else on the site automatically hides itself too.</p>
+          <div id="pvListWrap"><p style="color:var(--lt);padding:1.5rem;text-align:center">Loading…</p></div>
         </div>
       </div>
       <div class="page-panel" id="page-featureflags">
@@ -1794,6 +1801,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadBusinessDetailsBP();
   loadMaintenanceModeMA();
   loadFeatureFlagsFF();
+  loadPageVisibilityPV2();
   loadBlogPostsBLG();
   loadPlaylistPL();
   loadInstagramIG();
@@ -3769,6 +3777,56 @@ document.getElementById('maSaveBtn')?.addEventListener('click', async ()=>{
     statusEl.textContent = '❌ ' + e.message;
   }
 });
+
+// ═══════════════ PAGE VISIBILITY ═══════════════
+// Same registry and settings/pageVisibility doc as the main admin - take
+// a single page offline (distinct from Maintenance Mode above, which
+// takes the whole site down).
+const PAGE_VISIBILITY_REGISTRY2 = [
+  { key:'menu', label:'Brunch Menu', file:'menu.html' },
+  { key:'catering', label:'Catering', file:'catering.html' },
+  { key:'corporatecatering', label:'Corporate Catering', file:'corporate-catering.html' },
+  { key:'buildabox', label:'Build Your Own Box', file:'build-a-box.html' },
+  { key:'gallery', label:'Gallery', file:'gallery.html' },
+  { key:'loyalty', label:'Rewards / Loyalty', file:'loyalty.html' },
+  { key:'offers', label:'Offers', file:'offers.html' },
+  { key:'giftvouchers', label:'Gift Vouchers', file:'gift-vouchers.html' },
+  { key:'merchandise', label:'Merchandise', file:'merchandise.html' },
+  { key:'booking', label:'Table Booking', file:'booking.html' },
+  { key:'careers', label:'Careers', file:'careers.html' },
+  { key:'events', label:'Events', file:'events.html' },
+  { key:'community', label:'Community Board', file:'community.html' },
+  { key:'blog', label:'Blog', file:'blog.html' },
+  { key:'faq', label:'FAQ', file:'faq.html' },
+  { key:'contact', label:'Contact', file:'contact.html' },
+  { key:'about', label:'About', file:'about.html' }
+];
+async function loadPageVisibilityPV2(){
+  const listEl = document.getElementById('pvListWrap');
+  try{
+    const snap = await getDoc(doc(db,'settings','pageVisibility'));
+    const data = snap.exists() ? snap.data() : {};
+    listEl.innerHTML = PAGE_VISIBILITY_REGISTRY2.map(p=>{
+      const isOn = data[p.key] !== false; // defaults to on if never set, matching the main admin's behaviour
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.88rem">${escapeHtml(p.label)} <span style="color:var(--lt);font-size:.72rem">(${escapeHtml(p.file)})</span></span>
+        <label class="sv-toggle"><input type="checkbox" data-pv-page="${p.key}" ${isOn?'checked':''}><span class="sv-track"></span></label>
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('[data-pv-page]').forEach(cb=>{
+      cb.addEventListener('change', async ()=>{
+        try{
+          await setDoc(doc(db,'settings','pageVisibility'), { [cb.dataset.pvPage]: cb.checked }, { merge: true });
+        }catch(e){
+          alert('Could not save: ' + e.message);
+          cb.checked = !cb.checked;
+        }
+      });
+    });
+  }catch(err){
+    listEl.innerHTML = `<p style="color:#D70015">Could not load: ${err.message}</p>`;
+  }
+}
 
 // ═══════════════ FEATURE FLAGS ═══════════════
 const FEATURE_FLAG_REGISTRY = [
