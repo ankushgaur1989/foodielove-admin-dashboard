@@ -730,6 +730,7 @@
             <button type="button" class="hp-subtab wssub-tab active" data-wssub="highrisk">⚠️ High Risk Orders</button>
             <button type="button" class="hp-subtab wssub-tab" data-wssub="linter">🩺 Website Doctor</button>
             <button type="button" class="hp-subtab wssub-tab" data-wssub="fraud">🚨 Fraud Log</button>
+            <button type="button" class="hp-subtab wssub-tab" data-wssub="secguard">🛡️ Security Guard</button>
           </div>
           <div id="wssub-highrisk" class="wssub-panel" style="padding:1.4rem">
             <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Orders over $50 wait here for a quick manual check before prep starts. Payment's already been collected — approving just releases it to the kitchen.</p>
@@ -744,6 +745,12 @@
           <div id="wssub-fraud" class="wssub-panel" style="padding:1.4rem;display:none">
             <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real-time log — rate limits hit, enumeration attempts, coupon-stacking attempts. Worth a glance now and then.</p>
             <div id="fraudLogList2"><p style="color:var(--lt)">Loading…</p></div>
+          </div>
+          <div id="wssub-secguard" class="wssub-panel" style="padding:1.4rem;display:none">
+            <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real automated checks, run once a day — security headers, HTTPS, and a genuine live test that database rules actually reject unauthorized access, not just that they're documented. Detects and reports only — never changes code or deploys anything on its own.</p>
+            <div id="secGuardStatus2" style="margin-bottom:1rem"></div>
+            <h4 style="margin:1.2rem 0 .7rem;font-size:.85rem">Recent Reports</h4>
+            <div id="secGuardHistory2"></div>
           </div>
         </div>
       </div>
@@ -5112,8 +5119,36 @@ document.querySelectorAll('.wssub-tab').forEach(btn=>{
     document.querySelectorAll('.wssub-panel').forEach(p=>p.style.display='none');
     document.getElementById('wssub-'+btn.dataset.wssub).style.display='block';
     if(btn.dataset.wssub === 'fraud') loadFraudLog2();
+    if(btn.dataset.wssub === 'secguard') loadSecurityGuard2();
   });
 });
+async function loadSecurityGuard2(){
+  const statusEl = document.getElementById('secGuardStatus2');
+  const historyEl = document.getElementById('secGuardHistory2');
+  try{
+    const snap = await getDocs(query(collection(db2,'securityGuardReports'), orderBy('createdAt','desc'), limit(14)));
+    if(snap.empty){
+      statusEl.innerHTML = '<p style="color:var(--lt)">No reports yet — Security Guard runs automatically once a day. Nothing to show until the first run completes.</p>';
+      return;
+    }
+    const latest = snap.docs[0].data();
+    const latestDate = latest.createdAt?.toDate ? latest.createdAt.toDate().toLocaleString('en-AU') : '';
+    statusEl.innerHTML = `<div style="padding:1rem 1.2rem;border-radius:10px;background:${latest.hasIssues?'#FBE9E5':'#E8F5E9'};border:1.5px solid ${latest.hasIssues?'#C24A1E':'#1E8A3B'}">
+      <p style="font-weight:700;margin:0 0 .4rem;color:${latest.hasIssues?'#C24A1E':'#1E8A3B'}">${latest.hasIssues?'Needs attention':'All clear'} — last checked ${esc2(latestDate)}</p>
+      <p style="font-size:.85rem;margin:0;white-space:pre-line">${esc2(latest.summary)}</p>
+    </div>`;
+    historyEl.innerHTML = snap.docs.map(d=>{
+      const r = d.data();
+      const dateStr = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '';
+      return `<div style="padding:.6rem 0;border-bottom:1px solid var(--rule,#EDE4D2);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.83rem">${esc2(dateStr)}</span>
+        <span style="font-size:.75rem;font-weight:700;color:${r.hasIssues?'#C24A1E':'#1E8A3B'}">${r.hasIssues?'Issues found':'All clear'}</span>
+      </div>`;
+    }).join('');
+  }catch(err){
+    historyEl.innerHTML = `<p style="color:#C24A1E">Could not load reports: ${err.message}</p>`;
+  }
+}
 async function loadWebsiteSecurityPG(){ loadHighRiskOrders2(); }
 async function loadHighRiskOrders2(){
   const listEl = document.getElementById('highRiskOrdersList2');
