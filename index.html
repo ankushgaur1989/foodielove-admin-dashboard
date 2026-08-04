@@ -332,6 +332,7 @@
       <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses Tracker</div>
       <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
       <div class="nav-item" data-page="squaresales"><span class="dot"></span> Square Sales</div>
+      <div class="nav-item" data-page="squareconnect"><span class="dot"></span> Square Connection</div>
       <div class="nav-item" data-page="reports"><span class="dot"></span> Reports &amp; Reset</div>
 
       <p class="nav-group-label">Settings</p>
@@ -840,6 +841,19 @@
           <div class="stat-card"><p class="lbl">Refunds</p><p class="val" id="sqRefunds2">$0</p></div>
         </div>
         <p id="sqStatus2" style="font-size:.8rem;color:var(--mid);margin-top:1rem"></p>
+      </div>
+
+      <div class="page-panel" id="page-squareconnect">
+        <div class="panel" style="padding:1.4rem;max-width:480px">
+          <h3 style="margin:0 0 .4rem;font-size:1rem">Connect to Square</h3>
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Square is used in-cafe only — this connects your accounts securely by logging into Square directly (your Square password is never seen by this website).</p>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">
+            <span id="sqDot2" style="width:.6rem;height:.6rem;border-radius:50%;background:#C24A1E;display:inline-block"></span>
+            <span id="sqStatusText2" style="font-size:.85rem">Not connected</span>
+          </div>
+          <button class="reset-layout-btn" id="connectSquareBtn2" style="background:var(--ink);color:#fff;border-color:var(--ink)">Connect to Square</button>
+          <p style="font-size:.72rem;color:var(--lt);margin-top:.9rem">The Sandbox/Production environment switch lives under Page Visibility, next to the Square Live Testing Disclaimer — same as in the main admin.</p>
+        </div>
       </div>
 
       <div class="page-panel" id="page-reports">
@@ -4437,6 +4451,40 @@ const loaded = {};
 function lazyLoad(pid, fn){
   document.querySelectorAll(`[data-page="${pid}"]`).forEach(el => el.addEventListener('click', ()=>{ if(!loaded[pid]){ loaded[pid]=true; fn().catch(e=>console.error(pid+' load failed:', e)); } }));
 }
+
+// ── SQUARE CONNECTION & OAUTH ──
+// Real fix vs just copying the main admin's code verbatim: the redirect
+// URI here is hardcoded to MAIN_SITE rather than window.location.origin,
+// since this dashboard runs on its own separate domain with no backend
+// of its own - a redirect back to THIS site's own /.netlify/functions/
+// square-oauth-callback would 404, since that function only exists on
+// the main site's deployment. Same settings/square doc either way, so
+// the connection status shown here is always accurate regardless of
+// which admin initiated it.
+async function loadSquareConnectStatus(){
+  try{
+    const snap = await getDoc(doc(db2,'settings','square'));
+    const connected = snap.exists() && snap.data().connected;
+    document.getElementById('sqDot2').style.background = connected ? '#1E8A3B' : '#C24A1E';
+    document.getElementById('sqStatusText2').textContent = connected ? `Connected (merchant ${snap.data().merchantId||''})` : 'Not connected';
+  }catch(e){ console.warn('Could not load Square connection status:', e.message); }
+}
+document.getElementById('connectSquareBtn2')?.addEventListener('click', ()=>{
+  const SQUARE_CLIENT_ID = 'sq0idp-Da6IpFYDiE0f3RqIqATatQ';
+  const isSandbox = SQUARE_CLIENT_ID.startsWith('sandbox-');
+  const squareBase = isSandbox ? 'https://connect.squareupsandbox.com' : 'https://connect.squareup.com';
+  const redirectUri = encodeURIComponent(MAIN_SITE + '/.netlify/functions/square-oauth-callback');
+  const scope = encodeURIComponent('MERCHANT_PROFILE_READ ORDERS_READ ITEMS_READ');
+  // Same CSRF protection as the main admin - a random state value,
+  // checked against what comes back before anything gets saved, so an
+  // attacker can't complete Square's login with their own account and
+  // trick the owner into linking it in instead of the real one.
+  const oauthState = crypto.getRandomValues(new Uint32Array(4)).join('-');
+  sessionStorage.setItem('square_oauth_state', oauthState);
+  const sessionParam = isSandbox ? '' : '&session=false';
+  window.location.href = `${squareBase}/oauth2/authorize?client_id=${SQUARE_CLIENT_ID}&scope=${scope}&redirect_uri=${redirectUri}&state=${oauthState}${sessionParam}`;
+});
+lazyLoad('squareconnect', loadSquareConnectStatus);
 
 // ── CUSTOMERS ── built live from orders: one row per unique customer.
 let custRows = [];
