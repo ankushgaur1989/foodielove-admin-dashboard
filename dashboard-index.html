@@ -236,6 +236,7 @@
       <p class="nav-group-label">Reports</p>
       <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; GST</div>
       <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses</div>
+      <div class="nav-item" data-page="squaresales"><span class="dot"></span> Square Sales</div>
       <div class="nav-item" data-page="datausage"><span class="dot"></span> Data Usage</div>
       <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
 
@@ -861,6 +862,26 @@
         </div>
       </div>
 
+      <!-- ══ SQUARE SALES — migrated Aug 2026. Nightly-synced Square
+           sales totals (squareDailySales). ══ -->
+      <div class="page-panel" id="page-squaresales">
+        <div class="page-head"><div><h1>Square Sales</h1><p>Real Square sales, synced nightly (includes in-person terminal sales).</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real Square sales data, synced nightly (includes in-person terminal sales, not just website orders). Updates once a day, not live.</p>
+          <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:1.2rem">
+            <label style="font-size:.82rem;color:var(--mid)">Show last</label>
+            <select id="sqRangeSelect2" style="padding:.5rem .7rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select>
+          </div>
+          <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+            <div class="stat-card"><p class="lbl">Net Sales</p><p class="val" id="sqNetSales2">$0</p></div>
+            <div class="stat-card"><p class="lbl">Total Orders</p><p class="val" id="sqOrderCount2">0</p></div>
+            <div class="stat-card"><p class="lbl">Average Order Value</p><p class="val" id="sqAOV2">$0</p></div>
+            <div class="stat-card"><p class="lbl">Refunds</p><p class="val" id="sqRefunds2">$0</p></div>
+          </div>
+          <p id="sqStatus2" style="font-size:.8rem;color:var(--mid);margin-top:1rem"></p>
+        </div>
+      </div>
+
       <!-- ══ HERO SLIDESHOW — migrated Aug 2026. Pick + order homepage
            hero photos from the Gallery. ══ -->
       <div class="page-panel" id="page-heroslideshow">
@@ -1033,6 +1054,7 @@ const pageTitles = {
   heroslideshow: ['Hero Slideshow', 'Choose and order homepage hero photos'],
   textcontent: ['Text Content', 'Edit live text blocks on the site'],
   emailthemes: ['Email Themes', 'Pick the look for invoice and receipt emails'],
+  squaresales: ['Square Sales', 'Nightly-synced Square sales totals'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -1108,6 +1130,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadHeroSlideshowPG();
   loadTextAllOverrides2();
   loadEmailThemesPG();
+  loadSquareSalesPG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -3053,6 +3076,31 @@ document.getElementById('redeemLookupBtn2')?.addEventListener('click', async ()=
     card.innerHTML = `<div style="background:${bg};padding:1rem;border-radius:10px"><p style="font-weight:700;margin:0 0 .3rem">${icon} ${escapeHtml(data.category||'Result')}</p><p style="font-size:.85rem;margin:0">${escapeHtml(data.message||'')}</p></div>`;
   }catch(e){ card.innerHTML = `<div style="background:#FDECEC;padding:1rem;border-radius:10px"><p style="font-weight:700;color:#B00020">Error</p><p style="font-size:.85rem">${escapeHtml(e.message)}</p></div>`; }
 });
+
+// ══════════════════════════════════════════════════════════════════
+// SQUARE SALES — migrated, adapted to this dashboard.
+// ══════════════════════════════════════════════════════════════════
+async function loadSquareSalesPG(){
+  const status = document.getElementById('sqStatus2');
+  if(!status) return;
+  const days = parseInt(document.getElementById('sqRangeSelect2').value)||30;
+  status.textContent = 'Loading…';
+  const endDate = new Date();
+  const dateKeys = [];
+  for(let i=1;i<=days;i++){ const d=new Date(endDate); d.setDate(d.getDate()-i); dateKeys.push(d.toISOString().slice(0,10)); }
+  const snaps = await Promise.all(dateKeys.map(k=>getDoc(doc(db,'squareDailySales',k)).catch(()=>null)));
+  const daysData = snaps.filter(s=>s&&s.exists()&&!s.data().error).map(s=>s.data());
+  if(!daysData.length){ status.textContent = 'No synced sales data yet — the nightly sync runs automatically. Check back after the first run.'; return; }
+  const totalNet = daysData.reduce((s,d)=>s+(d.netSales||0),0);
+  const totalOrders = daysData.reduce((s,d)=>s+(d.orderCount||0),0);
+  const totalRefunds = daysData.reduce((s,d)=>s+(d.refunds||0),0);
+  document.getElementById('sqNetSales2').textContent = expMoney(totalNet);
+  document.getElementById('sqOrderCount2').textContent = totalOrders;
+  document.getElementById('sqAOV2').textContent = expMoney(totalOrders?totalNet/totalOrders:0);
+  document.getElementById('sqRefunds2').textContent = expMoney(totalRefunds);
+  status.textContent = `Showing last ${days} days.`;
+}
+document.getElementById('sqRangeSelect2')?.addEventListener('change', loadSquareSalesPG);
 
 // ══════════════════════════════════════════════════════════════════
 // HERO SLIDESHOW + TEXT CONTENT + EMAIL THEMES — migrated content
