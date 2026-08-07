@@ -87,13 +87,13 @@
   .btn.btn-ghost{background:var(--card);color:var(--ink);border-color:var(--border)}
   .btn.btn-ghost:hover{background:#F0F0F2;opacity:1}
 
-  .widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:start}
-  .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .widget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-items:stretch}
+  .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04);display:flex;flex-direction:column}
   .widget.dragging{opacity:.5;box-shadow:0 10px 30px rgba(0,0,0,.15)}
   .widget-head{display:flex;align-items:center;gap:.6rem;padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
   .widget-head h3{font-size:.88rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.5rem}
   .widget-drag{cursor:grab;color:var(--lt);font-size:1rem;line-height:1;user-select:none;touch-action:none;padding:.2rem;margin:-.2rem}
-  .widget-body{padding:1.2rem}
+  .widget-body{padding:1.2rem;flex:1}
   .widget-big-stat{font-size:1.9rem;font-weight:800;margin:0;letter-spacing:-.01em}
   .widget-sub{font-size:.78rem;color:var(--mid);margin:.3rem 0 0}
 
@@ -349,14 +349,14 @@
             </div>
           </div>
 
-          <div class="widget" data-widget="topItems" style="grid-column:span 2">
+          <div class="widget" data-widget="topItems" style="grid-column:1 / -1">
             <div class="widget-head"><span class="widget-drag">⠿</span><h3>Top Moving Items</h3></div>
             <div class="widget-body">
               <ol class="top-items-list" id="topItemsList"><li style="color:var(--lt)">Loading…</li></ol>
             </div>
           </div>
 
-          <div class="widget" data-widget="activityStream" style="grid-column:span 2">
+          <div class="widget" data-widget="activityStream" style="grid-column:1 / -1">
             <div class="widget-head"><span class="widget-drag">⠿</span><h3>Live Activity <span class="live-dot" id="liveDot"></span></h3></div>
             <div class="widget-body" style="max-height:280px;overflow-y:auto">
               <div id="activityStreamList"><p style="color:var(--lt);font-size:.82rem">Watching for new orders…</p></div>
