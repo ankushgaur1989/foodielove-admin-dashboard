@@ -194,6 +194,7 @@
       <div class="nav-item" data-page="menu-brunch"><span class="dot"></span> Brunch Menu</div>
       <div class="nav-item" data-page="menu-catering"><span class="dot"></span> Catering Menu</div>
       <div class="nav-item" data-page="charcuterie"><span class="dot"></span> Charcuterie Board</div>
+      <div class="nav-item" data-page="vitalbowls"><span class="dot"></span> Vital Bowls (Salad Builder)</div>
       <div class="nav-item" data-page="gymjunkies"><span class="dot"></span> Gym Junkies Menu</div>
       <div class="nav-item" data-page="merchandise"><span class="dot"></span> Merchandise</div>
       <div class="nav-item" data-page="events"><span class="dot"></span> Events</div>
@@ -623,8 +624,26 @@
         <p style="font-size:.78rem;color:var(--mid);margin-top:1rem">For GST, refunds, discounts, and surcharge breakdowns, see the Sales &amp; GST page — this page focuses on trends, not accounting totals.</p>
       </div>
 
-      <!-- ══ EMERGENCY REWARDS — migrated Aug 2026. Discounts for
-           emergency-service workers (settings/emergencyRewards). ══ -->
+      <!-- ══ VITAL BOWLS — migrated Aug 2026. The Build-Your-Own Salad
+           Bowl editor (settings/saladBowl). Ingredients, prices, macros. ══ -->
+      <div class="page-panel" id="page-vitalbowls">
+        <div class="page-head"><div><h1>Vital Bowls</h1><p>The live "Build Your Own Salad Bowl" on the Menu page.</p></div></div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <p style="font-size:.85rem;color:var(--mid);margin:0 0 1rem;max-width:560px">The real, live "Build Your Own Salad Bowl" on the Menu page. (Simplified vs the main admin: no per-ingredient photo or bowl-size slider yet — those stay main-admin-only for now. Everything a customer actually orders — ingredients, prices, macros — is fully covered.)</p>
+          <label style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;cursor:pointer">
+            <input type="checkbox" id="vbEnabled" style="width:1.1rem;height:1.1rem">
+            <span style="font-weight:600;font-size:.9rem">Vital Bowls enabled on the Menu page</span>
+          </label>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem">
+            <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Base Price ($)</label><input type="number" id="vbBasePrice" step="0.10" min="0" placeholder="14.90" style="padding:.55rem .7rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px;width:110px"></div>
+            <div><label style="font-size:.72rem;font-weight:700;color:var(--mid)">Bowl Photo</label><input type="file" id="vbBowlPhotoFile" accept="image/*"></div>
+          </div>
+          <button class="btn" id="vbSaveBtn" style="background:var(--ink,#1a1a1a);color:#fff">Save Vital Bowl Settings</button>
+          <span id="vbStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div class="panel" style="padding:1.4rem" id="vbCatGrid"></div>
+      </div>
+
       <div class="page-panel" id="page-pg-rewards">
         <div class="page-head"><div><h1>Emergency Rewards</h1><p>Special pricing for emergency-service workers, shown on the Rewards page.</p></div></div>
         <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
@@ -1152,6 +1171,7 @@ const pageTitles = {
   'gallery-soon': ['Gallery', 'Coming soon'],
   'pg-gallery': ['Gallery', 'Add and manage Gallery page photos'],
   'pg-rewards': ['Emergency Rewards', 'Special pricing for emergency-service workers'],
+  vitalbowls: ['Vital Bowls', 'Build-your-own salad bowl builder'],
   'communityboard-soon': ['Community Board', 'Coming soon'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
@@ -1278,6 +1298,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadAnalytics();
   loadGalleryPG();
   loadEmergencyServicesPG();
+  loadVitalBowlsVB();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -3672,6 +3693,147 @@ document.getElementById('pgEsAddBtn')?.addEventListener('click', async ()=>{
   await saveEmergencyServicesPG();
   nameInput.value = '';
   renderEmergencyServicesPG();
+});
+// ══════════════════════════════════════════════════════════════════
+// VITAL BOWLS — Build Your Own Salad Bowl. Migrated, adapted to this
+// dashboard (CSS var names mapped: --rule → --border). Same
+// settings/saladBowl doc and data shape as the main admin.
+// ══════════════════════════════════════════════════════════════════
+let vbData = { base: [], protein: [], topping: [], dressing: [] };
+let vbBowlPhotoUrl = null;
+const VB_CATS = [
+  { key:'base', label:'🥬 Base (choose 1)' },
+  { key:'protein', label:'🍗 Protein (any number)' },
+  { key:'topping', label:'🥕 Toppings (any number)' },
+  { key:'dressing', label:'🥣 Dressing (any number)' }
+];
+const vbEditingIdx = { base: null, protein: null, topping: null, dressing: null };
+function vbCapCat(cat){ return cat.charAt(0).toUpperCase()+cat.slice(1); }
+function renderVbCatGrid(){
+  const grid = document.getElementById('vbCatGrid');
+  if(!grid) return;
+  grid.innerHTML = VB_CATS.map(cat => `
+    <div style="margin-bottom:1.6rem">
+     <p style="font-weight:700;font-size:.85rem;margin-bottom:.6rem">${cat.label}</p>
+     <div id="vb${vbCapCat(cat.key)}List" style="margin-bottom:.7rem"></div>
+     <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end;padding:.8rem;background:var(--bg,#FBF6EF);border:1px solid var(--border);border-radius:10px">
+      <div><label style="font-size:.68rem;color:var(--mid)">Name</label><input type="text" id="vb${vbCapCat(cat.key)}Name" placeholder="Ingredient name" style="padding:.4rem .6rem;border:1.5px solid var(--border,#E3D6BA);border-radius:8px;font-size:.8rem"></div>
+      <div><label style="font-size:.68rem;color:var(--mid)">+$</label><input type="number" id="vb${vbCapCat(cat.key)}Price" min="0" step="0.50" style="width:70px;padding:.4rem .6rem;border:1.5px solid var(--border,#E3D6BA);border-radius:8px;font-size:.8rem"></div>
+      <div><label style="font-size:.68rem;color:var(--mid)">Cal</label><input type="number" id="vb${vbCapCat(cat.key)}Cal" min="0" style="width:60px;padding:.4rem .6rem;border:1.5px solid var(--border,#E3D6BA);border-radius:8px;font-size:.8rem"></div>
+      <div><label style="font-size:.68rem;color:var(--mid)">Protein g</label><input type="number" id="vb${vbCapCat(cat.key)}Protein" min="0" step="0.5" style="width:70px;padding:.4rem .6rem;border:1.5px solid var(--border,#E3D6BA);border-radius:8px;font-size:.8rem"></div>
+      <div><label style="font-size:.68rem;color:var(--mid)">Carbs g</label><input type="number" id="vb${vbCapCat(cat.key)}Carbs" min="0" step="0.5" style="width:70px;padding:.4rem .6rem;border:1.5px solid var(--border,#E3D6BA);border-radius:8px;font-size:.8rem"></div>
+      <div><label style="font-size:.68rem;color:var(--mid)">Fat g</label><input type="number" id="vb${vbCapCat(cat.key)}Fat" min="0" step="0.5" style="width:65px;padding:.4rem .6rem;border:1.5px solid var(--border,#E3D6BA);border-radius:8px;font-size:.8rem"></div>
+      <button class="btn" data-vb-add="${cat.key}" style="background:var(--ink,#1a1a1a);color:#fff;font-size:.78rem;padding:.5rem 1rem">+ Add</button>
+      <button class="btn" data-vb-cancel="${cat.key}" style="display:none;font-size:.78rem;padding:.5rem 1rem">Cancel</button>
+     </div>
+    </div>`).join('');
+  grid.querySelectorAll('[data-vb-add]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cat = btn.dataset.vbAdd;
+      const name = document.getElementById(`vb${vbCapCat(cat)}Name`).value.trim();
+      if(!name) return;
+      const ing = {
+        name,
+        price: parseFloat(document.getElementById(`vb${vbCapCat(cat)}Price`).value) || 0,
+        calories: parseFloat(document.getElementById(`vb${vbCapCat(cat)}Cal`).value) || 0,
+        protein: parseFloat(document.getElementById(`vb${vbCapCat(cat)}Protein`).value) || 0,
+        carbs: parseFloat(document.getElementById(`vb${vbCapCat(cat)}Carbs`).value) || 0,
+        fat: parseFloat(document.getElementById(`vb${vbCapCat(cat)}Fat`).value) || 0,
+      };
+      if(vbEditingIdx[cat] !== null){ vbData[cat][vbEditingIdx[cat]] = ing; vbEditingIdx[cat] = null; }
+      else{ vbData[cat].push(ing); }
+      ['Name','Price','Cal','Protein','Carbs','Fat'].forEach(f=>{ document.getElementById(`vb${vbCapCat(cat)}${f}`).value=''; });
+      btn.textContent = '+ Add';
+      grid.querySelector(`[data-vb-cancel="${cat}"]`).style.display = 'none';
+      renderVbCatLists();
+    });
+  });
+  grid.querySelectorAll('[data-vb-cancel]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cat = btn.dataset.vbCancel;
+      vbEditingIdx[cat] = null;
+      ['Name','Price','Cal','Protein','Carbs','Fat'].forEach(f=>{ document.getElementById(`vb${vbCapCat(cat)}${f}`).value=''; });
+      grid.querySelector(`[data-vb-add="${cat}"]`).textContent = '+ Add';
+      btn.style.display = 'none';
+      renderVbCatLists();
+    });
+  });
+  renderVbCatLists();
+}
+function renderVbCatLists(){
+  VB_CATS.forEach(cat=>{
+    const listEl = document.getElementById(`vb${vbCapCat(cat.key)}List`);
+    if(!listEl) return;
+    const items = vbData[cat.key] || [];
+    listEl.innerHTML = items.length ? items.map((ing,idx)=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:#fff;border:1px solid var(--border,#EDE4D2);border-radius:8px;margin-bottom:.4rem;font-size:.8rem">
+        <span><strong>${escapeHtml(ing.name)}</strong> <span style="color:var(--mid)">${ing.price>0?`+$${ing.price.toFixed(2)}`:'Included'} · ${ing.calories||0} cal · P${ing.protein||0}g C${ing.carbs||0}g F${ing.fat||0}g</span></span>
+        <span style="display:flex;gap:.4rem">
+          <button class="mm-btn-sm" data-vb-edit="${cat.key}:${idx}">Edit</button>
+          <button class="mm-btn-sm mm-btn-danger" data-vb-remove="${cat.key}:${idx}">Remove</button>
+        </span>
+      </div>`).join('') : '<p style="color:var(--lt);font-size:.8rem;font-style:italic">None yet.</p>';
+    listEl.querySelectorAll('[data-vb-edit]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const [c, i] = b.dataset.vbEdit.split(':');
+        const ing = vbData[c][i];
+        document.getElementById(`vb${vbCapCat(c)}Name`).value = ing.name;
+        document.getElementById(`vb${vbCapCat(c)}Price`).value = ing.price;
+        document.getElementById(`vb${vbCapCat(c)}Cal`).value = ing.calories;
+        document.getElementById(`vb${vbCapCat(c)}Protein`).value = ing.protein;
+        document.getElementById(`vb${vbCapCat(c)}Carbs`).value = ing.carbs;
+        document.getElementById(`vb${vbCapCat(c)}Fat`).value = ing.fat;
+        vbEditingIdx[c] = parseInt(i);
+        document.getElementById('vbCatGrid').querySelector(`[data-vb-add="${c}"]`).textContent = 'Update';
+        document.getElementById('vbCatGrid').querySelector(`[data-vb-cancel="${c}"]`).style.display = 'inline-block';
+      });
+    });
+    listEl.querySelectorAll('[data-vb-remove]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const [c, i] = b.dataset.vbRemove.split(':');
+        vbData[c].splice(parseInt(i), 1);
+        renderVbCatLists();
+      });
+    });
+  });
+}
+async function loadVitalBowlsVB(){
+  try{
+    const snap = await getDoc(doc(db,'settings','saladBowl'));
+    const data = snap.exists() ? snap.data() : {};
+    const en = document.getElementById('vbEnabled'); if(en) en.checked = !!data.enabled;
+    const bp = document.getElementById('vbBasePrice'); if(bp) bp.value = data.basePrice || 14.90;
+    vbBowlPhotoUrl = data.bowlPhoto || null;
+    vbData = { base: data.base||[], protein: data.protein||[], topping: data.topping||[], dressing: data.dressing||[] };
+    renderVbCatGrid();
+  }catch(e){ console.warn('Could not load Vital Bowls:', e.message); renderVbCatGrid(); }
+}
+document.getElementById('vbSaveBtn')?.addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('vbStatus');
+  statusEl.style.color = 'var(--mid)'; statusEl.textContent = 'Saving…';
+  try{
+    const file = document.getElementById('vbBowlPhotoFile').files[0];
+    if(file){
+      statusEl.textContent = 'Uploading photo…';
+      const compressed = await compressImageForUpload(file);
+      const sref = ref(storage, `saladBowlPhotos/${Date.now()}_${file.name}`);
+      await uploadBytes(sref, compressed);
+      vbBowlPhotoUrl = await getDownloadURL(sref);
+    }
+    await setDoc(doc(db,'settings','saladBowl'), {
+      enabled: document.getElementById('vbEnabled').checked,
+      basePrice: parseFloat(document.getElementById('vbBasePrice').value) || 14.90,
+      bowlPhoto: vbBowlPhotoUrl,
+      ...vbData,
+      updatedAt: serverTimestamp()
+    });
+    statusEl.style.color = '#1E8A3B';
+    statusEl.textContent = '✅ Saved — live on the Menu page now.';
+  }catch(e){
+    statusEl.style.color = '#D70015';
+    statusEl.textContent = '❌ ' + e.message;
+  }
+  setTimeout(()=>statusEl.textContent='', 3500);
 });
 </script>
 </body>
