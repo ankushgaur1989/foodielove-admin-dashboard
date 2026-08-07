@@ -222,6 +222,7 @@
       <p class="nav-group-label">Customers</p>
       <div class="nav-item" data-page="customers"><span class="dot"></span> Customer History</div>
       <div class="nav-item" data-page="loyalty"><span class="dot"></span> Loyalty</div>
+      <div class="nav-item" data-page="pg-loyalty"><span class="dot"></span> Loyalty Signups</div>
 
       <p class="nav-group-label">Marketing</p>
       <div class="nav-item" data-page="offers"><span class="dot"></span> Offers</div>
@@ -622,6 +623,24 @@
           </div>
         </div>
         <p style="font-size:.78rem;color:var(--mid);margin-top:1rem">For GST, refunds, discounts, and surcharge breakdowns, see the Sales &amp; GST page — this page focuses on trends, not accounting totals.</p>
+      </div>
+
+      <!-- ══ LOYALTY SIGNUPS — migrated Aug 2026. Loyalty program members
+           + points (loyaltySignups). Distinct from the Loyalty section
+           which shows userProfiles points balances. ══ -->
+      <div class="page-panel" id="page-pg-loyalty">
+        <div class="page-head"><div><h1>Loyalty Signups</h1><p>Members who joined the loyalty program, with their points.</p></div></div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <p style="font-size:.85rem;color:var(--mid);margin:0">Points are earned automatically from real Square purchases and redeemed for rewards on the Loyalty page.</p>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem;font-size:.78rem;color:var(--mid)">
+            <span>🎁 100 pts = Free coffee</span><span>·</span>
+            <span>300 pts = $10 off</span><span>·</span>
+            <span>600 pts = Free brunch item</span><span>·</span>
+            <span>1000 pts = $25 voucher</span>
+          </div>
+        </div>
+        <input type="text" id="pgLoyaltySearch" placeholder="Search by name, email, or referral code…" style="width:100%;padding:.6rem .8rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px;margin-bottom:1rem">
+        <div id="pgLoyaltyList"><p style="color:var(--lt)">Loading…</p></div>
       </div>
 
       <!-- ══ VITAL BOWLS — migrated Aug 2026. The Build-Your-Own Salad
@@ -1172,6 +1191,7 @@ const pageTitles = {
   'pg-gallery': ['Gallery', 'Add and manage Gallery page photos'],
   'pg-rewards': ['Emergency Rewards', 'Special pricing for emergency-service workers'],
   vitalbowls: ['Vital Bowls', 'Build-your-own salad bowl builder'],
+  'pg-loyalty': ['Loyalty Signups', 'Loyalty program members and points'],
   'communityboard-soon': ['Community Board', 'Coming soon'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
@@ -1299,6 +1319,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadGalleryPG();
   loadEmergencyServicesPG();
   loadVitalBowlsVB();
+  loadLoyaltyPG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -3835,6 +3856,76 @@ document.getElementById('vbSaveBtn')?.addEventListener('click', async ()=>{
   }
   setTimeout(()=>statusEl.textContent='', 3500);
 });
+// ══════════════════════════════════════════════════════════════════
+// LOYALTY SIGNUPS — migrated, adapted (loyaltySignups collection;
+// showToast replaced). Distinct from the Loyalty section (userProfiles).
+// ══════════════════════════════════════════════════════════════════
+let pgLoyaltyCache = [];
+async function loadLoyaltyPG(){
+  const listEl = document.getElementById('pgLoyaltyList');
+  if(!listEl) return;
+  try{
+    const snap = await getDocs(query(collection(db,'loyaltySignups'), orderBy('createdAt','desc')));
+    pgLoyaltyCache = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderLoyaltyPG();
+  }catch(e){
+    listEl.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load loyalty signups: ${escapeHtml(e.message)}</p>`;
+  }
+}
+function renderLoyaltyPG(){
+  const listEl = document.getElementById('pgLoyaltyList');
+  if(!listEl) return;
+  const searchTerm = (document.getElementById('pgLoyaltySearch')?.value || '').toLowerCase().trim();
+  const filtered = pgLoyaltyCache.filter(m=>{
+    if(!searchTerm) return true;
+    return (m.name||'').toLowerCase().includes(searchTerm)
+      || (m.email||'').toLowerCase().includes(searchTerm)
+      || (m.referralCode||'').toLowerCase().includes(searchTerm);
+  });
+  if(!filtered.length){
+    listEl.innerHTML = `<div class="panel" style="padding:2rem;text-align:center;color:var(--lt)">${pgLoyaltyCache.length ? 'No members match that search.' : 'No loyalty signups yet.'}</div>`;
+    return;
+  }
+  let html = '<div class="panel">';
+  filtered.forEach(m=>{
+    const points = Number(m.points) || 0;
+    const signupDate = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'}) : '—';
+    html += `<div class="mm-item-row" data-pgloy-id="${m.id}">
+      <div style="flex:1;min-width:0">
+        <div class="mm-item-name">${escapeHtml(m.name || 'Unnamed')} <span style="color:var(--lt);font-weight:400;font-size:.78rem">${m.referralCode ? '· '+escapeHtml(m.referralCode) : ''}</span></div>
+        <div class="mm-item-desc">${escapeHtml(m.email||'')}${m.phone ? ' · '+escapeHtml(m.phone) : ''} · joined ${signupDate}</div>
+      </div>
+      <div style="text-align:right;margin-right:1rem">
+        <div style="font-weight:800;font-size:1.05rem;color:var(--accent,#C2511C)">${points} pts</div>
+      </div>
+      <div class="mm-item-actions">
+        <input type="number" placeholder="New total" data-pgloy-input="${m.id}" style="width:90px;padding:.4rem .5rem;border:1px solid var(--border);border-radius:6px;font-size:.8rem">
+        <button class="mm-btn-sm" data-pgloy-save="${m.id}">Set Points</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+  listEl.querySelectorAll('[data-pgloy-save]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const memberId = btn.dataset.pgloySave;
+      const input = listEl.querySelector(`[data-pgloy-input="${memberId}"]`);
+      const newPoints = parseInt(input.value, 10);
+      if(isNaN(newPoints) || newPoints < 0){ alert('Enter a valid points total (0 or higher).'); return; }
+      const member = pgLoyaltyCache.find(m=>m.id===memberId);
+      if(!confirm(`Set ${member?.name || 'this member'}'s points to exactly ${newPoints}? This directly overwrites their current balance of ${member?.points || 0}.`)) return;
+      btn.disabled = true;
+      try{
+        await updateDoc(doc(db,'loyaltySignups',memberId), { points: newPoints });
+        loadLoyaltyPG();
+      }catch(e){
+        alert('Could not update points: ' + e.message);
+        btn.disabled = false;
+      }
+    });
+  });
+}
+document.getElementById('pgLoyaltySearch')?.addEventListener('input', renderLoyaltyPG);
 </script>
 </body>
 </html>
