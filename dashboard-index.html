@@ -3406,7 +3406,7 @@ function renderCareerJobsEditor2(){
       <label style="font-size:.78rem"><input type="checkbox" class="job-active2" data-idx="${idx}" ${job.active?'checked':''}> Active</label>
       <button class="btn" data-jobremove2="${idx}" style="background:#C24A1E">Remove</button>
     </div>`).join('') : '<p style="color:var(--lt)">No roles yet.</p>';
-  wrap.querySelectorAll('[data-jobremove2]').forEach(b=>b.addEventListener('click', ()=>{ careerJobsData2.splice(Number(b.dataset.jobremove2),1); renderCareerJobsEditor2(); }));
+  wrap.querySelectorAll('[data-jobremove2]').forEach(b=>b.addEventListener('click', ()=>{ const job = careerJobsData2[Number(b.dataset.jobremove2)]; if(!confirm(`Remove the role "${(job&&job.title)||'this role'}"? You'll still need to press Save to make it final.`)) return; careerJobsData2.splice(Number(b.dataset.jobremove2),1); renderCareerJobsEditor2(); }));
 }
 async function loadCareersPG(){
   const snap = await getDoc(doc(db,'settings','careers')).catch(()=>null);
@@ -3872,6 +3872,9 @@ function renderEmergencyServicesPG(){
     </div>`).join('');
   listEl.querySelectorAll('[data-pges-remove-service]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
+      const svc = pgEmergencyServices[Number(btn.dataset.pgesRemoveService)];
+      const itemCount = (svc && svc.items) ? svc.items.length : 0;
+      if(!confirm(`Remove "${(svc&&svc.name)||'this service'}"${itemCount ? ` and its ${itemCount} priced item${itemCount>1?'s':''}` : ''}? This can't be undone.`)) return;
       pgEmergencyServices.splice(Number(btn.dataset.pgesRemoveService), 1);
       await saveEmergencyServicesPG();
       renderEmergencyServicesPG();
@@ -4007,6 +4010,8 @@ function renderVbCatLists(){
     listEl.querySelectorAll('[data-vb-remove]').forEach(b=>{
       b.addEventListener('click', ()=>{
         const [c, i] = b.dataset.vbRemove.split(':');
+        const ing = vbData[c][i];
+        if(!confirm(`Remove "${(ing&&ing.name)||'this ingredient'}"? Press Save afterwards to update the live Menu.`)) return;
         vbData[c].splice(parseInt(i), 1);
         renderVbCatLists();
       });
