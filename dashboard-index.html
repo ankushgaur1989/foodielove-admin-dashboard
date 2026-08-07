@@ -248,6 +248,8 @@
       <div class="nav-item" data-page="reports" style="color:#E8703D"><span class="dot"></span> Reset Sales ⚠️</div>
       <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
+      <div class="nav-item" data-page="pagevisibility"><span class="dot"></span> Page Visibility</div>
+      <div class="nav-item" data-page="squareconnect"><span class="dot"></span> Connect Square</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
 
       <div class="footnote">Isolated build — separate from the main website. Connected read-only to live orders.</div>
@@ -929,6 +931,32 @@
         </div>
       </div>
 
+      <!-- ══ PAGE VISIBILITY — migrated Aug 2026. Take individual pages
+           offline (settings/pageVisibility). ══ -->
+      <div class="page-panel" id="page-pagevisibility">
+        <div class="page-head"><div><h1>Page Visibility</h1><p>Take any single page offline without affecting the rest.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.85rem;color:var(--mid);margin:0 0 1rem">Take any single page offline without affecting the rest of the site — different from Maintenance Mode, which takes everything down. When a page is off, visiting it directly shows a simple "not available right now" message, and any link to it anywhere else on the site automatically hides itself too.</p>
+          <div id="pvListWrap"><p style="color:var(--lt);padding:1.5rem;text-align:center">Loading…</p></div>
+        </div>
+      </div>
+
+      <!-- ══ CONNECT SQUARE — migrated Aug 2026. OAuth connect + status
+           (settings/square). ══ -->
+      <div class="page-panel" id="page-squareconnect">
+        <div class="page-head"><div><h1>Connect Square</h1><p>Securely link your Square account via OAuth.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <h3 style="margin-top:0">Connect to Square</h3>
+          <p style="font-size:.85rem;color:var(--mid);margin:0 0 1rem">Square is used in-cafe only — this connects your accounts securely by logging into Square directly (your Square password is never seen by this website).</p>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">
+            <span id="sqDot2" style="width:10px;height:10px;border-radius:50%;background:#C24A1E;display:inline-block"></span>
+            <span id="sqStatusText2" style="font-size:.85rem">Not connected</span>
+          </div>
+          <button class="btn" id="connectSquareBtn2" style="background:var(--ink,#1a1a1a);color:#fff">Connect to Square</button>
+          <p style="font-size:.78rem;color:var(--mid);margin-top:.8rem">The Sandbox/Production environment switch lives under Page Visibility, next to the Square Live Testing Disclaimer — same as in the main admin.</p>
+        </div>
+      </div>
+
       <!-- ══ UBER DELIVERY — migrated Aug 2026. Static info/setup panel;
            the actual booking button lives in Orders. ══ -->
       <div class="page-panel" id="page-uberintegration">
@@ -1098,6 +1126,8 @@ const pageTitles = {
   photocleanup: ['Photo Cleanup', 'Re-compress oversized photos'],
   reports: ['Reset Sales', 'Clear all orders — destructive'],
   uberintegration: ['Uber Delivery', 'Connect Uber Direct for courier booking'],
+  pagevisibility: ['Page Visibility', 'Take individual pages offline'],
+  squareconnect: ['Connect Square', 'Link your Square account via OAuth'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -1174,6 +1204,8 @@ onAuthStateChanged(auth, async (user)=>{
   loadTextAllOverrides2();
   loadEmailThemesPG();
   loadSquareSalesPG();
+  loadPageVisibilityPV2();
+  loadSquareConnectStatus();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -3295,6 +3327,79 @@ document.getElementById('resetOrdersBtn2')?.addEventListener('click', async ()=>
     for(const d of snap.docs){ await deleteDoc(doc(db,'orders',d.id)); }
     status.textContent = `✓ Deleted ${snap.size} orders. Sales reset to $0.`;
   }catch(e){ status.textContent = 'Could not complete: ' + e.message; }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// PAGE VISIBILITY + CONNECT SQUARE — migrated, adapted to this dashboard.
+// ══════════════════════════════════════════════════════════════════
+const PAGE_VISIBILITY_REGISTRY2 = [
+  { key:'menu', label:'Brunch Menu', file:'menu.html' },
+  { key:'catering', label:'Catering', file:'catering.html' },
+  { key:'corporatecatering', label:'Corporate Catering', file:'corporate-catering.html' },
+  { key:'buildabox', label:'Build Your Own Box', file:'build-a-box.html' },
+  { key:'gallery', label:'Gallery', file:'gallery.html' },
+  { key:'loyalty', label:'Rewards / Loyalty', file:'loyalty.html' },
+  { key:'offers', label:'Offers', file:'offers.html' },
+  { key:'giftvouchers', label:'Gift Vouchers', file:'gift-vouchers.html' },
+  { key:'merchandise', label:'Merchandise', file:'merchandise.html' },
+  { key:'booking', label:'Table Booking', file:'booking.html' },
+  { key:'careers', label:'Careers', file:'careers.html' },
+  { key:'events', label:'Events', file:'events.html' },
+  { key:'community', label:'Community Board', file:'community.html' },
+  { key:'blog', label:'Blog', file:'blog.html' },
+  { key:'faq', label:'FAQ', file:'faq.html' },
+  { key:'contact', label:'Contact', file:'contact.html' },
+  { key:'about', label:'About', file:'about.html' }
+];
+async function loadPageVisibilityPV2(){
+  const listEl = document.getElementById('pvListWrap');
+  if(!listEl) return;
+  try{
+    const snap = await getDoc(doc(db,'settings','pageVisibility'));
+    const data = snap.exists() ? snap.data() : {};
+    listEl.innerHTML = PAGE_VISIBILITY_REGISTRY2.map(p=>{
+      const isOn = data[p.key] !== false;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.7rem 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:.88rem">${escapeHtml(p.label)} <span style="color:var(--lt);font-size:.72rem">(${escapeHtml(p.file)})</span></span>
+        <label class="sv-toggle"><input type="checkbox" data-pv-page="${p.key}" ${isOn?'checked':''}><span class="sv-track"></span></label>
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('[data-pv-page]').forEach(cb=>{
+      cb.addEventListener('change', async ()=>{
+        try{
+          await setDoc(doc(db,'settings','pageVisibility'), { [cb.dataset.pvPage]: cb.checked }, { merge: true });
+        }catch(e){
+          alert('Could not save: ' + e.message);
+          cb.checked = !cb.checked;
+        }
+      });
+    });
+  }catch(err){
+    listEl.innerHTML = `<p style="color:#D70015">Could not load: ${err.message}</p>`;
+  }
+}
+
+// Connect Square — OAuth status + connect button.
+async function loadSquareConnectStatus(){
+  try{
+    const snap = await getDoc(doc(db,'settings','square'));
+    const connected = snap.exists() && snap.data().connected;
+    const dot = document.getElementById('sqDot2');
+    if(dot) dot.style.background = connected ? '#1E8A3B' : '#C24A1E';
+    const txt = document.getElementById('sqStatusText2');
+    if(txt) txt.textContent = connected ? `Connected (merchant ${snap.data().merchantId||''})` : 'Not connected';
+  }catch(e){ console.warn('Could not load Square connection status:', e.message); }
+}
+document.getElementById('connectSquareBtn2')?.addEventListener('click', ()=>{
+  const SQUARE_CLIENT_ID = 'sq0idp-Da6IpFYDiE0f3RqIqATatQ';
+  const isSandbox = SQUARE_CLIENT_ID.startsWith('sandbox-');
+  const squareBase = isSandbox ? 'https://connect.squareupsandbox.com' : 'https://connect.squareup.com';
+  const redirectUri = encodeURIComponent(MAIN_SITE + '/.netlify/functions/square-oauth-callback');
+  const scope = encodeURIComponent('MERCHANT_PROFILE_READ ORDERS_READ ITEMS_READ');
+  const oauthState = crypto.getRandomValues(new Uint32Array(4)).join('-');
+  sessionStorage.setItem('square_oauth_state', oauthState);
+  const sessionParam = isSandbox ? '' : '&session=false';
+  window.location.href = `${squareBase}/oauth2/authorize?client_id=${SQUARE_CLIENT_ID}&scope=${scope}&redirect_uri=${redirectUri}&state=${oauthState}${sessionParam}`;
 });
 </script>
 </body>
