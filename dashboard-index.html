@@ -211,7 +211,7 @@
       <p class="nav-group-label">Coming Soon</p>
       <div class="nav-item" data-page="websitesecurity" style="opacity:.55"><span class="dot"></span> Website Security</div>
       <div class="nav-item" data-page="analytics"><span class="dot"></span> Analytics</div>
-      <div class="nav-item" data-page="gallery-soon" style="opacity:.55"><span class="dot"></span> Gallery</div>
+      <div class="nav-item" data-page="pg-gallery"><span class="dot"></span> Gallery</div>
       <div class="nav-item" data-page="communityboard-soon" style="opacity:.55"><span class="dot"></span> Community Board</div>
 
       <p class="nav-group-label">Bookings</p>
@@ -622,13 +622,36 @@
         <p style="font-size:.78rem;color:var(--mid);margin-top:1rem">For GST, refunds, discounts, and surcharge breakdowns, see the Sales &amp; GST page — this page focuses on trends, not accounting totals.</p>
       </div>
 
-      <div class="page-panel" id="page-gallery-soon">
-        <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
-          <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
-          <h3 style="color:var(--dark);margin-bottom:.4rem">Gallery — coming soon</h3>
-          <p style="max-width:400px;margin:0 auto">Reserved for the Gallery page's management tools — not yet built here.</p>
+      <!-- ══ GALLERY — migrated Aug 2026. Real photo uploader for the
+           Gallery page (galleryPhotos collection). ══ -->
+      <div class="page-panel" id="page-pg-gallery">
+        <div class="page-head"><div><h1>Gallery</h1><p>Add and manage photos on the public Gallery page.</p></div></div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <h3 style="margin-top:0">Add a Photo</h3>
+          <p style="font-size:.82rem;color:var(--mid);margin:0 0 1rem">Shows up live on the Gallery page, newest first. (Video upload isn't supported in this dashboard yet — use the main admin panel for videos in the meantime.)</p>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start">
+            <div><label class="mm-lbl">Photo</label><input type="file" accept="image/png,image/jpeg,image/webp" id="pgGalPhotoFile"></div>
+            <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:.6rem">
+              <div><label class="mm-lbl">Caption (optional)</label><input type="text" id="pgGalCaption" placeholder="e.g. Sarah &amp; Tom's wedding grazing table" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px"></div>
+              <div><label class="mm-lbl">Category</label>
+                <select id="pgGalCategory" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+                  <option value="weddings">Weddings</option>
+                  <option value="corporate">Corporate</option>
+                  <option value="birthdays">Birthdays</option>
+                  <option value="grazing">Grazing Boxes</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button class="btn" id="pgGalAddBtn" style="margin-top:1rem">+ Add to Gallery</button>
+          <span id="pgGalStatus" style="font-size:.8rem;color:var(--mid);margin-left:.6rem"></span>
         </div>
+        <h3 style="margin:0 0 .8rem">All Gallery Photos</h3>
+        <div id="pgGalGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem"></div>
+        <div id="pgGalEmpty" style="display:none;color:var(--lt);padding:2rem;text-align:center">No photos uploaded yet — add your first one above.</div>
       </div>
+
       <div class="page-panel" id="page-communityboard-soon">
         <div class="panel" style="padding:3rem 2rem;text-align:center;color:var(--lt)">
           <div style="font-size:2rem;margin-bottom:.8rem">🚧</div>
@@ -1103,6 +1126,7 @@ const pageTitles = {
   orders: ['Orders', 'Live data from your production database'],
   websitesecurity: ['Website Security', 'Coming soon'],
   'gallery-soon': ['Gallery', 'Coming soon'],
+  'pg-gallery': ['Gallery', 'Add and manage Gallery page photos'],
   'communityboard-soon': ['Community Board', 'Coming soon'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
@@ -1227,6 +1251,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadPageVisibilityPV2();
   loadSquareConnectStatus();
   loadAnalytics();
+  loadGalleryPG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -3477,6 +3502,70 @@ async function loadAnalytics(){
     chartEl.innerHTML = `<p style="color:#D70015;font-size:.85rem">Could not load analytics: ${escapeHtml(err.message)}</p>`;
   }
 }
+// ══════════════════════════════════════════════════════════════════
+// GALLERY — migrated, adapted to this dashboard (showToast calls
+// replaced with the inline status text this section already has).
+// ══════════════════════════════════════════════════════════════════
+async function loadGalleryPG(){
+  const grid = document.getElementById('pgGalGrid');
+  const empty = document.getElementById('pgGalEmpty');
+  if(!grid) return;
+  try{
+    const snap = await getDocs(query(collection(db,'galleryPhotos'), orderBy('createdAt','desc')));
+    if(snap.empty){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    grid.innerHTML = snap.docs.map(d=>{
+      const p = d.data();
+      if(p.mediaType === 'video'){
+        return `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card);position:relative">
+          <span style="position:absolute;top:.4rem;right:.4rem;background:rgba(0,0,0,.65);color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:10px;z-index:1">🎥 VIDEO</span>
+          <video src="${escapeHtml(p.url)}" muted loop style="width:100%;height:110px;object-fit:cover;display:block"></video>
+          <div style="padding:.5rem .6rem"><p style="font-size:.7rem;color:var(--lt);text-transform:capitalize">${escapeHtml(p.category||'other')}</p></div>
+        </div>`;
+      }
+      return `<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card)" data-pggal-id="${d.id}">
+        <img src="${escapeHtml(p.url)}" style="width:100%;height:110px;object-fit:cover;display:block">
+        <div style="padding:.5rem .6rem">
+          <p style="font-size:.7rem;color:var(--mid);text-transform:capitalize;margin-bottom:.3rem">${escapeHtml(p.category||'other')}</p>
+          <p style="font-size:.72rem;color:var(--lt);margin-bottom:.5rem;min-height:1.6em">${escapeHtml(p.caption||'')}</p>
+          <button class="mm-btn-sm mm-btn-danger" style="width:100%" data-pggal-delete="${d.id}">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+    grid.querySelectorAll('[data-pggal-delete]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('Delete this photo permanently?')) return;
+        try{ await deleteDoc(doc(db,'galleryPhotos',btn.dataset.pggalDelete)); loadGalleryPG(); }
+        catch(e){ alert('Could not delete: ' + e.message); }
+      });
+    });
+  }catch(e){
+    grid.innerHTML = `<p style="color:#D70015;padding:1rem">Could not load gallery: ${escapeHtml(e.message)}</p>`;
+  }
+}
+document.getElementById('pgGalAddBtn')?.addEventListener('click', async ()=>{
+  const file = document.getElementById('pgGalPhotoFile').files[0];
+  const caption = document.getElementById('pgGalCaption').value.trim();
+  const category = document.getElementById('pgGalCategory').value;
+  const status = document.getElementById('pgGalStatus');
+  if(!file){ alert('Please choose a photo first.'); return; }
+  status.style.color = 'var(--mid)'; status.textContent = 'Optimizing photo…';
+  try{
+    const compressed = await compressImageForUpload(file);
+    status.textContent = 'Uploading…';
+    const sref = ref(storage, `galleryPhotos/${Date.now()}_${file.name}`);
+    await uploadBytes(sref, compressed);
+    const url = await getDownloadURL(sref);
+    await addDoc(collection(db,'galleryPhotos'), { url, caption, category, mediaType: 'image', compressed: true, createdAt: serverTimestamp() });
+    document.getElementById('pgGalPhotoFile').value = '';
+    document.getElementById('pgGalCaption').value = '';
+    status.style.color = '#1E8A3B'; status.textContent = '✅ Added to gallery';
+    setTimeout(()=>{ if(status) status.textContent=''; }, 2500);
+    loadGalleryPG();
+  }catch(e){
+    status.style.color = '#D70015'; status.textContent = '❌ ' + e.message;
+  }
+});
 </script>
 </body>
 </html>
