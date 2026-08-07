@@ -242,6 +242,7 @@
 
       <p class="nav-group-label">Settings</p>
       <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
+      <div class="nav-item" data-page="uberintegration"><span class="dot"></span> Uber Delivery</div>
       <div class="nav-item" data-page="careers"><span class="dot"></span> Careers &amp; Applications</div>
       <div class="nav-item" data-page="photocleanup"><span class="dot"></span> Photo Cleanup</div>
       <div class="nav-item" data-page="reports" style="color:#E8703D"><span class="dot"></span> Reset Sales ⚠️</div>
@@ -928,6 +929,18 @@
         </div>
       </div>
 
+      <!-- ══ UBER DELIVERY — migrated Aug 2026. Static info/setup panel;
+           the actual booking button lives in Orders. ══ -->
+      <div class="page-panel" id="page-uberintegration">
+        <div class="page-head"><div><h1>Uber Delivery</h1><p>Connect Uber Direct to book couriers from Orders.</p></div></div>
+        <div class="panel" style="padding:1.4rem;border-color:#06C167">
+          <h3 style="margin-top:0">🚗 Uber Delivery</h3>
+          <p style="font-size:.85rem;color:var(--mid);margin:0 0 1rem">"Book Uber Delivery" is built into the Orders tab — one tap on any delivery order books a real Uber courier. It needs your own Uber Direct business account connected first, the same way Square did.</p>
+          <a href="https://direct.uber.com" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:inline-block;background:#06C167">Open direct.uber.com to Sign Up →</a>
+          <p style="font-size:.78rem;color:var(--mid);margin-top:.8rem">Once signed up, add your Client ID, Client Secret, and Customer ID to Netlify environment variables on the main site, then redeploy — the button in Orders goes live.</p>
+        </div>
+      </div>
+
       <!-- ══ PHOTO CLEANUP — migrated Aug 2026. Triggers the main site's
            recompress background job and polls progress. ══ -->
       <div class="page-panel" id="page-photocleanup">
@@ -1084,6 +1097,7 @@ const pageTitles = {
   squaresales: ['Square Sales', 'Nightly-synced Square sales totals'],
   photocleanup: ['Photo Cleanup', 'Re-compress oversized photos'],
   reports: ['Reset Sales', 'Clear all orders — destructive'],
+  uberintegration: ['Uber Delivery', 'Connect Uber Direct for courier booking'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
