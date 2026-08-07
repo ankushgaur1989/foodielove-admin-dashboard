@@ -187,7 +187,10 @@
     .stat-row{grid-template-columns:1fr!important;gap:.8rem;margin-bottom:1.4rem}
     .stat-card .val{font-size:1.5rem}
     .widget-grid{grid-template-columns:1fr!important}
-    .widget{grid-column:auto!important}
+    .widget{grid-column:auto!important;overflow:hidden}
+    /* let a wide table scroll inside its widget rather than stretch the card */
+    .widget table{min-width:0}
+    .widget .panel,.widget > div{overflow-x:auto}
     /* Any wide grids collapse to single column on mobile */
     [style*="grid-template-columns:1fr 1fr"],[style*="grid-template-columns:repeat(2"],[style*="grid-template-columns:repeat(3"],[style*="grid-template-columns:repeat(4"]{grid-template-columns:1fr!important}
     /* Tables scroll horizontally instead of squishing/wrapping */
