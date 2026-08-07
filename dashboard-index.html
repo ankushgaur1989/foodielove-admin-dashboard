@@ -187,6 +187,7 @@
 
       <p class="nav-group-label">Orders</p>
       <div class="nav-item" data-page="orders"><span class="dot"></span> Orders</div>
+      <div class="nav-item" data-page="scanredeem"><span class="dot"></span> Scan &amp; Redeem</div>
       <div class="nav-item" data-page="cateringrequests"><span class="dot"></span> Catering Requests</div>
 
       <p class="nav-group-label">Menu</p>
@@ -230,6 +231,7 @@
       <p class="nav-group-label">Reports</p>
       <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; GST</div>
       <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses</div>
+      <div class="nav-item" data-page="datausage"><span class="dot"></span> Data Usage</div>
       <div class="nav-item" data-page="payments"><span class="dot"></span> Payment Summary</div>
 
       <p class="nav-group-label">Settings</p>
@@ -827,6 +829,32 @@
           <p id="careersEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No applications yet.</p>
         </div>
       </div>
+
+      <!-- ══ SCAN & REDEEM — migrated Aug 2026. Manual reward-code lookup;
+           calls the main site's redeem-code function. ══ -->
+      <div class="page-panel" id="page-scanredeem">
+        <div class="page-head"><div><h1>Scan &amp; Redeem</h1><p>Look up a reward code from a customer's QR.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Camera scanning isn't available in this dashboard yet — type or paste the code from the customer's QR code instead. Gift vouchers and loyalty points aren't here on purpose; they already redeem through Square directly.</p>
+          <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1rem">
+            <input id="redeemCodeInput2" placeholder="Paste or type reward code" style="flex:1;padding:.6rem .8rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+            <button type="button" class="btn" id="redeemLookupBtn2">Look Up</button>
+          </div>
+          <div id="redeemResult2"></div>
+        </div>
+      </div>
+
+      <!-- ══ DATA USAGE — migrated Aug 2026. Live Firestore document
+           counts. ══ -->
+      <div class="page-panel" id="page-datausage">
+        <div class="page-head"><div><h1>Data Usage</h1><p>Live document counts in your database.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Real document counts in your database right now — useful for noticing if something's growing fast or unexpectedly empty.</p>
+          <div id="usageGrid2" style="display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem"></div>
+          <button type="button" class="btn" id="refreshUsageBtn2">Refresh Counts</button>
+          <a href="https://console.firebase.google.com/project/foodielovecatering-9da7a/firestore/usage" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:inline-block;background:var(--mid)">Open Firebase Console ↗</a>
+        </div>
+      </div>
       <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-photos">
@@ -864,6 +892,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+// Base URL of the live main site, for the admin sections that call the
+// main site's deployed Netlify functions (Scan & Redeem, Photo Cleanup).
+const MAIN_SITE = 'https://www.foodielove.com.au';
 
 // Simple client-side compression before upload — same approach as the
 // main admin panel, keeps menu photos from being unnecessarily huge.
@@ -948,6 +979,8 @@ const pageTitles = {
   expenses: ['Expenses', 'Track business spending — for your own records'],
   cateringrequests: ['Catering Requests', 'Corporate enquiries and estimator leads'],
   careers: ['Careers & Applications', 'Job openings and applications'],
+  scanredeem: ['Scan & Redeem', 'Look up a reward code'],
+  datausage: ['Data Usage', 'Live document counts in your database'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -1019,6 +1052,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadExpensesPG();
   loadCateringRequestsPG();
   loadCareersPG();
+  loadDataUsagePG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -2931,6 +2965,38 @@ document.getElementById('saveJobsBtn2')?.addEventListener('click', async ()=>{
   await setDoc(doc(db,'settings','careers'), { jobs: careerJobsData2 });
   document.getElementById('jobsSaveStatus2').textContent = '✓ Saved';
   setTimeout(()=>document.getElementById('jobsSaveStatus2').textContent='', 2000);
+});
+
+// ══════════════════════════════════════════════════════════════════
+// DATA USAGE + SCAN & REDEEM — migrated, adapted to this dashboard.
+// ══════════════════════════════════════════════════════════════════
+async function loadDataUsagePG(){
+  const grid = document.getElementById('usageGrid2');
+  if(!grid) return;
+  grid.innerHTML = '<p style="color:var(--mid)">Counting…</p>';
+  const collections = ['orders','menuItems','galleryPhotos','expenses','communityPosts','staffUsers','promotions','corporateRequests','catering_leads','careerApplications','fraudLog','giftVouchers'];
+  const counts = await Promise.all(collections.map(async c => {
+    try{ const s = await getDocs(collection(db,c)); return [c, s.size]; }catch(e){ return [c, '—']; }
+  }));
+  grid.innerHTML = counts.map(([c,n]) => `<div class="stat-card" style="min-width:140px"><p class="lbl">${escapeHtml(c)}</p><p class="val">${n}</p></div>`).join('');
+}
+document.getElementById('refreshUsageBtn2')?.addEventListener('click', loadDataUsagePG);
+
+// Scan & Redeem — manual code entry, calls the main site's redeem-code fn.
+document.getElementById('redeemLookupBtn2')?.addEventListener('click', async ()=>{
+  const code = document.getElementById('redeemCodeInput2').value.trim();
+  const card = document.getElementById('redeemResult2');
+  if(!code) return;
+  card.innerHTML = '<p style="color:var(--mid)">Checking…</p>';
+  try{
+    const idToken = await auth.currentUser.getIdToken();
+    const resp = await fetch(MAIN_SITE + '/.netlify/functions/redeem-code', { method:'POST', headers:{'Authorization':'Bearer '+idToken,'Content-Type':'application/json'}, body: JSON.stringify({ code }) });
+    const data = await resp.json();
+    if(!resp.ok || !data.ok) throw new Error(data.message || 'Could not check this code.');
+    const bg = !data.recognized || !data.found ? '#FFF3E0' : !data.valid ? '#FDECEC' : '#E8F7EC';
+    const icon = !data.recognized || !data.found ? '⚠️' : !data.valid ? '❌' : '✅';
+    card.innerHTML = `<div style="background:${bg};padding:1rem;border-radius:10px"><p style="font-weight:700;margin:0 0 .3rem">${icon} ${escapeHtml(data.category||'Result')}</p><p style="font-size:.85rem;margin:0">${escapeHtml(data.message||'')}</p></div>`;
+  }catch(e){ card.innerHTML = `<div style="background:#FDECEC;padding:1rem;border-radius:10px"><p style="font-weight:700;color:#B00020">Error</p><p style="font-size:.85rem">${escapeHtml(e.message)}</p></div>`; }
 });
 </script>
 </body>
