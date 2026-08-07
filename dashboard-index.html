@@ -20,6 +20,18 @@
     --sidebar-text-active:#fff;
     --radius:12px;
   }
+  /* ── Dark mode palette (ported from the original admin) ── */
+  [data-theme="dark"]{
+    --bg:#161616;
+    --card:#212121;
+    --ink:#F2F2F2;
+    --mid:#A8A8AC;
+    --lt:#6E6E73;
+    --border:#333333;
+    --sidebar:#0D0D0D;
+  }
+  [data-theme="dark"] body{background:var(--bg);color:var(--ink)}
+  [data-theme="dark"] .logout-btn:hover,[data-theme="dark"] .reset-layout-btn:hover,[data-theme="dark"] .btn.btn-ghost:hover{background:#2E2E2E}
   *{box-sizing:border-box}
   html,body{overflow-x:hidden;width:100%;max-width:100%}
   body{
@@ -172,6 +184,23 @@
   .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;opacity:0;transition:opacity .25s}
   .sidebar-backdrop.show{display:block;opacity:1}
 
+  /* ── Quick search (⌘K command palette) — ported from original ── */
+  .cmdk-trigger{display:flex;align-items:center;gap:.5rem;padding:.5rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:9px;font-size:.8rem;color:var(--mid);cursor:pointer;transition:border-color .15s;white-space:nowrap}
+  .cmdk-trigger:hover{border-color:var(--accent)}
+  .cmdk-trigger kbd{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:.1rem .4rem;font-size:.72rem;font-family:inherit;color:var(--lt)}
+  #cmdkOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+  #cmdkOverlay.open{display:flex}
+  #cmdkModal{background:var(--card);border-radius:14px;width:min(560px,90vw);max-height:60vh;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);display:flex;flex-direction:column;animation:cmdkPop .18s cubic-bezier(0.16,1,0.3,1)}
+  @keyframes cmdkPop{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  #cmdkInput{border:none;outline:none;padding:1.1rem 1.3rem;font-size:1rem;background:transparent;color:var(--ink);border-bottom:1px solid var(--border)}
+  #cmdkResults{overflow-y:auto;padding:.5rem}
+  .cmdk-item{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:9px;cursor:pointer;font-size:.85rem;color:var(--ink)}
+  .cmdk-item.selected,.cmdk-item:hover{background:var(--accent);color:#fff}
+  .cmdk-empty{padding:2rem;text-align:center;color:var(--lt);font-size:.85rem}
+  /* ── Dark mode toggle button ── */
+  .theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:1rem;transition:transform .1s;flex-shrink:0}
+  .theme-toggle:active{transform:scale(.96)}
+
   @media(max-width:860px){
     /* GLOBAL MOBILE SAFETY NET — nothing may exceed the screen width.
        Everything wraps or contains rather than pushing off-screen. */
@@ -235,6 +264,12 @@
 
 <div id="dashboardScreen">
   <div class="app-shell">
+    <div id="cmdkOverlay">
+      <div id="cmdkModal">
+        <input type="text" id="cmdkInput" placeholder="Jump to any section…" autocomplete="off">
+        <div id="cmdkResults"></div>
+      </div>
+    </div>
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <nav class="sidebar" id="sidebar">
       <div class="brand">Foodie <span>Love</span></div>
@@ -325,7 +360,11 @@
             <p id="pageSubtitle">Live data from your production database</p>
           </div>
         </div>
-        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0">
+          <button class="cmdk-trigger" id="cmdkTrigger" title="Quick search (⌘K)"><span>🔍 Search</span><kbd>⌘K</kbd></button>
+          <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+          <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
       </div>
 
       <!-- OVERVIEW PAGE -->
@@ -1321,6 +1360,105 @@ document.getElementById('hamburgerBtn')?.addEventListener('click', (e)=>{
   if(sb?.classList.contains('open')) closeSidebar(); else openSidebar();
 });
 document.getElementById('sidebarBackdrop')?.addEventListener('click', closeSidebar);
+
+// ══════════════ QUICK SEARCH (⌘K command palette) — ported ══════════════
+// Builds its index straight from the sidebar nav items, so it stays in
+// sync with our grouped navigation automatically.
+function cmdkBuildIndex(){
+  return [...document.querySelectorAll('.nav-item[data-page]')].map(item=>({
+    label: item.textContent.trim(),
+    page: item.dataset.page,
+    el: item
+  }));
+}
+let cmdkSelectedIndex = 0;
+let cmdkCurrentResults = [];
+function openCmdk(){
+  document.getElementById('cmdkOverlay').classList.add('open');
+  const input = document.getElementById('cmdkInput');
+  input.value = '';
+  input.focus();
+  cmdkRender('');
+}
+function closeCmdk(){
+  document.getElementById('cmdkOverlay').classList.remove('open');
+}
+function cmdkRender(query){
+  const index = cmdkBuildIndex();
+  const q = query.trim().toLowerCase();
+  cmdkCurrentResults = q ? index.filter(i => i.label.toLowerCase().includes(q)) : index;
+  cmdkSelectedIndex = 0;
+  const resultsEl = document.getElementById('cmdkResults');
+  if(!cmdkCurrentResults.length){
+    resultsEl.innerHTML = '<div class="cmdk-empty">No matching section found.</div>';
+    return;
+  }
+  resultsEl.innerHTML = cmdkCurrentResults.map((r,i)=>
+    `<div class="cmdk-item${i===0?' selected':''}" data-cmdk-index="${i}">${escapeHtml(r.label)}</div>`
+  ).join('');
+  resultsEl.querySelectorAll('.cmdk-item').forEach(el=>{
+    el.addEventListener('click', ()=> cmdkChoose(Number(el.dataset.cmdkIndex)));
+  });
+}
+function cmdkChoose(index){
+  const result = cmdkCurrentResults[index];
+  if(!result) return;
+  result.el.click(); // reuse the existing panel-switching logic
+  closeCmdk();
+}
+document.getElementById('cmdkTrigger')?.addEventListener('click', openCmdk);
+document.getElementById('cmdkInput')?.addEventListener('input', e=> cmdkRender(e.target.value));
+document.getElementById('cmdkOverlay')?.addEventListener('click', e=>{
+  if(e.target.id === 'cmdkOverlay') closeCmdk();
+});
+document.addEventListener('keydown', e=>{
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault(); openCmdk(); return;
+  }
+  if(!document.getElementById('cmdkOverlay').classList.contains('open')) return;
+  if(e.key === 'Escape'){ closeCmdk(); return; }
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    cmdkSelectedIndex = Math.min(cmdkSelectedIndex+1, cmdkCurrentResults.length-1);
+    document.querySelectorAll('.cmdk-item').forEach((el,i)=> el.classList.toggle('selected', i===cmdkSelectedIndex));
+    document.querySelectorAll('.cmdk-item')[cmdkSelectedIndex]?.scrollIntoView({block:'nearest'});
+  }
+  if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    cmdkSelectedIndex = Math.max(cmdkSelectedIndex-1, 0);
+    document.querySelectorAll('.cmdk-item').forEach((el,i)=> el.classList.toggle('selected', i===cmdkSelectedIndex));
+    document.querySelectorAll('.cmdk-item')[cmdkSelectedIndex]?.scrollIntoView({block:'nearest'});
+  }
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    cmdkChoose(cmdkSelectedIndex);
+  }
+});
+
+// ══════════════ DARK MODE — ported ══════════════
+// Persists via localStorage; respects system preference on first visit.
+(function initTheme(){
+  const saved = localStorage.getItem('fl_theme');
+  const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (systemPrefersDark ? 'dark' : 'light');
+  if(theme === 'dark'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('themeToggle');
+    if(btn) btn.textContent = '☀️';
+  }
+})();
+document.getElementById('themeToggle')?.addEventListener('click', ()=>{
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if(isDark){
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('fl_theme', 'light');
+    document.getElementById('themeToggle').textContent = '🌙';
+  }else{
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('fl_theme', 'dark');
+    document.getElementById('themeToggle').textContent = '☀️';
+  }
+});
 
 onAuthStateChanged(auth, async (user)=>{
   if(!user){
