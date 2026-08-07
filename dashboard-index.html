@@ -187,6 +187,7 @@
 
       <p class="nav-group-label">Orders</p>
       <div class="nav-item" data-page="orders"><span class="dot"></span> Orders</div>
+      <div class="nav-item" data-page="cateringrequests"><span class="dot"></span> Catering Requests</div>
 
       <p class="nav-group-label">Menu</p>
       <div class="nav-item" data-page="menu-brunch"><span class="dot"></span> Brunch Menu</div>
@@ -233,6 +234,7 @@
 
       <p class="nav-group-label">Settings</p>
       <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
+      <div class="nav-item" data-page="careers"><span class="dot"></span> Careers &amp; Applications</div>
       <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
@@ -781,6 +783,50 @@
           </div>
         </div>
       </div>
+
+      <!-- ══ CATERING REQUESTS — migrated Aug 2026. Corporate catering
+           requests + quote-estimator leads. Read-only viewers. ══ -->
+      <div class="page-panel" id="page-cateringrequests">
+        <div class="page-head"><div><h1>Catering Requests</h1><p>Corporate enquiries and quote-estimator leads from the website.</p></div></div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <h3 style="margin-top:0">Corporate Catering Requests</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+            <thead><tr style="text-align:left;border-bottom:2px solid var(--border,#eee)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Company</th><th style="padding:.5rem">Contact</th><th style="padding:.5rem">Date Needed</th><th style="padding:.5rem">Guests</th><th style="padding:.5rem">Email/Phone</th></tr></thead>
+            <tbody id="corpTbody2"></tbody>
+          </table>
+          <p id="corpEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No corporate requests yet.</p>
+        </div>
+        <div class="panel" style="padding:1.4rem">
+          <h3 style="margin-top:0">Quote Estimator Leads</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+            <thead><tr style="text-align:left;border-bottom:2px solid var(--border,#eee)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Name</th><th style="padding:.5rem">Email</th><th style="padding:.5rem">Guests</th><th style="padding:.5rem">Est. Total</th></tr></thead>
+            <tbody id="leadsTbody2"></tbody>
+          </table>
+          <p id="leadsEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No estimator leads yet.</p>
+        </div>
+      </div>
+
+      <!-- ══ CAREERS — migrated Aug 2026. Manage public job openings +
+           view applications. ══ -->
+      <div class="page-panel" id="page-careers">
+        <div class="page-head"><div><h1>Careers &amp; Applications</h1><p>Manage job openings shown on the site and review applications.</p></div></div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <h3 style="margin-top:0">Job Openings</h3>
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Shown on the public Careers page. Toggle off to hide without deleting.</p>
+          <div id="careerJobsWrap2"></div>
+          <button type="button" class="btn" id="addJobBtn2" style="margin-top:.8rem">+ Add Another Role</button><br>
+          <button type="button" class="btn" id="saveJobsBtn2" style="margin-top:.8rem">Save Job Openings</button>
+          <span id="jobsSaveStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+        <div class="panel" style="padding:1.4rem">
+          <h3 style="margin-top:0">Career Applications</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+            <thead><tr style="text-align:left;border-bottom:2px solid var(--border,#eee)"><th style="padding:.5rem">Submitted</th><th style="padding:.5rem">Name</th><th style="padding:.5rem">Email/Phone</th><th style="padding:.5rem">Role</th><th style="padding:.5rem">Resume</th></tr></thead>
+            <tbody id="careersTbody2"></tbody>
+          </table>
+          <p id="careersEmpty2" style="display:none;color:var(--lt);padding:1rem;text-align:center">No applications yet.</p>
+        </div>
+      </div>
       <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-photos">
@@ -900,6 +946,8 @@ const pageTitles = {
   settings: ['Site Settings', ''],
   security: ['Security', ''],
   expenses: ['Expenses', 'Track business spending — for your own records'],
+  cateringrequests: ['Catering Requests', 'Corporate enquiries and estimator leads'],
+  careers: ['Careers & Applications', 'Job openings and applications'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -969,6 +1017,8 @@ onAuthStateChanged(auth, async (user)=>{
   loadPlaylistPL();
   loadInstagramIG();
   loadExpensesPG();
+  loadCateringRequestsPG();
+  loadCareersPG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -2821,6 +2871,66 @@ document.getElementById('downloadFYCsvBtn2')?.addEventListener('click', ()=>{
   a.href = url; a.download = `foodielove-expenses-${fyLabel.replace(/\s/g,'')}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+});
+
+// ══════════════════════════════════════════════════════════════════
+// CATERING REQUESTS + CAREERS — migrated from the original admin,
+// adapted to this dashboard (db, escapeHtml, inline money).
+// ══════════════════════════════════════════════════════════════════
+// Shared timestamp formatter for migrated sections.
+const whenTS = ts => { try{ const d = ts?.toDate ? ts.toDate() : new Date(ts); return d.toLocaleString('en-AU',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); }catch(e){ return '—'; } };
+
+// ── CATERING REQUESTS (Corporate + Estimator Leads) ──
+async function loadCateringRequestsPG(){
+  const [corpSnap, leadsSnap] = await Promise.all([
+    getDocs(query(collection(db,'corporateRequests'), orderBy('createdAt','desc'))).catch(()=>({docs:[],size:0})),
+    getDocs(query(collection(db,'catering_leads'), orderBy('createdAt','desc'))).catch(()=>({docs:[],size:0}))
+  ]);
+  const corpTb = document.getElementById('corpTbody2'), corpEmpty = document.getElementById('corpEmpty2');
+  if(corpTb){
+    corpEmpty.style.display = corpSnap.size ? 'none' : 'block';
+    corpTb.innerHTML = corpSnap.docs.map(d=>{ const c=d.data(); return `<tr style="border-bottom:1px solid var(--border,#eee)"><td style="padding:.5rem;font-size:.75rem">${whenTS(c.createdAt)}</td><td style="padding:.5rem">${escapeHtml(c.company)}</td><td style="padding:.5rem">${escapeHtml(c.contact)}</td><td style="padding:.5rem">${escapeHtml(c.date)} ${escapeHtml(c.time)}</td><td style="padding:.5rem">${escapeHtml(c.guests)}</td><td style="padding:.5rem;font-size:.75rem">${escapeHtml(c.email)}<br>${escapeHtml(c.phone)}</td></tr>`; }).join('');
+  }
+  const leadsTb = document.getElementById('leadsTbody2'), leadsEmpty = document.getElementById('leadsEmpty2');
+  if(leadsTb){
+    leadsEmpty.style.display = leadsSnap.size ? 'none' : 'block';
+    leadsTb.innerHTML = leadsSnap.docs.map(d=>{ const l=d.data(); return `<tr style="border-bottom:1px solid var(--border,#eee)"><td style="padding:.5rem;font-size:.75rem">${whenTS(l.createdAt)}</td><td style="padding:.5rem">${escapeHtml(l.name)}</td><td style="padding:.5rem;font-size:.75rem">${escapeHtml(l.email)}</td><td style="padding:.5rem">${escapeHtml(l.guests)}</td><td style="padding:.5rem;font-weight:700">${expMoney(l.estimatedTotal)}</td></tr>`; }).join('');
+  }
+}
+
+// ── CAREERS (Job Openings editor + Applications viewer) ──
+let careerJobsData2 = [];
+function renderCareerJobsEditor2(){
+  const wrap = document.getElementById('careerJobsWrap2');
+  if(!wrap) return;
+  wrap.innerHTML = careerJobsData2.length ? careerJobsData2.map((job,idx)=>`
+    <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap">
+      <input class="job-title2" data-idx="${idx}" placeholder="Title" value="${escapeHtml(job.title)}" style="flex:2;min-width:140px;padding:.5rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+      <input class="job-type2" data-idx="${idx}" placeholder="Type (e.g. Casual)" value="${escapeHtml(job.type)}" style="flex:1;min-width:100px;padding:.5rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+      <label style="font-size:.78rem"><input type="checkbox" class="job-active2" data-idx="${idx}" ${job.active?'checked':''}> Active</label>
+      <button class="btn" data-jobremove2="${idx}" style="background:#C24A1E">Remove</button>
+    </div>`).join('') : '<p style="color:var(--lt)">No roles yet.</p>';
+  wrap.querySelectorAll('[data-jobremove2]').forEach(b=>b.addEventListener('click', ()=>{ careerJobsData2.splice(Number(b.dataset.jobremove2),1); renderCareerJobsEditor2(); }));
+}
+async function loadCareersPG(){
+  const snap = await getDoc(doc(db,'settings','careers')).catch(()=>null);
+  careerJobsData2 = (snap && snap.exists() && Array.isArray(snap.data().jobs)) ? snap.data().jobs : [];
+  renderCareerJobsEditor2();
+  const tbody = document.getElementById('careersTbody2'), empty = document.getElementById('careersEmpty2');
+  if(!tbody) return;
+  const asnap = await getDocs(query(collection(db,'careerApplications'), orderBy('createdAt','desc'))).catch(()=>({docs:[],size:0}));
+  if(!asnap.size){ tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = asnap.docs.map(d=>{ const a=d.data(); return `<tr style="border-bottom:1px solid var(--border,#eee)"><td style="padding:.5rem;font-size:.75rem">${whenTS(a.createdAt)}</td><td style="padding:.5rem">${escapeHtml(a.name)}</td><td style="padding:.5rem;font-size:.75rem">${escapeHtml(a.email)}<br>${escapeHtml(a.phone)}</td><td style="padding:.5rem">${escapeHtml(a.role)||'Any'}</td><td style="padding:.5rem">${a.resumeUrl?`<a href="${escapeHtml(a.resumeUrl)}" target="_blank" rel="noopener">View</a>`:'—'}</td></tr>`; }).join('');
+}
+document.getElementById('addJobBtn2')?.addEventListener('click', ()=>{ careerJobsData2.push({title:'',type:'',desc:'',active:true}); renderCareerJobsEditor2(); });
+document.getElementById('saveJobsBtn2')?.addEventListener('click', async ()=>{
+  document.querySelectorAll('.job-title2').forEach(el=>{ careerJobsData2[Number(el.dataset.idx)].title = el.value.trim(); });
+  document.querySelectorAll('.job-type2').forEach(el=>{ careerJobsData2[Number(el.dataset.idx)].type = el.value.trim(); });
+  document.querySelectorAll('.job-active2').forEach(el=>{ careerJobsData2[Number(el.dataset.idx)].active = el.checked; });
+  await setDoc(doc(db,'settings','careers'), { jobs: careerJobsData2 });
+  document.getElementById('jobsSaveStatus2').textContent = '✓ Saved';
+  setTimeout(()=>document.getElementById('jobsSaveStatus2').textContent='', 2000);
 });
 </script>
 </body>
