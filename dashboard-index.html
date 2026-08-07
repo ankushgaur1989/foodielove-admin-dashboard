@@ -243,6 +243,8 @@
       <p class="nav-group-label">Settings</p>
       <div class="nav-item" data-page="staff"><span class="dot"></span> Staff Accounts</div>
       <div class="nav-item" data-page="careers"><span class="dot"></span> Careers &amp; Applications</div>
+      <div class="nav-item" data-page="photocleanup"><span class="dot"></span> Photo Cleanup</div>
+      <div class="nav-item" data-page="reports" style="color:#E8703D"><span class="dot"></span> Reset Sales ⚠️</div>
       <div class="nav-item" data-page="photos"><span class="dot"></span> Photos</div>
       <div class="nav-item" data-page="settings"><span class="dot"></span> Site Settings</div>
       <div class="nav-item" data-page="security"><span class="dot"></span> Security</div>
@@ -925,6 +927,31 @@
           <div id="themeGrid2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem"></div>
         </div>
       </div>
+
+      <!-- ══ PHOTO CLEANUP — migrated Aug 2026. Triggers the main site's
+           recompress background job and polls progress. ══ -->
+      <div class="page-panel" id="page-photocleanup">
+        <div class="page-head"><div><h1>Photo Cleanup</h1><p>Re-compress oversized photos across the site.</p></div></div>
+        <div class="panel" style="padding:1.4rem;background:#EAF4E9;border-color:#7CB342">
+          <h3 style="margin-top:0">⚡ Re-compress All Existing Photos</h3>
+          <p style="font-size:.82rem;color:var(--mid);margin:0 0 1rem">Goes through every existing menu item photo and site photo (hero, cards, logo), shrinks anything genuinely large, skips anything already small enough. Safe to run more than once. Same background job the main admin uses — this just triggers it and watches for progress.</p>
+          <button type="button" class="btn" id="recompressBtn2">Re-compress All Photos</button>
+          <div id="recompressStatus2" style="margin-top:1rem;font-size:.85rem;color:var(--mid)"></div>
+        </div>
+      </div>
+
+      <!-- ══ REPORTS / RESET — migrated Aug 2026. DESTRUCTIVE: deletes
+           every order. Typed confirmation required. ══ -->
+      <div class="page-panel" id="page-reports">
+        <div class="page-head"><div><h1>Reset Sales</h1><p>Clear all orders for a clean slate before going live.</p></div></div>
+        <div class="panel" style="padding:1.4rem;border-color:#C24A1E">
+          <h3 style="margin-top:0;color:#C24A1E">⚠️ Reset Sales to $0</h3>
+          <p style="font-size:.82rem;color:var(--mid);margin:0 0 1rem">Deletes every order in the database — a clean slate before going live for real. This cannot be undone. Type <strong>DELETE ALL ORDERS</strong> to confirm.</p>
+          <input id="resetConfirmInput2" placeholder="Type DELETE ALL ORDERS" style="width:100%;max-width:320px;margin-bottom:.8rem;padding:.6rem .8rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+          <br><button type="button" class="btn" id="resetOrdersBtn2" style="background:#C24A1E">Delete All Orders</button>
+          <span id="resetStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
       <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-photos">
@@ -1055,6 +1082,8 @@ const pageTitles = {
   textcontent: ['Text Content', 'Edit live text blocks on the site'],
   emailthemes: ['Email Themes', 'Pick the look for invoice and receipt emails'],
   squaresales: ['Square Sales', 'Nightly-synced Square sales totals'],
+  photocleanup: ['Photo Cleanup', 'Re-compress oversized photos'],
+  reports: ['Reset Sales', 'Clear all orders — destructive'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -3198,6 +3227,60 @@ document.getElementById('txtSaveBtn2')?.addEventListener('click', async ()=>{
   document.getElementById('txtStatus2').textContent = '✓ Saved — live on the site now.';
   setTimeout(()=>document.getElementById('txtStatus2').textContent='', 2500);
   loadTextAllOverrides2();
+});
+
+// ══════════════════════════════════════════════════════════════════
+// PHOTO CLEANUP + REPORTS/RESET — migrated, adapted to this dashboard.
+// ══════════════════════════════════════════════════════════════════
+// Photo Cleanup: triggers the main site's recompress job, polls progress.
+document.getElementById('recompressBtn2')?.addEventListener('click', async ()=>{
+  const btn = document.getElementById('recompressBtn2');
+  const statusEl = document.getElementById('recompressStatus2');
+  btn.disabled = true;
+  statusEl.innerHTML = 'Starting…';
+  try{
+    const idToken = await auth.currentUser.getIdToken();
+    const resp = await fetch(MAIN_SITE + '/.netlify/functions/recompress-existing-photos', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken} });
+    const trigger = await resp.json();
+    if(!resp.ok) throw new Error(trigger.error || 'Could not start');
+    const jobId = trigger.jobId;
+    for(let attempt = 0; attempt < 100; attempt++){
+      await new Promise(r => setTimeout(r, 3000));
+      const jobSnap = await getDoc(doc(db,'photoRecompressJobs',jobId));
+      if(!jobSnap.exists()) continue;
+      const job = jobSnap.data();
+      if(job.status === 'running' || job.status === 'queued'){
+        statusEl.textContent = `Working… ${job.processed||0} photos checked (${job.compressed||0} compressed, ${job.skipped||0} already fine)`;
+      }
+      if(job.status === 'complete'){
+        statusEl.innerHTML = `✅ Done — checked ${job.processed}, compressed ${job.compressed}, ${job.skipped} already fine.`;
+        btn.disabled = false; return;
+      }
+      if(job.status === 'error'){
+        statusEl.innerHTML = `❌ ${escapeHtml(job.error||'Something went wrong')}`;
+        btn.disabled = false; return;
+      }
+    }
+    statusEl.textContent = 'Still running after 5 minutes — check back shortly.';
+    btn.disabled = false;
+  }catch(e){
+    statusEl.innerHTML = `❌ Could not start: ${escapeHtml(e.message)}`;
+    btn.disabled = false;
+  }
+});
+
+// Reports/Reset: deletes every order. Destructive — typed confirmation.
+document.getElementById('resetOrdersBtn2')?.addEventListener('click', async ()=>{
+  const val = document.getElementById('resetConfirmInput2').value.trim();
+  const status = document.getElementById('resetStatus2');
+  if(val !== 'DELETE ALL ORDERS'){ status.textContent = 'Type the exact confirmation phrase first.'; return; }
+  if(!confirm('This permanently deletes every order. Are you absolutely sure?')) return;
+  status.textContent = 'Deleting…';
+  try{
+    const snap = await getDocs(collection(db,'orders'));
+    for(const d of snap.docs){ await deleteDoc(doc(db,'orders',d.id)); }
+    status.textContent = `✓ Deleted ${snap.size} orders. Sales reset to $0.`;
+  }catch(e){ status.textContent = 'Could not complete: ' + e.message; }
 });
 </script>
 </body>
