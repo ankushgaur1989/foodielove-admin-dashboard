@@ -88,11 +88,11 @@
   .btn.btn-ghost:hover{background:#F0F0F2;opacity:1}
 
   .widget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:start}
-  .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04);touch-action:none}
+  .widget{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04)}
   .widget.dragging{opacity:.5;box-shadow:0 10px 30px rgba(0,0,0,.15)}
   .widget-head{display:flex;align-items:center;gap:.6rem;padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
   .widget-head h3{font-size:.88rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.5rem}
-  .widget-drag{cursor:grab;color:var(--lt);font-size:1rem;line-height:1;user-select:none}
+  .widget-drag{cursor:grab;color:var(--lt);font-size:1rem;line-height:1;user-select:none;touch-action:none;padding:.2rem;margin:-.2rem}
   .widget-body{padding:1.2rem}
   .widget-big-stat{font-size:1.9rem;font-weight:800;margin:0;letter-spacing:-.01em}
   .widget-sub{font-size:.78rem;color:var(--mid);margin:.3rem 0 0}
@@ -188,6 +188,10 @@
     .stat-card .val{font-size:1.5rem}
     .widget-grid{grid-template-columns:1fr!important}
     .widget{grid-column:auto!important;overflow:hidden}
+    /* Drag-to-rearrange is a desktop feature; hide handles on mobile so
+       they can never interfere with scrolling. */
+    .widget-drag{display:none}
+    .widget-toolbar p{display:none}
     /* let a wide table scroll inside its widget rather than stretch the card */
     .widget table{min-width:0}
     .widget .panel,.widget > div{overflow-x:auto}
