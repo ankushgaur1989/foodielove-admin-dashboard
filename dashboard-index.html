@@ -227,6 +227,7 @@
       <div class="nav-item" data-page="vouchers"><span class="dot"></span> Gift Vouchers</div>
       <div class="nav-item" data-page="discounts"><span class="dot"></span> Discounts</div>
       <div class="nav-item" data-page="community"><span class="dot"></span> Community / Charity</div>
+      <div class="nav-item" data-page="pg-rewards"><span class="dot"></span> Emergency Rewards</div>
 
       <p class="nav-group-label">Website Content</p>
       <div class="nav-item" data-page="heroslideshow"><span class="dot"></span> Hero Slideshow</div>
@@ -622,8 +623,31 @@
         <p style="font-size:.78rem;color:var(--mid);margin-top:1rem">For GST, refunds, discounts, and surcharge breakdowns, see the Sales &amp; GST page — this page focuses on trends, not accounting totals.</p>
       </div>
 
-      <!-- ══ GALLERY — migrated Aug 2026. Real photo uploader for the
-           Gallery page (galleryPhotos collection). ══ -->
+      <!-- ══ EMERGENCY REWARDS — migrated Aug 2026. Discounts for
+           emergency-service workers (settings/emergencyRewards). ══ -->
+      <div class="page-panel" id="page-pg-rewards">
+        <div class="page-head"><div><h1>Emergency Rewards</h1><p>Special pricing for emergency-service workers, shown on the Rewards page.</p></div></div>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
+          <h3 style="margin-top:0">Add a New Emergency Service</h3>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:1;min-width:180px"><label class="mm-lbl">Service Name</label><input type="text" id="pgEsNewName" placeholder="e.g. Firefighter" style="width:100%;padding:.55rem .7rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px"></div>
+            <div><label class="mm-lbl">Sketch Icon</label>
+              <select id="pgEsNewIcon" style="padding:.55rem .7rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+                <option value="fire">🔥 Fire</option>
+                <option value="police">🚓 Police</option>
+                <option value="ambulance">🚑 Ambulance</option>
+                <option value="doctor">⚕️ Doctor / Paramedic</option>
+                <option value="nurse">💉 Nurse</option>
+                <option value="senior">🌟 Senior Citizen</option>
+                <option value="shield">🛡️ General Service</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" id="pgEsAddBtn" style="margin-top:1rem">+ Add Service</button>
+        </div>
+        <div id="pgEsServicesList"></div>
+      </div>
+
       <div class="page-panel" id="page-pg-gallery">
         <div class="page-head"><div><h1>Gallery</h1><p>Add and manage photos on the public Gallery page.</p></div></div>
         <div class="panel" style="padding:1.4rem;margin-bottom:1rem">
@@ -1127,6 +1151,7 @@ const pageTitles = {
   websitesecurity: ['Website Security', 'Coming soon'],
   'gallery-soon': ['Gallery', 'Coming soon'],
   'pg-gallery': ['Gallery', 'Add and manage Gallery page photos'],
+  'pg-rewards': ['Emergency Rewards', 'Special pricing for emergency-service workers'],
   'communityboard-soon': ['Community Board', 'Coming soon'],
   'menu-brunch': ['Brunch Menu', ''],
   'menu-catering': ['Catering Menu', ''],
@@ -1252,6 +1277,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadSquareConnectStatus();
   loadAnalytics();
   loadGalleryPG();
+  loadEmergencyServicesPG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -3565,6 +3591,87 @@ document.getElementById('pgGalAddBtn')?.addEventListener('click', async ()=>{
   }catch(e){
     status.style.color = '#D70015'; status.textContent = '❌ ' + e.message;
   }
+});
+// ══════════════════════════════════════════════════════════════════
+// EMERGENCY REWARDS — migrated, adapted to this dashboard.
+// ══════════════════════════════════════════════════════════════════
+const ES_ICONS_PG = { fire:'🔥', police:'🚓', ambulance:'🚑', doctor:'⚕️', nurse:'💉', senior:'🌟', shield:'🛡️' };
+let pgEmergencyServices = [];
+async function loadEmergencyServicesPG(){
+  try{
+    const snap = await getDoc(doc(db,'settings','emergencyRewards'));
+    pgEmergencyServices = snap.exists() ? (snap.data().services || []) : [];
+  }catch(e){ pgEmergencyServices = []; }
+  renderEmergencyServicesPG();
+}
+async function saveEmergencyServicesPG(){
+  await setDoc(doc(db,'settings','emergencyRewards'), { services: pgEmergencyServices, updatedAt: serverTimestamp() });
+}
+function renderEmergencyServicesPG(){
+  const listEl = document.getElementById('pgEsServicesList');
+  if(!listEl) return;
+  if(!pgEmergencyServices.length){
+    listEl.innerHTML = '<p style="color:var(--lt);font-size:.85rem;padding:1rem">No services added yet — add your first one above.</p>';
+    return;
+  }
+  listEl.innerHTML = pgEmergencyServices.map((svc, sIdx) => `
+    <div class="panel" style="padding:1.2rem;margin-bottom:1rem">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+      <h3 style="margin:0;display:flex;align-items:center;gap:.5rem">${ES_ICONS_PG[svc.icon]||'🛡️'} ${escapeHtml(svc.name)}</h3>
+      <button type="button" class="mm-btn-sm mm-btn-danger" data-pges-remove-service="${sIdx}">Remove Service</button>
+     </div>
+     <div style="margin-bottom:.6rem">
+      ${(svc.items||[]).map((it,iIdx)=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border)">
+         <span style="font-size:.85rem">${escapeHtml(it.name)} <b style="color:var(--accent,#C2511C)">$${Number(it.price).toFixed(2)}</b></span>
+         <button type="button" class="mm-btn-sm mm-btn-danger" style="min-width:auto;padding:.2rem .5rem;font-size:.7rem" data-pges-remove-item="${sIdx}:${iIdx}">✕</button>
+        </div>`).join('') || '<p style="font-size:.78rem;color:var(--lt)">No discounted items yet.</p>'}
+     </div>
+     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <input type="text" id="pgEsItemName-${sIdx}" placeholder="e.g. Coffee" style="flex:1;min-width:140px;padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+      <input type="number" id="pgEsItemPrice-${sIdx}" placeholder="Special price $" min="0" step="0.50" style="width:130px;padding:.5rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem">
+      <button type="button" class="mm-btn-sm" data-pges-add-item="${sIdx}">+ Add Priced Item</button>
+     </div>
+    </div>`).join('');
+  listEl.querySelectorAll('[data-pges-remove-service]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      pgEmergencyServices.splice(Number(btn.dataset.pgesRemoveService), 1);
+      await saveEmergencyServicesPG();
+      renderEmergencyServicesPG();
+    });
+  });
+  listEl.querySelectorAll('[data-pges-remove-item]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const [sIdx, iIdx] = btn.dataset.pgesRemoveItem.split(':').map(Number);
+      pgEmergencyServices[sIdx].items.splice(iIdx, 1);
+      await saveEmergencyServicesPG();
+      renderEmergencyServicesPG();
+    });
+  });
+  listEl.querySelectorAll('[data-pges-add-item]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const sIdx = Number(btn.dataset.pgesAddItem);
+      const nameInput = document.getElementById(`pgEsItemName-${sIdx}`);
+      const priceInput = document.getElementById(`pgEsItemPrice-${sIdx}`);
+      const name = nameInput.value.trim();
+      const price = parseFloat(priceInput.value);
+      if(!name || isNaN(price)) return;
+      if(!pgEmergencyServices[sIdx].items) pgEmergencyServices[sIdx].items = [];
+      pgEmergencyServices[sIdx].items.push({ name, price });
+      await saveEmergencyServicesPG();
+      renderEmergencyServicesPG();
+    });
+  });
+}
+document.getElementById('pgEsAddBtn')?.addEventListener('click', async ()=>{
+  const nameInput = document.getElementById('pgEsNewName');
+  const iconSelect = document.getElementById('pgEsNewIcon');
+  const name = nameInput.value.trim();
+  if(!name) return;
+  pgEmergencyServices.push({ id: 'es_' + Date.now(), name, icon: iconSelect.value, items: [] });
+  await saveEmergencyServicesPG();
+  nameInput.value = '';
+  renderEmergencyServicesPG();
 });
 </script>
 </body>
