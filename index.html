@@ -318,6 +318,7 @@
       <div class="nav-item" data-page="loyalty"><span class="dot"></span> Loyalty</div>
 
       <p class="nav-group-label">Marketing</p>
+      <div class="nav-item" data-page="reviews"><span class="dot"></span> Reviews</div>
       <div class="nav-item" data-page="offers"><span class="dot"></span> Offers</div>
       <div class="nav-item" data-page="vouchers"><span class="dot"></span> Gift Vouchers</div>
       <div class="nav-item" data-page="giftcards"><span class="dot"></span> Gift Cards (Square)</div>
@@ -1221,6 +1222,36 @@
           <tbody id="loyTbody"><tr><td colspan="5" style="text-align:center;color:var(--lt);padding:2rem">Loading…</td></tr></tbody>
         </table></div></div>
       </div>
+      <div class="page-panel" id="page-reviews">
+        <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Reviews shown on your website. Website reviews arrive here from customers (pending until you approve). You can also add your best Google &amp; Instagram reviews by hand — they all show together on the site, newest first.</p>
+        <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
+          <h3 id="rvFormTitle" style="margin:0 0 .8rem">Add a Review</h3>
+          <input type="hidden" id="rvEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Reviewer name</label><input type="text" id="rvName" placeholder="e.g. Priya S."></div>
+            <div><label class="mm-lbl">Source</label>
+              <select id="rvSource"><option value="google">Google</option><option value="instagram">Instagram</option><option value="website">Website</option></select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+            <div><label class="mm-lbl">Rating</label>
+              <select id="rvRating"><option value="5">★★★★★ (5)</option><option value="4">★★★★ (4)</option><option value="3">★★★ (3)</option><option value="2">★★ (2)</option><option value="1">★ (1)</option></select>
+            </div>
+            <div><label class="mm-lbl">Date</label><input type="date" id="rvDate"></div>
+          </div>
+          <div style="margin-bottom:.8rem"><label class="mm-lbl">Review text</label><textarea id="rvText" rows="3" placeholder="What they said…" style="width:100%"></textarea></div>
+          <div style="display:flex;gap:.6rem;align-items:center">
+            <button class="btn btn-primary" id="rvSaveBtn">Add Review</button>
+            <button class="btn btn-ghost" id="rvCancelBtn" style="display:none">Cancel edit</button>
+          </div>
+          <p style="font-size:.72rem;color:var(--lt);margin-top:.6rem">Tip: for Google &amp; Instagram, copy the reviewer's real name, words, rating and date. Added reviews go live immediately.</p>
+        </div>
+        <div class="panel" style="padding:1.4rem">
+          <h3 style="margin:0 0 .3rem">All Reviews</h3>
+          <p style="font-size:.78rem;color:var(--mid);margin:0 0 1rem">Approve website submissions, edit, or remove. Live reviews show a green dot.</p>
+          <div id="rvList"><p style="color:var(--lt);font-size:.85rem">Loading…</p></div>
+        </div>
+      </div>
       <div class="page-panel" id="page-offers">
         <p style="color:var(--mid);font-size:.85rem;margin-bottom:1rem">Same discount codes customers type at checkout, and the same cards shown on your Offers page — one place controls both.</p>
         <div class="panel" style="padding:1.4rem;margin-bottom:1.2rem">
@@ -1553,6 +1584,7 @@ const pageTitles = {
   customers: ['Customer History', ''],
   loyalty: ['Loyalty', ''],
   offers: ['Offers', 'Promotions and discount codes — same system either way'],
+  reviews: ['Reviews', 'Website, Google & Instagram reviews shown on your site'],
   vouchers: ['Gift Vouchers', ''],
   discounts: ['Discounts', ''],
   community: ['Community / Charity', ''],
@@ -1833,6 +1865,7 @@ onAuthStateChanged(auth, async (user)=>{
   loadPhotosPH();
   loadHomepageText();
   loadPromotionsOF();
+  loadReviewsRV();
   loadMerchandiseMC();
   loadEventsEV();
   loadCountdownBannerCDB();
@@ -3456,6 +3489,116 @@ document.getElementById('pgLoyaltySearch')?.addEventListener('input', renderLoya
 // ═══════════════ OFFERS / DISCOUNTS (promotions) ═══════════════
 let ofPromosCache = [];
 let ofEditingId = null;
+
+// ══════════════ REVIEWS (website + Google + Instagram) ══════════════
+const RV_BADGE = { google:'🔵 Google', instagram:'🟣 Instagram', website:'🟠 Website' };
+function rvStars(n){ n=Number(n)||5; return '★'.repeat(n)+'☆'.repeat(5-n); }
+function rvDateOf(r){
+  if(r.date && r.date.seconds) return new Date(r.date.seconds*1000);
+  if(r.date) return new Date(r.date);
+  if(r.createdAt && r.createdAt.seconds) return new Date(r.createdAt.seconds*1000);
+  return new Date(0);
+}
+async function loadReviewsRV(){
+  const listEl = document.getElementById('rvList');
+  if(!listEl) return;
+  try{
+    const snap = await getDocs(query(collection(db,'reviews')));
+    if(snap.empty){ listEl.innerHTML = '<p style="color:var(--lt);font-size:.85rem">No reviews yet. Add your first one above.</p>'; return; }
+    let rows = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    rows.sort((a,b)=> rvDateOf(b) - rvDateOf(a));
+    listEl.innerHTML = rows.map(r=>{
+      const src = (r.source==='google'||r.source==='instagram') ? r.source : 'website';
+      const live = r.status === 'approved';
+      const dt = rvDateOf(r);
+      const dstr = dt.getFullYear()>1971 ? dt.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<div style="border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.7rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.2rem;flex-wrap:wrap">
+              <span style="color:var(--accent);font-size:.85rem">${rvStars(r.rating)}</span>
+              <strong style="font-size:.9rem">${escapeHtml(r.name||'')}</strong>
+              <span style="font-size:.68rem;color:var(--mid)">${RV_BADGE[src]}</span>
+              <span style="font-size:.68rem;color:var(--lt)">${dstr}</span>
+              ${live ? '<span style="font-size:.66rem;color:var(--green)">● live</span>' : '<span style="font-size:.66rem;color:#F0A030">● pending</span>'}
+            </div>
+            <div style="font-size:.85rem;color:var(--ink);line-height:1.5">"${escapeHtml(r.text||'')}"</div>
+          </div>
+          <div style="display:flex;gap:.4rem;flex-shrink:0">
+            ${!live ? `<button class="btn btn-primary" data-rv-approve="${r.id}" style="padding:.4rem .8rem;font-size:.75rem">Approve</button>` : ''}
+            <button class="btn btn-ghost" data-rv-edit="${r.id}" style="padding:.4rem .7rem;font-size:.75rem">Edit</button>
+            <button class="btn btn-ghost" data-rv-del="${r.id}" style="padding:.4rem .7rem;font-size:.75rem;color:#D14">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('[data-rv-approve]').forEach(b=>b.addEventListener('click', async ()=>{
+      await updateDoc(doc(db,'reviews',b.dataset.rvApprove), { status:'approved' });
+      showToast('Review approved — now live on the site', 'success'); loadReviewsRV();
+    }));
+    listEl.querySelectorAll('[data-rv-del]').forEach(b=>b.addEventListener('click', async ()=>{
+      const row = rows.find(x=>x.id===b.dataset.rvDel);
+      if(!confirm(`Delete the review from "${(row&&row.name)||'this reviewer'}"? This can't be undone.`)) return;
+      await deleteDoc(doc(db,'reviews',b.dataset.rvDel));
+      showToast('Review deleted', 'info'); loadReviewsRV();
+    }));
+    listEl.querySelectorAll('[data-rv-edit]').forEach(b=>b.addEventListener('click', ()=>{
+      const r = rows.find(x=>x.id===b.dataset.rvEdit);
+      if(!r) return;
+      document.getElementById('rvEditId').value = r.id;
+      document.getElementById('rvName').value = r.name||'';
+      document.getElementById('rvText').value = r.text||'';
+      document.getElementById('rvRating').value = String(r.rating||5);
+      document.getElementById('rvSource').value = (r.source==='google'||r.source==='instagram')?r.source:'website';
+      const dt = rvDateOf(r);
+      document.getElementById('rvDate').value = dt.getFullYear()>1971 ? dt.toISOString().slice(0,10) : '';
+      document.getElementById('rvFormTitle').textContent = 'Edit Review';
+      document.getElementById('rvSaveBtn').textContent = 'Save Changes';
+      document.getElementById('rvCancelBtn').style.display = '';
+      document.getElementById('page-reviews').scrollIntoView({behavior:'smooth', block:'start'});
+    }));
+  }catch(e){
+    listEl.innerHTML = '<p style="color:#D14;font-size:.85rem">Could not load reviews: '+escapeHtml(e.message)+'</p>';
+  }
+}
+function rvResetForm(){
+  document.getElementById('rvEditId').value = '';
+  document.getElementById('rvName').value = '';
+  document.getElementById('rvText').value = '';
+  document.getElementById('rvRating').value = '5';
+  document.getElementById('rvSource').value = 'google';
+  document.getElementById('rvDate').value = '';
+  document.getElementById('rvFormTitle').textContent = 'Add a Review';
+  document.getElementById('rvSaveBtn').textContent = 'Add Review';
+  document.getElementById('rvCancelBtn').style.display = 'none';
+}
+document.getElementById('rvCancelBtn')?.addEventListener('click', rvResetForm);
+document.getElementById('rvSaveBtn')?.addEventListener('click', async ()=>{
+  const name = document.getElementById('rvName').value.trim();
+  const text = document.getElementById('rvText').value.trim();
+  const rating = Number(document.getElementById('rvRating').value);
+  const source = document.getElementById('rvSource').value;
+  const dateStr = document.getElementById('rvDate').value;
+  if(!name || !text){ showToast('Please add a name and the review text', 'error'); return; }
+  const editId = document.getElementById('rvEditId').value;
+  const payload = { name, text, rating, source, status:'approved' };
+  if(dateStr) payload.date = dateStr;
+  try{
+    if(editId){
+      await updateDoc(doc(db,'reviews',editId), payload);
+      showToast('Review saved', 'success');
+    }else{
+      if(!payload.date) payload.date = new Date().toISOString().slice(0,10);
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db,'reviews'), payload);
+      showToast('Review added — now live on the site', 'success');
+    }
+    rvResetForm();
+    loadReviewsRV();
+  }catch(e){
+    showToast('Could not save: '+e.message, 'error');
+  }
+});
 
 async function loadPromotionsOF(){
   const listEl = document.getElementById('ofListWrap');
