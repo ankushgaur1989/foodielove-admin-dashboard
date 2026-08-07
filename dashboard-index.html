@@ -228,6 +228,11 @@
       <div class="nav-item" data-page="discounts"><span class="dot"></span> Discounts</div>
       <div class="nav-item" data-page="community"><span class="dot"></span> Community / Charity</div>
 
+      <p class="nav-group-label">Website Content</p>
+      <div class="nav-item" data-page="heroslideshow"><span class="dot"></span> Hero Slideshow</div>
+      <div class="nav-item" data-page="textcontent"><span class="dot"></span> Text Content</div>
+      <div class="nav-item" data-page="emailthemes"><span class="dot"></span> Email Themes</div>
+
       <p class="nav-group-label">Reports</p>
       <div class="nav-item" data-page="sales"><span class="dot"></span> Sales &amp; GST</div>
       <div class="nav-item" data-page="expenses"><span class="dot"></span> Expenses</div>
@@ -855,6 +860,50 @@
           <a href="https://console.firebase.google.com/project/foodielovecatering-9da7a/firestore/usage" target="_blank" rel="noopener" class="btn" style="text-decoration:none;display:inline-block;background:var(--mid)">Open Firebase Console ↗</a>
         </div>
       </div>
+
+      <!-- ══ HERO SLIDESHOW — migrated Aug 2026. Pick + order homepage
+           hero photos from the Gallery. ══ -->
+      <div class="page-panel" id="page-heroslideshow">
+        <div class="page-head"><div><h1>Hero Slideshow</h1><p>Choose and order the homepage hero photos.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Tick photos from your Gallery to include in the homepage hero rotation, then reorder with the arrows.</p>
+          <div id="heroPicker2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.7rem;margin-bottom:1rem"><p style="color:var(--mid);grid-column:1/-1">Loading gallery photos…</p></div>
+          <h4 style="margin:1.2rem 0 .6rem">Selected order</h4>
+          <div id="heroSelected2" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"><p style="color:var(--lt)">Nothing selected yet.</p></div>
+          <button type="button" class="btn" id="heroSaveBtn2">Save Slideshow Order</button>
+          <span id="heroStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+        </div>
+      </div>
+
+      <!-- ══ TEXT CONTENT — migrated Aug 2026. Edit live text blocks by
+           key (textOverrides collection). ══ -->
+      <div class="page-panel" id="page-textcontent">
+        <div class="page-head"><div><h1>Text Content</h1><p>Edit live text blocks on the site by key.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Edit live text blocks by key. Enter the same key used on the site to update it, or add a new one for text you want to make editable.</p>
+          <div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap">
+            <input id="txtKeyInput2" placeholder="text key, e.g. catering_intro" style="flex:1;min-width:200px;padding:.6rem .8rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px">
+            <button type="button" class="btn" id="txtLoadBtn2">Load / Create</button>
+          </div>
+          <div id="txtEditorArea2" style="display:none">
+            <textarea id="txtContent2" rows="4" style="width:100%;padding:.6rem .8rem;border:1.5px solid var(--border,#e5e5e5);border-radius:8px"></textarea>
+            <button type="button" class="btn" id="txtSaveBtn2" style="margin-top:.6rem">Save Text</button>
+            <span id="txtStatus2" style="font-size:.78rem;color:var(--mid);margin-left:.6rem"></span>
+          </div>
+          <h4 style="margin:1.5rem 0 .6rem">All Overrides Currently Set</h4>
+          <div id="txtAllList2"><p style="color:var(--mid)">Loading…</p></div>
+        </div>
+      </div>
+
+      <!-- ══ EMAIL THEMES — migrated Aug 2026. Pick the look for invoice
+           and receipt emails (settings/emailTheme). ══ -->
+      <div class="page-panel" id="page-emailthemes">
+        <div class="page-head"><div><h1>Email Themes</h1><p>Pick the look for invoice and receipt emails.</p></div></div>
+        <div class="panel" style="padding:1.4rem">
+          <p style="font-size:.8rem;color:var(--mid);margin:0 0 1rem">Pick the look for every invoice and receipt email. Switch anytime.</p>
+          <div id="themeGrid2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem"></div>
+        </div>
+      </div>
       <div class="page-panel" id="page-payments"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Payment Summary</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-staff"><div class="panel" style="padding:3rem 2rem;text-align:center"><p style="font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lt);font-weight:700;margin-bottom:.6rem">Coming Soon</p><h3 style="font-size:1.1rem;margin:0 0 .5rem">Staff Accounts</h3><p style="color:var(--mid);font-size:.85rem;max-width:360px;margin:0 auto">This section is planned but not built yet. It will show real, live data here once it's ready.</p></div></div>
       <div class="page-panel" id="page-photos">
@@ -981,6 +1030,9 @@ const pageTitles = {
   careers: ['Careers & Applications', 'Job openings and applications'],
   scanredeem: ['Scan & Redeem', 'Look up a reward code'],
   datausage: ['Data Usage', 'Live document counts in your database'],
+  heroslideshow: ['Hero Slideshow', 'Choose and order homepage hero photos'],
+  textcontent: ['Text Content', 'Edit live text blocks on the site'],
+  emailthemes: ['Email Themes', 'Pick the look for invoice and receipt emails'],
 };
 document.querySelectorAll('.nav-item[data-page]').forEach(item=>{
   item.addEventListener('click', ()=>{
@@ -1053,6 +1105,9 @@ onAuthStateChanged(auth, async (user)=>{
   loadCateringRequestsPG();
   loadCareersPG();
   loadDataUsagePG();
+  loadHeroSlideshowPG();
+  loadTextAllOverrides2();
+  loadEmailThemesPG();
   initWidgetDragging();
   pollActivityStream();
   setInterval(pollActivityStream, 15000);
@@ -2997,6 +3052,104 @@ document.getElementById('redeemLookupBtn2')?.addEventListener('click', async ()=
     const icon = !data.recognized || !data.found ? '⚠️' : !data.valid ? '❌' : '✅';
     card.innerHTML = `<div style="background:${bg};padding:1rem;border-radius:10px"><p style="font-weight:700;margin:0 0 .3rem">${icon} ${escapeHtml(data.category||'Result')}</p><p style="font-size:.85rem;margin:0">${escapeHtml(data.message||'')}</p></div>`;
   }catch(e){ card.innerHTML = `<div style="background:#FDECEC;padding:1rem;border-radius:10px"><p style="font-weight:700;color:#B00020">Error</p><p style="font-size:.85rem">${escapeHtml(e.message)}</p></div>`; }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// HERO SLIDESHOW + TEXT CONTENT + EMAIL THEMES — migrated content
+// editors, adapted to this dashboard.
+// ══════════════════════════════════════════════════════════════════
+let heroGalleryPhotos2 = [], heroSelection2 = [];
+async function loadHeroSlideshowPG(){
+  const wrap = document.getElementById('heroPicker2');
+  if(!wrap) return;
+  const [gSnap, sSnap] = await Promise.all([
+    getDocs(query(collection(db,'galleryPhotos'), orderBy('createdAt','desc'), limit(60))),
+    getDoc(doc(db,'settings','heroSlideshow')).catch(()=>null)
+  ]);
+  heroGalleryPhotos2 = gSnap.docs.map(d=>({id:d.id, ...d.data()})).filter(p=>p.mediaType!=='video');
+  const existing = (sSnap && sSnap.exists() && Array.isArray(sSnap.data().slides)) ? sSnap.data().slides : [];
+  heroSelection2 = existing.map(s => ({ url:s.url, posX:s.posX||50, posY:s.posY||50, zoom:s.zoom||100 }));
+  renderHeroPicker2(); renderHeroSelected2();
+}
+function renderHeroPicker2(){
+  const wrap = document.getElementById('heroPicker2');
+  if(!wrap) return;
+  wrap.innerHTML = heroGalleryPhotos2.length ? heroGalleryPhotos2.map(p => {
+    const picked = heroSelection2.some(s=>s.url===p.url);
+    return `<div data-heropick2="${escapeHtml(p.url)}" style="cursor:pointer;border-radius:8px;overflow:hidden;border:3px solid ${picked?'var(--accent,#C2511C)':'transparent'}"><img src="${escapeHtml(p.thumbUrl||p.url)}" style="width:100%;height:90px;object-fit:cover;display:block"></div>`;
+  }).join('') : '<p style="color:var(--mid);grid-column:1/-1">No gallery photos found — add some under Gallery first.</p>';
+  wrap.querySelectorAll('[data-heropick2]').forEach(el=>el.addEventListener('click', ()=>{
+    const url = el.dataset.heropick2;
+    const idx = heroSelection2.findIndex(s=>s.url===url);
+    if(idx>-1) heroSelection2.splice(idx,1); else heroSelection2.push({url, posX:50, posY:50, zoom:100});
+    renderHeroPicker2(); renderHeroSelected2();
+  }));
+}
+function renderHeroSelected2(){
+  const wrap = document.getElementById('heroSelected2');
+  if(!wrap) return;
+  wrap.innerHTML = heroSelection2.length ? heroSelection2.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem;border:1px solid var(--border,#eee);border-radius:8px">
+      <img src="${escapeHtml(s.url)}" style="width:60px;height:44px;object-fit:cover;border-radius:6px">
+      <span style="flex:1;font-size:.8rem">Slide ${i+1}</span>
+      <button class="btn" data-heroup2="${i}" style="padding:.3rem .5rem" ${i===0?'disabled':''}>↑</button>
+      <button class="btn" data-herodown2="${i}" style="padding:.3rem .5rem" ${i===heroSelection2.length-1?'disabled':''}>↓</button>
+    </div>`).join('') : '<p style="color:var(--lt)">Nothing selected yet.</p>';
+  wrap.querySelectorAll('[data-heroup2]').forEach(b=>b.addEventListener('click', ()=>{ const i=Number(b.dataset.heroup2); [heroSelection2[i-1],heroSelection2[i]]=[heroSelection2[i],heroSelection2[i-1]]; renderHeroSelected2(); }));
+  wrap.querySelectorAll('[data-herodown2]').forEach(b=>b.addEventListener('click', ()=>{ const i=Number(b.dataset.herodown2); [heroSelection2[i+1],heroSelection2[i]]=[heroSelection2[i],heroSelection2[i+1]]; renderHeroSelected2(); }));
+}
+document.getElementById('heroSaveBtn2')?.addEventListener('click', async ()=>{
+  const st = document.getElementById('heroStatus2'); st.textContent = 'Saving…';
+  await setDoc(doc(db,'settings','heroSlideshow'), { slides: heroSelection2, updatedAt: serverTimestamp() });
+  st.textContent = `✓ Saved — ${heroSelection2.length} photo(s) will show on the homepage hero.`;
+  setTimeout(()=>st.textContent='', 3000);
+});
+
+// ── EMAIL THEMES ──
+const EMAIL_THEMES2 = {
+  'warm-rustic': { name:'Warm Rustic', bg:'#f7f1e6', card:'#ffffff', accent:'#c2511c', ink:'#3a2418' },
+  'coastal-blue': { name:'Coastal Blue', bg:'#eaf2f5', card:'#ffffff', accent:'#2f7d9e', ink:'#1f3a44' },
+  'midnight-dark': { name:'Midnight Dark', bg:'#14110f', card:'#211c18', accent:'#d9a94a', ink:'#f0e6d8' },
+  'autumn-harvest': { name:'Autumn Harvest', bg:'#efe3d0', card:'#fbf5e9', accent:'#8c2f39', ink:'#3a2418' },
+  'blush-pastel': { name:'Blush Pastel', bg:'#faf0ee', card:'#ffffff', accent:'#c96b7e', ink:'#4a2f34' },
+  'charcoal-mono': { name:'Charcoal Mono', bg:'#e8e8e8', card:'#ffffff', accent:'#333333', ink:'#1a1a1a' }
+};
+async function loadEmailThemesPG(){
+  const grid = document.getElementById('themeGrid2');
+  if(!grid) return;
+  let activeId = 'warm-rustic';
+  const snap = await getDoc(doc(db,'settings','emailTheme')).catch(()=>null);
+  if(snap && snap.exists() && snap.data().activeThemeId) activeId = snap.data().activeThemeId;
+  grid.innerHTML = Object.entries(EMAIL_THEMES2).map(([id,t])=>`
+    <div data-themepick2="${id}" style="cursor:pointer;border-radius:12px;overflow:hidden;border:3px solid ${id===activeId?'var(--accent,#C2511C)':'transparent'}">
+      <div style="background:${t.bg};padding:.9rem"><div style="background:${t.card};border-radius:8px;padding:.6rem"><div style="width:60%;height:7px;background:${t.accent};border-radius:4px;margin-bottom:.3rem"></div><div style="width:80%;height:5px;background:${t.ink};opacity:.4;border-radius:3px"></div></div></div>
+      <div style="padding:.5rem .7rem;background:#fff;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.8rem;font-weight:600">${t.name}</span>${id===activeId?'<span style="color:var(--accent,#C2511C);font-size:.72rem;font-weight:700">✓ Active</span>':''}</div>
+    </div>`).join('');
+  grid.querySelectorAll('[data-themepick2]').forEach(el=>el.addEventListener('click', async ()=>{ await setDoc(doc(db,'settings','emailTheme'), { activeThemeId: el.dataset.themepick2, updatedAt: serverTimestamp() }); loadEmailThemesPG(); }));
+}
+
+// ── TEXT EDITOR (generic key/value overrides) ──
+async function loadTextAllOverrides2(){
+  const el = document.getElementById('txtAllList2');
+  if(!el) return;
+  const snap = await getDocs(collection(db,'textOverrides')).catch(()=>({docs:[],size:0}));
+  el.innerHTML = snap.size ? snap.docs.map(d=>`<div style="padding:.5rem 0;border-bottom:1px solid var(--border,#eee);font-size:.82rem"><strong>${escapeHtml(d.id)}</strong>: ${escapeHtml((d.data().content||'').slice(0,90))} <button class="btn" data-txtedit2="${escapeHtml(d.id)}" style="padding:.2rem .5rem;font-size:.7rem;margin-left:.5rem">Edit</button></div>`).join('') : '<p style="color:var(--lt)">No overrides set yet.</p>';
+  el.querySelectorAll('[data-txtedit2]').forEach(b=>b.addEventListener('click', ()=>{ document.getElementById('txtKeyInput2').value = b.dataset.txtedit2; document.getElementById('txtLoadBtn2').click(); }));
+}
+document.getElementById('txtLoadBtn2')?.addEventListener('click', async ()=>{
+  const key = document.getElementById('txtKeyInput2').value.trim();
+  if(!key) return;
+  const snap = await getDoc(doc(db,'textOverrides',key)).catch(()=>null);
+  document.getElementById('txtContent2').value = (snap && snap.exists()) ? (snap.data().content||'') : '';
+  document.getElementById('txtEditorArea2').style.display = 'block';
+});
+document.getElementById('txtSaveBtn2')?.addEventListener('click', async ()=>{
+  const key = document.getElementById('txtKeyInput2').value.trim();
+  if(!key) return;
+  await setDoc(doc(db,'textOverrides',key), { content: document.getElementById('txtContent2').value, updatedAt: serverTimestamp() });
+  document.getElementById('txtStatus2').textContent = '✓ Saved — live on the site now.';
+  setTimeout(()=>document.getElementById('txtStatus2').textContent='', 2500);
+  loadTextAllOverrides2();
 });
 </script>
 </body>
